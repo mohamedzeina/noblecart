@@ -11,11 +11,22 @@ This project is an **e-commerce platform** built using the **MVC architecture** 
 
 ## Features
 
-- User authentication (registration, login, password reset)
-- Product listing with search and filtering options
-- Shopping cart and checkout process
-- Order management for customers and admins
-- Admin panel for managing products, users, and orders
+- **User Authentication**
+  - Registration and login system.
+  - User-specific session handling.
+
+- **Product Management**
+  - Add, update, and delete products.
+  - Browse product catalog.
+  - Search and filter options.
+
+- **Shopping Cart**
+  - Add/remove items to/from the cart.
+  - View total cost dynamically.
+
+- **Order Management**
+  - Place orders.
+  - Track order history.
 
 
 ## Tech Stack
@@ -25,7 +36,7 @@ This project is an **e-commerce platform** built using the **MVC architecture** 
 - **Database:** MongoDB with Mongoose
 - **Authentication:** Express-sessions (with connect-mongodb-session for session storage) for session management, bcryptjs for password encryption
 - **Security:** csurf for CSRF protection
-- **Payment Gateway:**
+- **Payment Gateway:** Integrated with **Stripe** for secure payment processing
 
 
 ## Architecture
@@ -47,7 +58,6 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    ```bash
    npm install
    ```
-
 3. Set up your environment variables in a .env file:
    ```makefile
    MONGODB_URI=<your-mongodb-uri>
