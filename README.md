@@ -1,6 +1,6 @@
 # Online Shop
 
-This project is an **e-commerce platform** built using the **MVC architecture** with Node.js and Express.js. It allows users to browse and purchase products, while admins can manage products, users, and orders through an admin panel.
+Welcome to the **Online Shop** repository! This project is a feature-rich e-commerce platform built to demonstrate web development, database management, and user authentication concepts. It provides essential functionalities to create and manage an online store.
 
 ## Table of Contents
 
