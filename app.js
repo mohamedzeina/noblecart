@@ -7,6 +7,8 @@ const mongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+const helmet = require('helmet');
+const compression = require('compression');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -47,6 +49,9 @@ const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
+
+app.use(helmet()); // Helmet middleware for security
+app.use(compression()); // Compression middleware for performance
 
 app.use(bodyParser.urlencoded({ extended: false })); // Parses body like we used to do manually in previous http version of this project
 app.use(
