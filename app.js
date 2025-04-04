@@ -1,4 +1,7 @@
 const path = require('path');
+const fs = require('fs');
+
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -9,6 +12,7 @@ const flash = require('connect-flash');
 const multer = require('multer');
 const helmet = require('helmet');
 const compression = require('compression');
+const morgan = require('morgan');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -50,8 +54,14 @@ const csrfProtection = csrf();
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+const acessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' }
+); // Creating a write stream to log requests
+
 app.use(helmet()); // Helmet middleware for security
 app.use(compression()); // Compression middleware for performance
+app.use(morgan('combined', {stream: acessLogStream})); // Morgan middleware for logging
 
 app.use(bodyParser.urlencoded({ extended: false })); // Parses body like we used to do manually in previous http version of this project
 app.use(
