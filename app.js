@@ -1,5 +1,4 @@
 const path = require('path');
-const dotenv = require('dotenv');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -25,7 +24,6 @@ const fileStorage = multer.diskStorage({
   },
 });
 
-dotenv.config();
 
 const fileFilter = (req, file, cb) => {
   if (
@@ -107,7 +105,7 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to DB Successfully');
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((err) => {
     console.log(err);
