@@ -60,7 +60,7 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    npm install
    ```
    
-3. Set up your environment variables using a nodemon.json file:
+3. Set up your environment variables using a nodemon.json file for the development server:
    Create a file named nodemon.json in the root of the project and add the following content::
    ```json
      {
@@ -84,5 +84,9 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    
 5. Start the development server:
    ```bash
-   npm start
+   npm run dev
    ```
+6. Open your browser and navigate to:  
+   [https://localhost:3000](https://localhost:3000)
+
+   > 🔒 Your browser may display a security warning because the SSL certificate is self-signed. You can safely bypass this for local development.
