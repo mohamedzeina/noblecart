@@ -71,7 +71,12 @@ This project follows the **Model-View-Controller (MVC)** pattern:
       }
     }
    ```
-4. Start the development server:
+4. Generate local SSL certificates:
+   To enable HTTPS for local development, create server.key and server.cert files in the root directory:
+    ```bash
+   openssl req -nodes -new -x509 -keyout server.key -out server.cert
+   ```
+5. Start the development server:
    ```bash
    npm start
    ```
