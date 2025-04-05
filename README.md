@@ -54,10 +54,12 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    git clone https://github.com/mohamedzeina/online-shop.git
    cd online-shop
    ```
+   
 2. Install dependencies:
    ```bash
    npm install
    ```
+   
 3. Set up your environment variables using a nodemon.json file:
    Create a file named nodemon.json in the root of the project and add the following content::
    ```json
@@ -71,11 +73,15 @@ This project follows the **Model-View-Controller (MVC)** pattern:
       }
     }
    ```
+   
 4. Generate local SSL certificates:
    To enable HTTPS for local development, create server.key and server.cert files in the root directory:
     ```bash
    openssl req -nodes -new -x509 -keyout server.key -out server.cert
    ```
+   When prompted, be sure to set Common Name (CN) to localhost.
+   This ensures the certificate works correctly in your local development environment.
+   
 5. Start the development server:
    ```bash
    npm start
