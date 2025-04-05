@@ -41,3 +41,5 @@ next-env.d.ts
 /invoices
 
 access.log
+server.cert
+server.key
