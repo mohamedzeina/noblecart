@@ -58,13 +58,18 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    ```bash
    npm install
    ```
-3. Set up your environment variables in a .env file:
-   ```env
-   MONGODB_URI=your-mongodb-uri
-   NODEMAILER_API_KEY=your-nodemailer-api-key
-   FROM_EMAIL=email-used-for-nodemailer
-   STRIPE_PUB_KEY=your-stripe-publishable-key
-   STRIPE_SECRET_KEY=your-stripe-secret
+3. Set up your environment variables using a nodemon.json file:
+   Create a file named nodemon.json in the root of the project and add the following content::
+   ```json
+     {
+      "env": {
+        "MONGODB_URI": "your-mongodb-uri",
+        "NODEMAILER_API_KEY": "your-nodemailer-api-key",
+        "FROM_EMAIL": "email-used-for-nodemailer",
+        "STRIPE_PUB_KEY": "your-stripe-publishable-key",
+        "STRIPE_SECRET_KEY": "your-stripe-secret"
+      }
+    }
    ```
 4. Start the development server:
    ```bash
