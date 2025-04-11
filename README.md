@@ -2,8 +2,6 @@
 
 Welcome to the **Online Shop** repository! This project is a feature-rich e-commerce platform built to demonstrate web development, database management, and user authentication concepts. It provides essential functionalities to create and manage an online store.
 
-![Screenshot](assets/screenshot.png)
-
 ## Table of Contents
 
 - [Features](#features)
