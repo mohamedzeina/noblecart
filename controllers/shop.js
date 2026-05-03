@@ -213,57 +213,88 @@ exports.postOrder = (req, res, next) => {
     });
 };
 
-exports.getInvoice = (req, res, next) => {
-  const orderId = req.params.orderId;
-  Order.findById(orderId)
-    .then((order) => {
-      if (!order) {
-        return next(new Error('No order found.'));
-      }
-      if (order.user.userId.toString() !== req.user._id.toString()) {
-        console.log(order.user.userId.toString());
-        console.log(req.user._id.toString());
-        return next(new Error('Unauthorized access.'));
-      }
 
-      const invoiceName = 'invoice-' + orderId + '.pdf';
-      const invoicePath = path.join('invoices', invoiceName);
+exports.getInvoice = async (req, res, next) => {
+  try {
+    const orderId = req.params.orderId;
+    const order = await Order.findById(orderId);
 
-      const pdfDoc = new PDFDocument();
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-        'Content-Disposition',
-        'inline; filename="' + invoiceName + '"'
-      );
-      pdfDoc.pipe(fs.createWriteStream(invoicePath));
-      pdfDoc.pipe(res);
+    if (!order) return next(new Error('No order found.'));
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      return next(new Error('Unauthorized access.'));
+    }
 
-      pdfDoc.fontSize(26).text('Order #' + orderId, {
-        underline: true,
-      });
-      pdfDoc.text('---------------');
-      let totalPrice = 0;
-      order.products.forEach((prod) => {
-        totalPrice = totalPrice + prod.quantity * prod.productData.price;
-        pdfDoc
-          .fontSize(14)
-          .text(
-            prod.productData.title +
-              ' - ' +
-              prod.quantity +
-              ' x ' +
-              '$' +
-              prod.productData.price
-          );
-      });
-      pdfDoc.fontSize(26).text('---------------');
-      pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
+    const invoiceName = 'invoice-' + orderId + '.pdf';
+    const invoicePath = path.join('invoices', invoiceName);
 
-      pdfDoc.end();
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+    const pdfDoc = new PDFDocument({ margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+
+    const pageWidth = pdfDoc.page.width;
+    const contentRight = pageWidth - 50;
+
+    // Header bar
+    pdfDoc.rect(0, 0, pageWidth, 75).fill('#0f766e');
+    pdfDoc.fillColor('white').fontSize(26).font('Helvetica-Bold').text('INVOICE', 50, 22);
+    pdfDoc.fontSize(10).font('Helvetica')
+      .text('Online Shop', 0, 25, { align: 'right', width: contentRight })
+      .text('online-shop-luts.onrender.com', 0, 40, { align: 'right', width: contentRight });
+
+    // Order meta
+    pdfDoc.fillColor('#475569').fontSize(10).font('Helvetica-Bold').text('ORDER ID', 50, 100);
+    pdfDoc.font('Helvetica').fillColor('#1e293b').fontSize(10).text(orderId, 50, 114);
+    pdfDoc.fillColor('#475569').fontSize(10).font('Helvetica-Bold').text('BILLED TO', 50, 135);
+    pdfDoc.font('Helvetica').fillColor('#1e293b').text(order.user.email, 50, 149);
+
+    // Divider
+    pdfDoc.moveTo(50, 175).lineTo(contentRight, 175).strokeColor('#e2e8f0').lineWidth(1).stroke();
+
+    // Table header
+    const ROW_H = 32;
+    const COL_QTY = 340;
+    const COL_PRICE = 390;
+    const COL_TOTAL = 470;
+
+    pdfDoc.rect(50, 182, pageWidth - 100, 22).fill('#f8fafc');
+    pdfDoc.fillColor('#64748b').fontSize(9).font('Helvetica-Bold')
+      .text('ITEM', 60, 189)
+      .text('QTY', COL_QTY, 189, { width: 44, align: 'center' })
+      .text('UNIT PRICE', COL_PRICE, 189, { width: 74, align: 'right' })
+      .text('TOTAL', COL_TOTAL, 189, { width: contentRight - COL_TOTAL, align: 'right' });
+
+    // Products
+    let y = 212;
+    let totalPrice = 0;
+
+    order.products.forEach((prod, i) => {
+      const lineTotal = prod.quantity * prod.productData.price;
+      totalPrice += lineTotal;
+      const midY = y + ROW_H / 2;
+
+      pdfDoc.fillColor('#1e293b').fontSize(11).font('Helvetica')
+        .text(prod.productData.title, 60, midY - 6, { width: 270 })
+        .text(String(prod.quantity), COL_QTY, midY - 6, { width: 44, align: 'center' })
+        .text('$' + prod.productData.price.toFixed(2), COL_PRICE, midY - 6, { width: 74, align: 'right' });
+      pdfDoc.fillColor('#0f766e').font('Helvetica-Bold')
+        .text('$' + lineTotal.toFixed(2), COL_TOTAL, midY - 6, { width: contentRight - COL_TOTAL, align: 'right' });
+
+      y += ROW_H;
+      pdfDoc.moveTo(50, y).lineTo(contentRight, y).strokeColor('#f1f5f9').lineWidth(0.5).stroke();
     });
+
+    // Total row
+    pdfDoc.moveTo(50, y + 10).lineTo(contentRight, y + 10).strokeColor('#e2e8f0').lineWidth(1).stroke();
+    pdfDoc.fillColor('#0f766e').fontSize(13).font('Helvetica-Bold')
+      .text('TOTAL', COL_PRICE, y + 20, { width: 74, align: 'right' })
+      .text('$' + totalPrice.toFixed(2), COL_TOTAL, y + 20, { width: contentRight - COL_TOTAL, align: 'right' });
+
+    pdfDoc.end();
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
