@@ -53,8 +53,9 @@ const store = mongoDBStore({
 
 const csrfProtection = csrf();
 
-const privateKey = fs.readFileSync('server.key');
-const certificate = fs.readFileSync('server.cert');
+const sslKeyExists = fs.existsSync('server.key') && fs.existsSync('server.cert');
+const privateKey = sslKeyExists ? fs.readFileSync('server.key') : null;
+const certificate = sslKeyExists ? fs.readFileSync('server.cert') : null;
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -125,7 +126,10 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to DB Successfully');
-    https.createServer({key: privateKey, cert: certificate}, app).listen(process.env.PORT || 3000);
+    const server = sslKeyExists
+      ? https.createServer({ key: privateKey, cert: certificate }, app)
+      : app;
+    server.listen(process.env.PORT || 3000);
    
   })
   .catch((err) => {
