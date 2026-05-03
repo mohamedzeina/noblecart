@@ -1,6 +1,8 @@
 # Online Shop
 
-A full-stack e-commerce web application built with Node.js and Express.js, following the MVC pattern. Supports product management, shopping cart, Stripe payments, PDF invoice generation, and email-based password reset — served over HTTPS locally.
+A full-stack e-commerce web application built with Node.js and Express.js, following the MVC pattern. Supports product management, shopping cart, Stripe payments, PDF invoice generation, and email-based password reset.
+
+**Live demo:** [online-shop-luts.onrender.com](https://online-shop-luts.onrender.com)
 
 ## Table of Contents
 
@@ -22,11 +24,12 @@ A full-stack e-commerce web application built with Node.js and Express.js, follo
 
 - **Product Management** (Admin only)
   - Create, edit, and delete products
-  - Image upload with file type validation (PNG/JPEG)
+  - Image upload with file type validation (PNG/JPEG), stored on Cloudinary
   - Products are scoped to the authenticated admin user
 
 - **Shopping Cart**
-  - Add and remove products
+  - Add products without page reload — cart icon updates live with a badge counter
+  - Remove products from a modern cart page with images and line totals
   - Cart persists across sessions via MongoDB
 
 - **Orders & Payments**
@@ -56,7 +59,7 @@ A full-stack e-commerce web application built with Node.js and Express.js, follo
 | Database | MongoDB + Mongoose |
 | Sessions | express-session + connect-mongodb-session |
 | Auth | bcryptjs |
-| File Uploads | Multer |
+| File Uploads | Multer + Cloudinary |
 | Payments | Stripe |
 | Email | Resend |
 | PDF | PDFKit |
@@ -103,9 +106,9 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 │   ├── css/
 │   └── js/
 ├── util/
-│   ├── file.js             # fs.unlink helper
+│   ├── file.js             # Cloudinary delete helper
+│   ├── cloudinary.js       # Cloudinary SDK config
 │   └── paginationHelper.js
-├── images/                 # Uploaded product images (gitignored)
 └── invoices/               # Generated PDF invoices (gitignored)
 ```
 
