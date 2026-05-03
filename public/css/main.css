@@ -17,6 +17,7 @@ body {
 main {
   padding: 1rem;
   margin: auto;
+  max-width: 1200px;
 }
 
 form {
@@ -294,6 +295,26 @@ form {
   margin: 0 0.25rem;
 }
 
+.nav-icon {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem 0;
+}
+
+.page-header__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
 .btn {
   display: inline-block;
   padding: 0.25rem 1rem;
@@ -309,6 +330,18 @@ form {
 .btn:hover,
 .btn:active {
   background-color: #0f766e;
+  color: white;
+}
+
+.btn--solid {
+  background-color: #0f766e;
+  color: white;
+  border-color: #0f766e;
+}
+
+.btn--solid:hover {
+  background-color: #0d6660;
+  border-color: #0d6660;
   color: white;
 }
 
@@ -377,23 +410,40 @@ form {
 }
 
 .pagination {
-  margin-top: 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 2rem 0 1rem;
 }
 
 .pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
   text-decoration: none;
-  color: #0f766e;
-  padding: 0.5rem;
-  border: 1px solid #0f766e;
-  margin: 0 1rem;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.pagination a:hover,
-.pagination a:active,
+.pagination a:hover {
+  background: #f0fdfa;
+  border-color: #0f766e;
+  color: #0f766e;
+}
+
 .pagination a.active {
-  background-color: #0f766e;
+  background: #0f766e;
+  border-color: #0f766e;
   color: white;
+  font-weight: 600;
 }
 
 @media (min-width: 768px) {

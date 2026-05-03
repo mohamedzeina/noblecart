@@ -1,6 +1,6 @@
 const Product = require('../models/product');
 
-const ITEMS_PER_PAGE = 2; // Number of products to be displayed on a single page
+const ITEMS_PER_PAGE = 6;
 const paginationHelper = (
   req,
   res,

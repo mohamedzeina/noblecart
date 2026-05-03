@@ -10,17 +10,6 @@ const Product = require('../models/product');
 const Order = require('../models/order');
 const pg = require('../util/paginationHelper');
 
-exports.getProducts = (req, res, next) => {
-  pg.paginationHelper(
-    req,
-    res,
-    next,
-    'shop/product-list',
-    'All Products',
-    '/products',
-    {}
-  );
-};
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId; // Extracting dynamic parameter from path

@@ -6,6 +6,10 @@
         <%- include('../includes/navigation.ejs') %>
 
             <main>
+                <div class="page-header">
+                    <h1 class="page-header__title">My Products</h1>
+                    <a href="/admin/add-product" class="btn btn--solid">+ Add Product</a>
+                </div>
                 <% if (prods.length > 0) { %>
                     <div class="grid">
                         <% for (let product of prods) { %>
