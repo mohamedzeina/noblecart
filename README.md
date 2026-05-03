@@ -1,92 +1,176 @@
 # Online Shop
 
-Welcome to the **Online Shop** repository! This project is a feature-rich e-commerce platform built to demonstrate web development, database management, and user authentication concepts. It provides essential functionalities to create and manage an online store.
+A full-stack e-commerce web application built with Node.js and Express.js, following the MVC pattern. Supports product management, shopping cart, Stripe payments, PDF invoice generation, and email-based password reset — served over HTTPS locally.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
+- [Project Structure](#project-structure)
 - [Installation](#installation)
+- [Environment Variables](#environment-variables)
+- [Scripts](#scripts)
 
 ## Features
 
 - **User Authentication**
-  - Registration and login system.
-  - User-specific session handling.
+  - Registration and login with session-based auth
+  - Passwords hashed with bcryptjs
+  - Email-based password reset via tokenized links (expires after 1 hour)
+  - Signup confirmation email via SendGrid
 
-- **Product Management**
-  - Add, update, and delete products.
-  - Browse product catalog.
-  - Search and filter options.
+- **Product Management** (Admin only)
+  - Create, edit, and delete products
+  - Image upload with file type validation (PNG/JPEG)
+  - Products are scoped to the authenticated admin user
 
 - **Shopping Cart**
-  - Add/remove items to/from the cart.
-  - View total cost dynamically.
+  - Add and remove products
+  - Cart persists across sessions via MongoDB
 
-- **Order Management**
-  - Place orders.
-  - Track order history.
+- **Orders & Payments**
+  - Stripe Checkout integration for secure payments
+  - Orders created automatically on successful payment
+  - Paginated order history per user
+  - Downloadable PDF invoices generated server-side with PDFKit
 
+- **Security**
+  - CSRF protection on all state-changing requests
+  - HTTP security headers via Helmet
+  - Server-side input validation with express-validator
+  - HTTPS for local development
+
+- **Other**
+  - Pagination on product listings and admin dashboard
+  - Morgan HTTP request logging to `access.log`
+  - Response compression
 
 ## Tech Stack
 
-- **Backend:** Node.js, Express.js
-- **Frontend:** EJS (Embedded JavaScript) templating engine
-- **Database:** MongoDB with Mongoose
-- **Authentication:** Express-sessions (with connect-mongodb-session for session storage) for session management, bcryptjs for password encryption
-- **Security:** csurf for CSRF protection
-- **Payment Gateway:** Integrated with **Stripe** for secure payment processing
-
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js |
+| Framework | Express.js |
+| View Engine | EJS |
+| Database | MongoDB + Mongoose |
+| Sessions | express-session + connect-mongodb-session |
+| Auth | bcryptjs |
+| File Uploads | Multer |
+| Payments | Stripe |
+| Email | Nodemailer + SendGrid |
+| PDF | PDFKit |
+| Validation | express-validator |
+| Security | Helmet, csurf |
+| Dev | nodemon, morgan |
 
 ## Architecture
 
 This project follows the **Model-View-Controller (MVC)** pattern:
 
-- **Model:** MongoDB collections, with schema definitions handled by Mongoose.
-- **View:** EJS (Embedded JavaScript) templating engine
-- **Controller:** Business logic is handled by Express.js controllers, interacting with models and rendering appropriate views or sending JSON responses.
+- **Models** (`/models`) — Mongoose schemas for `User`, `Product`, and `Order`. The `User` model includes cart methods (`addToCart`, `removeFromCart`, `clearCart`).
+- **Views** (`/views`) — EJS templates organized by feature (`shop/`, `admin/`, `auth/`), with shared partials in `includes/`.
+- **Controllers** (`/controllers`) — Business logic separated into `shop.js`, `admin.js`, `auth.js`, and `error.js`.
+- **Routes** (`/routes`) — Express routers map HTTP methods/paths to controller functions, with `isAuth` middleware guarding protected routes.
+
+## Project Structure
+
+```
+.
+├── app.js                  # App entry point (HTTPS server, middleware, routes)
+├── nodemon.json            # Dev environment variables (gitignored — see below)
+├── middleware/
+│   └── is-auth.js          # Session-based auth guard
+├── models/
+│   ├── user.js
+│   ├── product.js
+│   └── order.js
+├── controllers/
+│   ├── auth.js
+│   ├── shop.js
+│   ├── admin.js
+│   └── error.js
+├── routes/
+│   ├── auth.js
+│   ├── shop.js
+│   └── admin.js
+├── views/
+│   ├── auth/
+│   ├── shop/
+│   ├── admin/
+│   └── includes/
+├── public/
+│   ├── css/
+│   └── js/
+├── util/
+│   ├── file.js             # fs.unlink helper
+│   └── paginationHelper.js
+├── images/                 # Uploaded product images (gitignored)
+└── invoices/               # Generated PDF invoices (gitignored)
+```
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the repository**
    ```bash
    git clone https://github.com/mohamedzeina/online-shop.git
    cd online-shop
    ```
-   
-2. Install dependencies:
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
-   
-3. Set up your environment variables using a nodemon.json file for the development server:
-   Create a file named nodemon.json in the root of the project and add the following content::
+
+3. **Configure environment variables**
+
+   Create a `nodemon.json` file in the project root (this file is gitignored — never commit it):
    ```json
-     {
-      "env": {
-        "MONGODB_URI": "your-mongodb-uri",
-        "NODEMAILER_API_KEY": "your-nodemailer-api-key",
-        "FROM_EMAIL": "email-used-for-nodemailer",
-        "STRIPE_PUB_KEY": "your-stripe-publishable-key",
-        "STRIPE_SECRET_KEY": "your-stripe-secret"
-      }
-    }
+   {
+     "env": {
+       "MONGODB_URI": "your-mongodb-connection-string",
+       "NODEMAILER_API_KEY": "your-sendgrid-api-key",
+       "FROM_EMAIL": "your-verified-sender-email",
+       "STRIPE_PUB_KEY": "your-stripe-publishable-key",
+       "STRIPE_SECRET_KEY": "your-stripe-secret-key"
+     }
+   }
    ```
-   
-4. Generate local SSL certificates:
-   To enable HTTPS for local development, create server.key and server.cert files in the root directory:
-    ```bash
+
+   See [Environment Variables](#environment-variables) for details on obtaining each value.
+
+4. **Generate local SSL certificates**
+
+   The app runs on HTTPS locally. Generate a self-signed certificate:
+   ```bash
    openssl req -nodes -new -x509 -keyout server.key -out server.cert
    ```
-   When prompted, be sure to set Common Name (CN) to localhost.
-   This ensures the certificate works correctly in your local development environment.
-   
-5. Start the development server:
+   When prompted for **Common Name (CN)**, enter `localhost`.
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
-6. Open your browser and navigate to:  
-   [https://localhost:3000](https://localhost:3000)
 
-   > 🔒 Your browser may display a security warning because the SSL certificate is self-signed. You can safely bypass this for local development.
+6. Visit [https://localhost:3000](https://localhost:3000)
+
+   > Your browser will warn about the self-signed certificate. This is expected — proceed past the warning for local development.
+
+## Environment Variables
+
+| Variable | Description | Where to get it |
+|---|---|---|
+| `MONGODB_URI` | MongoDB connection string | [MongoDB Atlas](https://www.mongodb.com/atlas) or local MongoDB |
+| `NODEMAILER_API_KEY` | SendGrid API key for transactional email | [SendGrid](https://sendgrid.com) |
+| `FROM_EMAIL` | Verified sender email address for SendGrid | Your SendGrid verified sender |
+| `STRIPE_PUB_KEY` | Stripe publishable key | [Stripe Dashboard](https://dashboard.stripe.com) |
+| `STRIPE_SECRET_KEY` | Stripe secret key | [Stripe Dashboard](https://dashboard.stripe.com) |
+
+> For Stripe, use test-mode keys (prefixed `pk_test_` / `sk_test_`) during development.
+
+## Scripts
+
+| Script | Command | Description |
+|---|---|---|
+| `start` | `node app.js` | Start the production server |
+| `dev` | `nodemon app.js` | Start with auto-reload (reads env from nodemon.json) |

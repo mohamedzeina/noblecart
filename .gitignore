@@ -1,45 +1,26 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-.yarn/install-state.gz
+# Environment / secrets — never commit these
+nodemon.json
+.env
+.env.local
+.env.*.local
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
+# HTTPS certificates
+server.key
+server.cert
 *.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Uploaded files (user-generated content)
+/images/
+/invoices/
 
-# local env files
-nodemon.json
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-.vercel
-
-/images
-/invoices
-
+# Logs
 access.log
-server.cert
-server.key
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
+
