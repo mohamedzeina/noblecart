@@ -58,7 +58,7 @@ A full-stack e-commerce web application built with Node.js and Express.js, follo
 | Auth | bcryptjs |
 | File Uploads | Multer |
 | Payments | Stripe |
-| Email | Nodemailer + SendGrid |
+| Email | Resend |
 | PDF | PDFKit |
 | Validation | express-validator |
 | Security | Helmet, csurf |
@@ -129,7 +129,7 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    {
      "env": {
        "MONGODB_URI": "your-mongodb-connection-string",
-       "NODEMAILER_API_KEY": "your-sendgrid-api-key",
+       "RESEND_API_KEY": "your-resend-api-key",
        "FROM_EMAIL": "your-verified-sender-email",
        "STRIPE_PUB_KEY": "your-stripe-publishable-key",
        "STRIPE_SECRET_KEY": "your-stripe-secret-key",
@@ -164,8 +164,8 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 | Variable | Description | Where to get it |
 |---|---|---|
 | `MONGODB_URI` | MongoDB connection string | [MongoDB Atlas](https://www.mongodb.com/atlas) or local MongoDB |
-| `NODEMAILER_API_KEY` | SendGrid API key for transactional email | [SendGrid](https://sendgrid.com) |
-| `FROM_EMAIL` | Verified sender email address for SendGrid | Your SendGrid verified sender |
+| `RESEND_API_KEY` | Resend API key for transactional email | [Resend Dashboard](https://resend.com) |
+| `FROM_EMAIL` | Verified sender email address | Your Resend verified sender (or `onboarding@resend.dev` for testing) |
 | `STRIPE_PUB_KEY` | Stripe publishable key | [Stripe Dashboard](https://dashboard.stripe.com) |
 | `STRIPE_SECRET_KEY` | Stripe secret key | [Stripe Dashboard](https://dashboard.stripe.com) |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | [Cloudinary Console](https://cloudinary.com/console) |
