@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const Product = require('../models/product');
+const User = require('../models/user');
 const fileHelper = require('../util/file');
 const pg = require('../util/paginationHelper');
 
@@ -181,7 +182,13 @@ exports.deleteProduct = (req, res, next) => {
       }
 
       fileHelper.deleteFile(product.imagePublicId);
-      return Product.deleteOne({ _id: prodId, userId: req.user._id });
+      return Promise.all([
+        Product.deleteOne({ _id: prodId, userId: req.user._id }),
+        User.updateMany(
+          { 'cart.items.productId': prodId },
+          { $pull: { 'cart.items': { productId: prodId } } }
+        ),
+      ]);
     })
     .then(() => {
       console.log('Deleted Product Successfully');

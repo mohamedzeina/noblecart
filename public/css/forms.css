@@ -78,3 +78,65 @@
 .form-card .btn:hover {
   background-color: #0d6660;
 }
+
+.file-upload {
+  position: relative;
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.file-upload:hover,
+.file-upload.drag-over {
+  border-color: #0f766e;
+  background: #f0fdfa;
+}
+
+.file-upload__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-upload__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.file-upload__placeholder p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  margin: 0;
+}
+
+.file-upload__placeholder span {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.file-upload__preview {
+  max-height: 150px;
+  max-width: 100%;
+  border-radius: 6px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.file-upload__hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0.5rem 0 0;
+  pointer-events: none;
+}
