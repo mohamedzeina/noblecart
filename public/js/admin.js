@@ -10,14 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'csrf-token': csrf },
       })
         .then(result => result.json())
-        .then(data => {
-          console.log(data);
-          prodElement.parentNode.removeChild(prodElement);
+        .then(({ totalItems }) => {
+          prodElement.remove();
 
-          if (document.querySelectorAll('.product-item').length === 0) {
+          const ITEMS_PER_PAGE = 6;
+          const params = new URLSearchParams(window.location.search);
+          const currentPage = parseInt(params.get('page')) || 1;
+          const lastPage = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+          if (totalItems === 0) {
             document.querySelector('.grid')?.remove();
             document.querySelector('.pagination')?.remove();
-
             const emptyState = document.createElement('div');
             emptyState.className = 'empty-state';
             emptyState.innerHTML = `
@@ -30,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
               <p class="empty-state__subtitle">Get started by adding your first product.</p>
             `;
             document.querySelector('main').appendChild(emptyState);
+          } else if (currentPage > lastPage) {
+            params.set('page', lastPage);
+            window.location.search = params.toString();
+          } else {
+            window.location.reload();
           }
         })
         .catch(err => console.log(err));
