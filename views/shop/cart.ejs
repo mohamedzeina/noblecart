@@ -11,14 +11,26 @@
                         <h1 class="cart__title">Shopping Cart</h1>
                         <ul class="cart__item-list">
                             <% products.forEach(p => { %>
-                                <li class="cart__item">
+                                <li class="cart__item" data-product-id="<%= p.productId._id %>" data-price="<%= p.productId.price %>">
                                     <div class="cart__item-image">
                                         <img src="<%= p.productId.imageUrl %>" alt="<%= p.productId.title %>">
                                     </div>
                                     <div class="cart__item-info">
                                         <h2 class="cart__item-title"><%= p.productId.title %></h2>
                                         <p class="cart__item-price">$<%= p.productId.price.toFixed(2) %> each</p>
-                                        <p class="cart__item-qty">Qty: <%= p.quantity %></p>
+                                        <div class="cart__qty-controls">
+                                            <button class="cart__qty-btn" data-action="decrease" data-product-id="<%= p.productId._id %>">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                                                </svg>
+                                            </button>
+                                            <span class="cart__qty-value"><%= p.quantity %></span>
+                                            <button class="cart__qty-btn" data-action="increase" data-product-id="<%= p.productId._id %>">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="cart__item-right">
                                         <p class="cart__item-total">$<%= (p.productId.price * p.quantity).toFixed(2) %></p>
@@ -41,15 +53,15 @@
                         <ul class="cart-summary__items">
                             <% let total = 0; %>
                             <% products.forEach(p => { total += p.productId.price * p.quantity; %>
-                                <li class="cart-summary__item">
-                                    <span><%= p.productId.title %> &times; <%= p.quantity %></span>
-                                    <span>$<%= (p.productId.price * p.quantity).toFixed(2) %></span>
+                                <li class="cart-summary__item" data-product-id="<%= p.productId._id %>">
+                                    <span><%= p.productId.title %> &times; <span class="summary-item__qty"><%= p.quantity %></span></span>
+                                    <span class="summary-item__total">$<%= (p.productId.price * p.quantity).toFixed(2) %></span>
                                 </li>
                             <% }) %>
                         </ul>
                         <div class="cart-summary__total">
                             <span>Total</span>
-                            <span>$<%= total.toFixed(2) %></span>
+                            <span id="cart-grand-total">$<%= total.toFixed(2) %></span>
                         </div>
                         <a href="/checkout" class="btn btn--solid cart-summary__checkout">Proceed to Checkout</a>
                     </aside>
@@ -67,4 +79,5 @@
                 </div>
             <% } %>
         </main>
+        <script src="/js/cart.js"></script>
         <%- include('../includes/end.ejs') %>

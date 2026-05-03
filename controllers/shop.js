@@ -70,6 +70,34 @@ exports.postCart = (req, res, next) => {
     });
 };
 
+exports.postCartUpdate = (req, res, next) => {
+  const { productId, action } = req.body;
+  let productPrice;
+
+  Product.findById(productId)
+    .then((product) => {
+      if (!product) throw new Error('Product not found');
+      productPrice = product.price;
+      return action === 'increase'
+        ? req.user.addToCart(product)
+        : req.user.decrementFromCart(productId);
+    })
+    .then(() => {
+      const cartCount = req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0);
+      const cartItem = req.user.cart.items.find(
+        (i) => i.productId.toString() === productId
+      );
+      const itemQuantity = cartItem ? cartItem.quantity : 0;
+      const itemTotal = (itemQuantity * productPrice).toFixed(2);
+      res.json({ cartCount, itemQuantity, itemTotal, removed: itemQuantity === 0 });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
