@@ -24,12 +24,15 @@ A full-stack e-commerce web application built with Node.js and Express.js, follo
 
 - **Product Management** (Admin only)
   - Create, edit, and delete products
-  - Image upload with file type validation (PNG/JPEG), stored on Cloudinary
+  - Image upload with drag-and-drop support and instant preview, stored on Cloudinary
+  - Delete with inline confirmation and loading state — no accidental deletions
+  - Deleting a product automatically removes it from all user carts
   - Products are scoped to the authenticated admin user
 
 - **Shopping Cart**
   - Add products without page reload — cart icon updates live with a badge counter
-  - Remove products from a modern cart page with images and line totals
+  - Adjust quantity with + / − controls or remove items entirely with a trash icon
+  - Line totals and order summary update instantly without page reload
   - Cart persists across sessions via MongoDB
 
 - **Orders & Payments**
