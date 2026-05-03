@@ -164,16 +164,13 @@ exports.postLogout = (req, res, next) => {
 };
 
 exports.getReset = (req, res, next) => {
-  let message = req.flash('resetError');
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
+  let errorMessage = req.flash('resetError');
+  let successMessage = req.flash('resetSuccess');
   res.render('auth/reset', {
     path: '/reset',
     pageTitle: 'Reset Password',
-    errorMessage: message,
+    errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+    successMessage: successMessage.length > 0 ? successMessage[0] : null,
   });
 };
 
@@ -195,7 +192,8 @@ exports.postReset = (req, res, next) => {
         return user.save();
       })
       .then(() => {
-        res.redirect('/');
+        req.flash('resetSuccess', 'Check your inbox — a reset link is on its way.');
+        res.redirect('/reset');
         resend.emails.send({
           from: process.env.FROM_EMAIL,
           to: req.body.email,

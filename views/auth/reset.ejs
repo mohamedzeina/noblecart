@@ -7,16 +7,33 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-        <% if (errorMessage) { %>
-        <div class="user-message user-message--error"> <%= errorMessage %></div>
-        <% } %>
-        <form class="login-form" action="/reset" method="POST">
-            <div class="form-control">
-                <label for="email">E-Mail</label>
-                <input type="email" name="email" id="email">
+        <div class="auth-card">
+            <% if (successMessage) { %>
+                <div class="auth-card__success">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="40" height="40">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h1 class="auth-card__title">Check your inbox</h1>
+                    <p class="auth-card__subtitle">A reset link is on its way to your email.</p>
+                </div>
+            <% } else { %>
+                <h1 class="auth-card__title">Reset password</h1>
+                <p class="auth-card__subtitle">Enter your email and we'll send you a reset link</p>
+                <% if (errorMessage) { %>
+                <p class="auth-card__error"><%= errorMessage %></p>
+                <% } %>
+                <form action="/reset" method="POST">
+                    <div class="form-control">
+                        <label for="email">E-Mail</label>
+                        <input type="email" name="email" id="email">
+                    </div>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button class="btn" type="submit">Send Reset Link</button>
+                </form>
+            <% } %>
+            <div class="auth-card__footer">
+                <a href="/login">Back to login</a>
             </div>
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-            <button class="btn" type="submit">Reset Password</button>
-        </form>
+        </div>
     </main>
 <%- include('../includes/end.ejs') %>

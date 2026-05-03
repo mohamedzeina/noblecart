@@ -274,6 +274,12 @@ form {
   color: red;
 }
 
+.user-message--success {
+  border-color: #0f766e;
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
 .pagination {
   margin-top: 2rem;
   text-align: center;

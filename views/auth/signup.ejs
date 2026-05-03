@@ -7,39 +7,46 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-        <% if (errorMessage) { %>
-        <div class="user-message user-message--error"> <%= errorMessage %></div>
-        <% } %>
-        <form class="login-form" action="/signup" method="POST" novalidate>
-            <div class="form-control">
-                <label for="email">E-Mail</label>
-                <input 
-                class="<%=  validationErrors.find(e => e.path === 'email') ? 'invalid' : ''  %>"
-                type="email" 
-                name="email" 
-                id="email" 
-                value="<%= oldInput.email %>">
+        <div class="auth-card">
+            <h1 class="auth-card__title">Create an account</h1>
+            <p class="auth-card__subtitle">Start shopping today</p>
+            <% if (errorMessage) { %>
+            <p class="auth-card__error"><%= errorMessage %></p>
+            <% } %>
+            <form action="/signup" method="POST" novalidate>
+                <div class="form-control">
+                    <label for="email">E-Mail</label>
+                    <input
+                    class="<%= validationErrors.find(e => e.path === 'email') ? 'invalid' : '' %>"
+                    type="email"
+                    name="email"
+                    id="email"
+                    value="<%= oldInput.email %>">
+                </div>
+                <div class="form-control">
+                    <label for="password">Password</label>
+                    <input
+                    class="<%= validationErrors.find(e => e.path === 'password') ? 'invalid' : '' %>"
+                    type="password"
+                    name="password"
+                    id="password"
+                    value="<%= oldInput.password %>">
+                </div>
+                <div class="form-control">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input
+                    class="<%= validationErrors.find(e => e.path === 'confirmPassword') ? 'invalid' : '' %>"
+                    type="password"
+                    name="confirmPassword"
+                    id="confirmPassword"
+                    value="<%= oldInput.confirmPassword %>">
+                </div>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button class="btn" type="submit">Sign Up</button>
+            </form>
+            <div class="auth-card__footer">
+                Already have an account? <a href="/login">Log in</a>
             </div>
-            <div class="form-control">
-                <label for="password">Password</label>
-                <input 
-                class="<%=  validationErrors.find(e => e.path === 'password') ? 'invalid' : ''  %>"
-                type="password" 
-                name="password" 
-                id="password" 
-                value="<%= oldInput.password %>">
-            </div>
-            <div class="form-control">
-                <label for="confirmPassword">Confirm Password</label>
-                <input
-                class="<%=  validationErrors.find(e => e.path === 'confirmPassword') ? 'invalid' : ''  %>"
-                type="password" 
-                name="confirmPassword" 
-                id="confirmPassword" 
-                value="<%= oldInput.confirmPassword %>">
-            </div>
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-            <button class="btn" type="submit">Sign Up</button>
-        </form>
+        </div>
     </main>
 <%- include('../includes/end.ejs') %>
