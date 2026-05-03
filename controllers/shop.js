@@ -255,6 +255,8 @@ exports.getInvoice = async (req, res, next) => {
     const invoiceName = 'invoice-' + orderId + '.pdf';
     const invoicePath = path.join('invoices', invoiceName);
 
+    fs.mkdirSync('invoices', { recursive: true });
+
     const pdfDoc = new PDFDocument({ margin: 50 });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
