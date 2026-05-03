@@ -1,9 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const prodId = btn.parentNode.querySelector('[name=productId]').value;
-      const csrf = btn.parentNode.querySelector('[name=_csrf]').value;
-      const prodElement = btn.closest('article');
+  const main = document.querySelector('main');
+
+  main.addEventListener('click', (e) => {
+    // Delete button clicked — show inline confirmation
+    if (e.target.closest('.delete-btn')) {
+      const btn = e.target.closest('.delete-btn');
+      const actions = btn.closest('.card__actions');
+
+      actions.dataset.prodId = btn.parentNode.querySelector('[name=productId]').value;
+      actions.dataset.csrf = btn.parentNode.querySelector('[name=_csrf]').value;
+      actions.dataset.original = actions.innerHTML;
+
+      actions.innerHTML = `
+        <span class="delete-confirm__label">Delete this product?</span>
+        <button class="btn danger delete-confirm__yes" type="button">Yes, delete</button>
+        <button class="btn delete-confirm__no" type="button">Cancel</button>
+      `;
+    }
+
+    // Cancel — restore original buttons
+    if (e.target.closest('.delete-confirm__no')) {
+      const actions = e.target.closest('.card__actions');
+      actions.innerHTML = actions.dataset.original;
+    }
+
+    // Confirm — proceed with delete
+    if (e.target.closest('.delete-confirm__yes')) {
+      const actions = e.target.closest('.card__actions');
+      const prodId = actions.dataset.prodId;
+      const csrf = actions.dataset.csrf;
+      const prodElement = actions.closest('article');
 
       fetch('/admin/product/' + prodId, {
         method: 'DELETE',
@@ -41,6 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         })
         .catch(err => console.log(err));
-    });
+    }
   });
 });

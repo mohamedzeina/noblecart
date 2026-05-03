@@ -3,8 +3,12 @@
 
 <body>
     <%- include('includes/navigation.ejs') %>
-    <div class="error">
-        <h1>Some error occured!</h1>
-        <p>We're working on fixing this, sorry for the inconvenience!</p>
-    </div>
+    <main>
+        <div class="error-page">
+            <p class="error-page__code">500</p>
+            <h1 class="error-page__title">Something went wrong</h1>
+            <p class="error-page__subtitle">We're working on fixing this. Sorry for the inconvenience.</p>
+            <a href="/" class="btn btn--solid">Back to Shop</a>
+        </div>
+    </main>
 <%- include('includes/end.ejs') %>
