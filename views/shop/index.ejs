@@ -5,7 +5,15 @@
 <body>
     <%- include('../includes/navigation.ejs') %>
 
-    <main>
+    <section class="hero">
+        <div class="hero__content">
+            <h1 class="hero__title">Shop the latest products</h1>
+            <p class="hero__subtitle">Discover our curated collection, updated regularly with new arrivals.</p>
+            <a href="#products" class="hero__cta">Browse All Products</a>
+        </div>
+    </section>
+
+    <main id="products">
         <% if (prods.length > 0) { %>
             <div class="grid">
                 <% for (let product of prods) { %>
@@ -14,8 +22,7 @@
                             <h1 class="product__title"><%= product.title %></h1>
                         </header>
                         <div class="card__image">
-                            <img src="<%= product.imageUrl %>"
-                                alt="<%= product.title %>">
+                            <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
                         </div>
                         <div class="card__content">
                             <h2 class="product__price">$<%= product.price %></h2>
@@ -32,7 +39,15 @@
             </div>
             <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, prevPage: prevPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPrevPage: hasPrevPage}) %>
         <% } else { %>
-            <h1>No Products Found!</h1>
+            <div class="empty-state">
+                <div class="empty-state__icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z" />
+                    </svg>
+                </div>
+                <h2 class="empty-state__title">No products yet</h2>
+                <p class="empty-state__subtitle">Check back soon for new arrivals.</p>
+            </div>
         <% } %>
     </main>
 <%- include('../includes/end.ejs') %>

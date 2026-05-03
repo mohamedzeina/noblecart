@@ -37,7 +37,16 @@
                     </div>
                     <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, prevPage: prevPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPrevPage: hasPrevPage}) %>
                     <% } else { %>
-                        <h1>No Products Found!</h1>
+                        <div class="empty-state">
+                            <div class="empty-state__icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </div>
+                            <h2 class="empty-state__title">No products yet</h2>
+                            <p class="empty-state__subtitle">Get started by adding your first product.</p>
+                            <a href="/admin/add-product" class="btn">Add Product</a>
+                        </div>
                         <% } %>
             </main>
             <%- include('../includes/end.ejs') %>
