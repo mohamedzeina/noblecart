@@ -69,6 +69,17 @@ router.post('/reset', authController.postReset);
 
 router.get('/reset/:token', authController.getNewPassword);
 
-router.post('/new-password', authController.postNewPassword);
+router.post(
+  '/new-password',
+  [
+    body(
+      'password',
+      'Please enter a password that is at least 6 characters long.'
+    )
+      .isLength({ min: 6 })
+      .trim(),
+  ],
+  authController.postNewPassword
+);
 
 module.exports = router;

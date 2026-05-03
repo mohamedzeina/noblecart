@@ -243,6 +243,17 @@ exports.postNewPassword = (req, res, next) => {
   const userId = req.body.userId;
   const token = req.body.passwordToken;
 
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/new-password', {
+      path: '/new-password',
+      pageTitle: 'New Password',
+      errorMessage: errors.array()[0].msg,
+      userId: userId,
+      passwordToken: token,
+    });
+  }
+
   let resetUser;
 
   User.findOne({
