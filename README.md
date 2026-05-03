@@ -132,7 +132,10 @@ This project follows the **Model-View-Controller (MVC)** pattern:
        "NODEMAILER_API_KEY": "your-sendgrid-api-key",
        "FROM_EMAIL": "your-verified-sender-email",
        "STRIPE_PUB_KEY": "your-stripe-publishable-key",
-       "STRIPE_SECRET_KEY": "your-stripe-secret-key"
+       "STRIPE_SECRET_KEY": "your-stripe-secret-key",
+       "CLOUDINARY_CLOUD_NAME": "your-cloud-name",
+       "CLOUDINARY_API_KEY": "your-api-key",
+       "CLOUDINARY_API_SECRET": "your-api-secret"
      }
    }
    ```
@@ -165,6 +168,9 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 | `FROM_EMAIL` | Verified sender email address for SendGrid | Your SendGrid verified sender |
 | `STRIPE_PUB_KEY` | Stripe publishable key | [Stripe Dashboard](https://dashboard.stripe.com) |
 | `STRIPE_SECRET_KEY` | Stripe secret key | [Stripe Dashboard](https://dashboard.stripe.com) |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | [Cloudinary Console](https://cloudinary.com/console) |
+| `CLOUDINARY_API_KEY` | Cloudinary API key | [Cloudinary Console](https://cloudinary.com/console) |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret | [Cloudinary Console](https://cloudinary.com/console) |
 
 > For Stripe, use test-mode keys (prefixed `pk_test_` / `sk_test_`) during development.
 

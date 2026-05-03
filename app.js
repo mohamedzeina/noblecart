@@ -23,12 +23,14 @@ const errorController = require('./controllers/error');
 const User = require('./models/user');
 
 
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'images');
-  },
-  filename: (req, file, cb) => {
-    cb(null, new Date().toDateString() + '-' + file.originalname);
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('./util/cloudinary');
+
+const fileStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'online-shop',
+    allowed_formats: ['png', 'jpg', 'jpeg'],
   },
 });
 
@@ -65,7 +67,16 @@ const acessLogStream = fs.createWriteStream(
   { flags: 'a' }
 ); // Creating a write stream to log requests
 
-app.use(helmet()); // Helmet middleware for security
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'img-src': ["'self'", 'data:', 'https://res.cloudinary.com'],
+      },
+    },
+  })
+);
 app.use(compression()); // Compression middleware for performance
 app.use(morgan('combined', {stream: acessLogStream})); // Morgan middleware for logging
 

@@ -56,11 +56,13 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   const imageUrl = image.path;
+  const imagePublicId = image.filename;
 
   const product = new Product({
     title: title,
     price: price,
     imageUrl: imageUrl,
+    imagePublicId: imagePublicId,
     description: description,
     userId: req.user,
   });
@@ -140,8 +142,9 @@ exports.postEditProduct = (req, res, next) => {
       product.title = updatedTitle;
       product.price = updatedPrice;
       if (image) {
-        fileHelper.deleteFile(product.imageUrl);
+        fileHelper.deleteFile(product.imagePublicId);
         product.imageUrl = image.path;
+        product.imagePublicId = image.filename;
       }
       product.description = updatedDesc;
 
@@ -177,7 +180,7 @@ exports.deleteProduct = (req, res, next) => {
         return new Error('Product not found.');
       }
 
-      fileHelper.deleteFile(product.imageUrl);
+      fileHelper.deleteFile(product.imagePublicId);
       return Product.deleteOne({ _id: prodId, userId: req.user._id });
     })
     .then(() => {
