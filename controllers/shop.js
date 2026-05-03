@@ -57,7 +57,10 @@ exports.postCart = (req, res, next) => {
       return req.user.addToCart(product);
     })
     .then(() => {
-      console.log('Added Product to Cart Successfully');
+      const cartCount = req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0);
+      if (req.headers['x-requested-with'] === 'fetch') {
+        return res.json({ success: true, cartCount });
+      }
       res.redirect('/cart');
     })
     .catch((err) => {

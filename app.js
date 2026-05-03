@@ -122,9 +122,12 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken(); // Provided by CSRF middleware we added
+  res.locals.csrfToken = req.csrfToken();
+  res.locals.cartCount = req.user
+    ? req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0)
+    : 0;
   next();
-}); // Every request that is executed will have these fields for the views that are rendered
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
