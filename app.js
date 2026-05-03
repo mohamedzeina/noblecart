@@ -74,6 +74,7 @@ app.use(
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         'img-src': ["'self'", 'data:', 'https://res.cloudinary.com'],
         'script-src': ["'self'", 'https://js.stripe.com'],
+        'frame-src': ["'self'", 'https://js.stripe.com'],
       },
     },
   })
