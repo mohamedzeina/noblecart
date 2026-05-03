@@ -295,6 +295,16 @@ form {
   margin: 0 0.25rem;
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .delete-confirm__label {
   display: block;
   font-size: 0.8rem;

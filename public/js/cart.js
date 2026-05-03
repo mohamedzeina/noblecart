@@ -5,6 +5,10 @@ document.addEventListener('click', (e) => {
   const action = btn.dataset.action;
   const productId = btn.dataset.productId;
   const csrf = document.querySelector('[name="_csrf"]').value;
+  const controls = btn.closest('.cart__qty-controls');
+  const allBtns = controls.querySelectorAll('.cart__qty-btn');
+
+  allBtns.forEach(b => b.disabled = true);
 
   fetch('/cart-update', {
     method: 'POST',
@@ -49,5 +53,6 @@ document.addEventListener('click', (e) => {
       const grandTotal = document.getElementById('cart-grand-total');
       if (grandTotal) grandTotal.textContent = '$' + total.toFixed(2);
     })
-    .catch((err) => console.error(err));
+    .catch((err) => console.error(err))
+    .finally(() => allBtns.forEach(b => b.disabled = false));
 });
