@@ -17,17 +17,43 @@
                     <a href="/" class="btn">Start Shopping</a>
                 </div>
             <% } else { %>
+                <div class="page-header">
+                    <h1 class="page-header__title">Your Orders</h1>
+                </div>
                 <ul class="orders">
                     <% orders.forEach(order => { %>
-                        <li class="orders__item">
-                            <h1>Order - # <%= order._id %> - <a href="/orders/<%= order._id %>">Invoice</a></h1>
-                            <ul class="orders__products">
+                        <li class="order-card">
+                            <div class="order-card__header">
+                                <div>
+                                    <p class="order-card__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></p>
+                                    <p class="order-card__id-full"><%= order._id %></p>
+                                </div>
+                                <a href="/orders/<%= order._id %>" class="btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16" style="margin-right:4px;vertical-align:middle;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                    </svg>
+                                    Invoice
+                                </a>
+                            </div>
+                            <ul class="order-card__products">
                                 <% order.products.forEach(p => { %>
-                                    <li class="orders__products-item"><%= p.productData.title %> (<%= p.quantity %>)</li>
-                                <% }); %>
+                                    <li class="order-card__product">
+                                        <div class="order-card__product-image">
+                                            <img src="<%= p.productData.imageUrl %>" alt="<%= p.productData.title %>">
+                                        </div>
+                                        <div class="order-card__product-info">
+                                            <span class="order-card__product-title"><%= p.productData.title %></span>
+                                            <span class="order-card__product-price">$<%= p.productData.price.toFixed(2) %> &times; <%= p.quantity %></span>
+                                        </div>
+                                        <span class="order-card__product-total">$<%= (p.productData.price * p.quantity).toFixed(2) %></span>
+                                    </li>
+                                <% }) %>
                             </ul>
+                            <div class="order-card__footer">
+                                <span class="order-card__total">Total: $<%= order.products.reduce((sum, p) => sum + p.quantity * p.productData.price, 0).toFixed(2) %></span>
+                            </div>
                         </li>
-                    <% }); %>
+                    <% }) %>
                 </ul>
             <% } %>
         </main>
