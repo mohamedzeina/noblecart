@@ -1,23 +1,20 @@
-const deleteProduct = (btn) => {
-  const prodId = btn.parentNode.querySelector('[name=productId]').value;
-  const csrf = btn.parentNode.querySelector('[name=_csrf]').value;
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prodId = btn.parentNode.querySelector('[name=productId]').value;
+      const csrf = btn.parentNode.querySelector('[name=_csrf]').value;
+      const prodElement = btn.closest('article');
 
-  const prodElement = btn.closest('article');
-
-  fetch('/admin/product/' + prodId, {
-    method: 'DELETE',
-    headers: {
-      'csrf-token': csrf,
-    },
-  })
-    .then((result) => {
-      return result.json();
-    })
-    .then((data) => {
-      console.log(data);
-      prodElement.parentNode.removeChild(prodElement); // Removing article DOM element of the product being deleted
-    })
-    .catch((err) => {
-      console.log(err);
+      fetch('/admin/product/' + prodId, {
+        method: 'DELETE',
+        headers: { 'csrf-token': csrf },
+      })
+        .then(result => result.json())
+        .then(data => {
+          console.log(data);
+          prodElement.parentNode.removeChild(prodElement);
+        })
+        .catch(err => console.log(err));
     });
-};
+  });
+});
