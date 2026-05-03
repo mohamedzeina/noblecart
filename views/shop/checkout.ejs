@@ -5,21 +5,49 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-          <ul class="cart__item-list">
-            <% products.forEach(p => { %>
-                <li class="cart__item">
-                    <h1><%= p.productId.title %></h1>
-                    <h2>Quantity: <%= p.quantity %></h2>
-                </li>
-            <% }) %>
-        </ul>
-        <div class="centered">
-          <h2> Total: $<%= totalSum %> </h2>
-        </div>
-        <div class="centered">
-          <button id="order-btn" class="btn" data-stripe-key="<%= stripePublicKey %>" data-session-id="<%= sessionId %>">ORDER</button>
-          <script src="https://js.stripe.com/v3/"></script>
-          <script src="/js/checkout.js"></script>
-        </div>
+            <div class="cart-layout">
+                <section class="cart-items">
+                    <h1 class="cart__title">Review Your Order</h1>
+                    <ul class="cart__item-list">
+                        <% products.forEach(p => { %>
+                            <li class="cart__item">
+                                <div class="cart__item-image">
+                                    <img src="<%= p.productId.imageUrl %>" alt="<%= p.productId.title %>">
+                                </div>
+                                <div class="cart__item-info">
+                                    <h2 class="cart__item-title"><%= p.productId.title %></h2>
+                                    <p class="cart__item-price">$<%= p.productId.price.toFixed(2) %> each</p>
+                                    <p class="cart__item-qty">Qty: <%= p.quantity %></p>
+                                </div>
+                                <div class="cart__item-right">
+                                    <p class="cart__item-total">$<%= (p.productId.price * p.quantity).toFixed(2) %></p>
+                                </div>
+                            </li>
+                        <% }) %>
+                    </ul>
+                </section>
+                <aside class="cart-summary">
+                    <h2 class="cart-summary__title">Order Summary</h2>
+                    <ul class="cart-summary__items">
+                        <% products.forEach(p => { %>
+                            <li class="cart-summary__item">
+                                <span><%= p.productId.title %> &times; <%= p.quantity %></span>
+                                <span>$<%= (p.productId.price * p.quantity).toFixed(2) %></span>
+                            </li>
+                        <% }) %>
+                    </ul>
+                    <div class="cart-summary__total">
+                        <span>Total</span>
+                        <span>$<%= totalSum.toFixed(2) %></span>
+                    </div>
+                    <button id="order-btn" class="btn btn--solid cart-summary__checkout"
+                        data-stripe-key="<%= stripePublicKey %>"
+                        data-session-id="<%= sessionId %>">
+                        Pay with Stripe
+                    </button>
+                </aside>
+            </div>
         </main>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script src="/js/checkout.js"></script>
         <%- include('../includes/end.ejs') %>
