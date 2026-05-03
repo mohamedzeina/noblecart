@@ -75,6 +75,8 @@ app.use(
         'img-src': ["'self'", 'data:', 'https://res.cloudinary.com'],
         'script-src': ["'self'", 'https://js.stripe.com'],
         'frame-src': ["'self'", 'https://js.stripe.com'],
+        'style-src': ["'self'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com'],
       },
     },
   })
