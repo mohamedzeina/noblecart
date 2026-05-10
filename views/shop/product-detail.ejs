@@ -5,24 +5,67 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-            <a href="/" class="product-detail__back">
+            <% const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home & Living', accessories: 'Accessories' }; %>
+            <a href="/category/<%= product.category %>" class="product-detail__back">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                 </svg>
-                Back to Shop
+                Back to <%= catLabels[product.category] || product.category %>
             </a>
             <div class="product-detail">
                 <div class="product-detail__image">
-                    <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+                    <% if (product.modelUrl) { %>
+                        <div class="view-toggle">
+                            <button class="view-toggle__btn active" data-view="image">Photo</button>
+                            <button class="view-toggle__btn" data-view="3d">3D View</button>
+                        </div>
+                    <% } %>
+                    <div id="view-image">
+                        <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+                    </div>
+                    <% if (product.modelUrl) { %>
+                        <div id="view-3d" style="display:none" data-model-url="<%= product.modelUrl %>"></div>
+                    <% } %>
                 </div>
                 <div class="product-detail__info">
+                    <span class="product-detail__badge"><%= catLabels[product.category] || product.category %></span>
                     <h1 class="product-detail__title"><%= product.title %></h1>
                     <p class="product-detail__price">$<%= product.price.toFixed(2) %></p>
                     <p class="product-detail__description"><%= product.description %></p>
+
                     <% if (isAuthenticated) { %>
                         <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                    <% } else { %>
+                        <a href="/login" class="btn product-detail__login-cta">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                            Sign in to add to cart
+                        </a>
                     <% } %>
+
+                    <div class="product-detail__trust">
+                        <div class="trust-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                            </svg>
+                            <span>Free shipping</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                            </svg>
+                            <span>30-day returns</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                            </svg>
+                            <span>Secure payment</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
+        <% if (product.modelUrl) { %>
+        <script type="module" src="/js/product-detail.js"></script>
+        <% } %>
         <%- include('../includes/end.ejs') %>

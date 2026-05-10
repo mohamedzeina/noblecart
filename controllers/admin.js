@@ -18,7 +18,8 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const image = req.file;
+  const image = req.files && req.files.image ? req.files.image[0] : null;
+  const model = req.files && req.files.model ? req.files.model[0] : null;
   const description = req.body.description;
   const price = req.body.price;
   const category = req.body.category;
@@ -29,13 +30,8 @@ exports.postAddProduct = (req, res, next) => {
       path: '/admin/add-product',
       editing: false,
       hasError: true,
-      product: {
-        title: title,
-        price: price,
-        description: description,
-        category: category,
-      },
-      errorMessage: 'Attached file is not an image.',
+      product: { title, price, description, category },
+      errorMessage: 'Please provide a product image.',
       validationErrors: [],
     });
   }
@@ -43,32 +39,28 @@ exports.postAddProduct = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
+    fileHelper.deleteFile(image.filename);
+    if (model) fileHelper.deleteModel(model.filename);
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
       editing: false,
       hasError: true,
-      product: {
-        title: title,
-        price: price,
-        description: description,
-        category: category,
-      },
+      product: { title, price, description, category },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
     });
   }
 
-  const imageUrl = image.path;
-  const imagePublicId = image.filename;
-
   const product = new Product({
-    title: title,
-    price: price,
-    imageUrl: imageUrl,
-    imagePublicId: imagePublicId,
-    description: description,
-    category: category,
+    title,
+    price,
+    imageUrl: image.path,
+    imagePublicId: image.filename,
+    modelUrl: model ? model.path : undefined,
+    modelPublicId: model ? model.filename : undefined,
+    description,
+    category,
     userId: req.user,
   });
   product
@@ -115,7 +107,8 @@ exports.getEditProduct = (req, res, next) => {
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
-  const image = req.file;
+  const image = req.files && req.files.image ? req.files.image[0] : null;
+  const model = req.files && req.files.model ? req.files.model[0] : null;
   const updatedPrice = req.body.price;
   const updatedDesc = req.body.description;
   const updatedCategory = req.body.category;
@@ -123,7 +116,8 @@ exports.postEditProduct = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    console.log(updatedDesc);
+    if (image) fileHelper.deleteFile(image.filename);
+    if (model) fileHelper.deleteModel(model.filename);
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Edit Product',
       path: '/admin/edit-product',
@@ -142,7 +136,6 @@ exports.postEditProduct = (req, res, next) => {
   }
 
   Product.findById(prodId)
-
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
         return res.redirect('/');
@@ -153,6 +146,11 @@ exports.postEditProduct = (req, res, next) => {
         fileHelper.deleteFile(product.imagePublicId);
         product.imageUrl = image.path;
         product.imagePublicId = image.filename;
+      }
+      if (model) {
+        fileHelper.deleteModel(product.modelPublicId);
+        product.modelUrl = model.path;
+        product.modelPublicId = model.filename;
       }
       product.description = updatedDesc;
       product.category = updatedCategory;
@@ -190,6 +188,7 @@ exports.deleteProduct = (req, res, next) => {
       }
 
       fileHelper.deleteFile(product.imagePublicId);
+      fileHelper.deleteModel(product.modelPublicId);
       return Promise.all([
         Product.deleteOne({ _id: prodId, userId: req.user._id }),
         User.updateMany(

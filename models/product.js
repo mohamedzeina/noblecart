@@ -18,6 +18,12 @@ const productSchema = new Schema({
   imagePublicId: {
     type: String,
   },
+  modelUrl: {
+    type: String,
+  },
+  modelPublicId: {
+    type: String,
+  },
   description: {
     type: String,
     required: true,

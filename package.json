@@ -6,11 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "build:viewer": "esbuild public/js/product-detail-src.js --bundle --format=esm --outfile=public/js/product-detail.js"
   },
   "author": "Mohamed Zeina",
   "license": "ISC",
   "devDependencies": {
+    "esbuild": "^0.28.0",
     "nodemon": "^3.1.4"
   },
   "dependencies": {
@@ -43,6 +45,7 @@
     "pug": "^3.0.3",
     "resend": "^6.4.2",
     "sequelize": "^6.37.3",
-    "stripe": "^16.10.0"
+    "stripe": "^16.10.0",
+    "three": "^0.184.0"
   }
 }

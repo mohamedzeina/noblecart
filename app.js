@@ -28,24 +28,23 @@ const cloudinary = require('./util/cloudinary');
 
 const fileStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'online-shop',
-    allowed_formats: ['png', 'jpg', 'jpeg'],
+  params: async (req, file) => {
+    if (file.fieldname === 'model') {
+      return { folder: 'online-shop-models', resource_type: 'raw', format: 'glb' };
+    }
+    return { folder: 'online-shop', allowed_formats: ['png', 'jpg', 'jpeg'] };
   },
 });
 
-
 const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype == 'image/png' ||
-    file.mimetype == 'image/jpeg' ||
-    file.mimetype == 'image/jpg'
-  ) {
+  if (file.fieldname === 'model') {
+    cb(null, file.originalname.toLowerCase().endsWith('.glb'));
+  } else if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(null, false);
   }
-}; // Filter to only accept png, jpeg or jpg file uploads
+};
 
 const app = express();
 const store = mongoDBStore({
@@ -72,11 +71,13 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'img-src': ["'self'", 'data:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
-        'script-src': ["'self'", 'https://js.stripe.com'],
+        'img-src': ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
+        'script-src': ["'self'", 'https://js.stripe.com', 'https://ajax.googleapis.com', 'https://www.gstatic.com'],
         'frame-src': ["'self'", 'https://js.stripe.com'],
         'style-src': ["'self'", 'https://fonts.googleapis.com'],
         'font-src': ["'self'", 'https://fonts.gstatic.com'],
+        'worker-src': ["'self'", 'blob:'],
+        'connect-src': ["'self'", 'https://res.cloudinary.com', 'blob:', 'https://www.gstatic.com'],
       },
     },
   })
@@ -86,8 +87,11 @@ app.use(morgan('combined', {stream: acessLogStream})); // Morgan middleware for 
 
 app.use(bodyParser.urlencoded({ extended: false })); // Parses body like we used to do manually in previous http version of this project
 app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
-); // Using multer to handle image uploads by an admin
+  multer({ storage: fileStorage, fileFilter }).fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'model', maxCount: 1 },
+  ])
+);
 
 app.use(express.static(path.join(__dirname, 'public'))); // Grant read access to the public folder statically
 app.use('/images', express.static(path.join(__dirname, 'images')));

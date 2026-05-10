@@ -23,7 +23,35 @@
                     value="<% if (editing || hasError) { %><%= product.title %><% } %>">
                 </div>
                 <div class="form-control">
-                    <label>Image</label>
+                    <label>3D Model <span class="form-control__hint">(optional — .glb)</span></label>
+                    <div class="file-upload" id="model-upload-area">
+                        <input type="file" name="model" id="model-file" accept=".glb" class="file-upload__input">
+                        <% if (editing && product.modelUrl) { %>
+                            <div class="file-upload__placeholder" id="model-placeholder">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                </svg>
+                                <p>Current model loaded — click to replace</p>
+                                <span>.glb</span>
+                            </div>
+                        <% } else { %>
+                            <div class="file-upload__placeholder" id="model-placeholder">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                </svg>
+                                <p>Click to upload .glb</p>
+                                <span>3D model file — auto-generates product image</span>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div id="model-viewer-container" style="margin-top:0.5rem;border-radius:8px;overflow:hidden;position:relative;background:#1a1a1a;<% if (!(editing && product.modelUrl)) { %>display:none;<% } %>height:420px;">
+                        <% if (editing && product.modelUrl) { %>
+                            <model-viewer id="model-preview-viewer" src="<%= product.modelUrl %>" auto-rotate camera-controls interaction-prompt="none" ar-modes="" style="width:100%;height:420px;overflow:hidden;display:block;"></model-viewer>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label>Product Image <span class="form-control__hint" id="image-label-hint">(auto-filled from 3D model, or upload manually)</span></label>
                     <div class="file-upload" id="file-upload-area">
                         <input type="file" name="image" id="image" accept="image/png,image/jpeg,image/jpg" class="file-upload__input">
                         <% if (editing && product.imageUrl) { %>
@@ -76,5 +104,6 @@
             </form>
         </div>
     </main>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script src="/js/upload.js"></script>
 <%- include('../includes/end.ejs') %>
