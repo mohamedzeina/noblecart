@@ -2,7 +2,7 @@
 
 A full-stack luxury e-commerce web application built with Node.js and Express.js, following the MVC pattern. Features a 3D product viewer, slide-out cart drawer, product categories, Stripe payments, and PDF invoice generation.
 
-**Live demo:** [online-shop-luts.onrender.com](https://online-shop-luts.onrender.com)
+**Live demo:** [noblecart.onrender.com](https://noblecart.onrender.com)
 
 ## Table of Contents
 
@@ -138,8 +138,8 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/mohamedzeina/online-shop.git
-   cd online-shop
+   git clone https://github.com/mohamedzeina/noblecart.git
+   cd noblecart
    ```
 
 2. **Install dependencies**
