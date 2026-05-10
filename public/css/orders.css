@@ -1,3 +1,20 @@
+.orders-header {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.orders-header__title {
+  font-family: 'Cormorant', serif;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #0c0a09;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
 .orders {
   list-style: none;
   padding: 1.5rem;
@@ -10,9 +27,14 @@
 
 .order-card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.order-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
 }
 
 .order-card__header {
@@ -24,17 +46,41 @@
 }
 
 .order-card__id {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .order-card__id-full {
-  font-size: 0.75rem;
-  color: #94a3b8;
+  font-size: 0.7rem;
+  color: #cbd5e1;
   font-family: monospace;
-  margin: 0.2rem 0 0;
+  margin: 0.15rem 0 0;
+}
+
+.order-card__invoice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #111111;
+  color: #ffffff;
+  border: 1px solid #111111;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.order-card__invoice-btn:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+  color: #ffffff;
 }
 
 .order-card__products {
@@ -64,6 +110,7 @@
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
+  background: #eef2f6;
 }
 
 .order-card__product-image img {
@@ -93,18 +140,20 @@
 .order-card__product-total {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #0f766e;
+  color: #1e293b;
 }
 
 .order-card__footer {
   padding: 0.75rem 1.25rem;
   border-top: 1px solid #f1f5f9;
+  background: #fafafa;
   display: flex;
   justify-content: flex-end;
 }
 
 .order-card__total {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #0f766e;
+  color: #1e293b;
+  letter-spacing: -0.01em;
 }

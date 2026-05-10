@@ -14,11 +14,11 @@
                     </div>
                     <h2 class="empty-state__title">No orders yet</h2>
                     <p class="empty-state__subtitle">Your completed orders will appear here.</p>
-                    <a href="/" class="btn">Start Shopping</a>
+                    <a href="/" class="btn btn--solid">Start Shopping</a>
                 </div>
             <% } else { %>
-                <div class="page-header">
-                    <h1 class="page-header__title">Your Orders</h1>
+                <div class="orders-header">
+                    <h1 class="orders-header__title">Your Orders</h1>
                 </div>
                 <ul class="orders">
                     <% orders.forEach(order => { %>
@@ -26,10 +26,9 @@
                             <div class="order-card__header">
                                 <div>
                                     <p class="order-card__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></p>
-                                    <p class="order-card__id-full"><%= order._id %></p>
                                 </div>
-                                <a href="/orders/<%= order._id %>" class="btn" target="_blank" rel="noopener noreferrer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16" style="margin-right:4px;vertical-align:middle;">
+                                <a href="/orders/<%= order._id %>" class="order-card__invoice-btn" target="_blank" rel="noopener noreferrer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                     </svg>
                                     Invoice
