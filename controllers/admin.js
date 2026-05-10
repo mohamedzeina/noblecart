@@ -195,6 +195,10 @@ exports.deleteProduct = (req, res, next) => {
           { 'cart.items.productId': prodId },
           { $pull: { 'cart.items': { productId: prodId } } }
         ),
+        User.updateMany(
+          { 'wishlist.productId': prodId },
+          { $pull: { wishlist: { productId: prodId } } }
+        ),
       ]);
     })
     .then(() => {
