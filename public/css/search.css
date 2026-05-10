@@ -214,9 +214,10 @@
 /* Search results page */
 .search-results__header {
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid #e2e8f0;
 }
+
 
 .search-results__title {
   font-size: 1.75rem;
@@ -234,4 +235,22 @@
   font-size: 0.875rem;
   color: #94a3b8;
   margin: 0;
+}
+
+.empty-state--compact {
+  padding: 2.5rem 1rem;
+}
+
+.search-suggestions-section {
+  margin-top: 0;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.search-suggestions-section__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0c0a09;
+  margin: 0 0 0;
+  padding: 0 1.5rem 1.5rem;
 }

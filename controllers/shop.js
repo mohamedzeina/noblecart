@@ -44,11 +44,23 @@ exports.getSearch = (req, res, next) => {
   const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   Product.find({ $or: [{ title: regex }, { category: regex }, { description: regex }] })
     .then((products) => {
-      res.render('shop/search', {
-        pageTitle: `"${query}"`,
-        path: '/search',
-        products,
-        query,
+      if (products.length > 0) {
+        return res.render('shop/search', {
+          pageTitle: `"${query}"`,
+          path: '/search',
+          products,
+          query,
+          suggestions: [],
+        });
+      }
+      return Product.find({}).limit(4).then((suggestions) => {
+        res.render('shop/search', {
+          pageTitle: `"${query}"`,
+          path: '/search',
+          products: [],
+          query,
+          suggestions,
+        });
       });
     })
     .catch((err) => {
