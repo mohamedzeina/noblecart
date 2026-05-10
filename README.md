@@ -1,6 +1,6 @@
-# Online Shop
+# Noblecart
 
-A full-stack e-commerce web application built with Node.js and Express.js, following the MVC pattern. Supports product management, shopping cart, Stripe payments, PDF invoice generation, and email-based password reset.
+A full-stack luxury e-commerce web application built with Node.js and Express.js, following the MVC pattern. Features a 3D product viewer, slide-out cart drawer, product categories, Stripe payments, and PDF invoice generation.
 
 **Live demo:** [online-shop-luts.onrender.com](https://online-shop-luts.onrender.com)
 
@@ -20,35 +20,46 @@ A full-stack e-commerce web application built with Node.js and Express.js, follo
   - Registration and login with session-based auth
   - Passwords hashed with bcryptjs
   - Email-based password reset via tokenized links (expires after 1 hour)
-  - Signup confirmation email via SendGrid
+  - Signup confirmation email via Resend
 
 - **Product Management** (Admin only)
-  - Create, edit, and delete products
-  - Image upload with drag-and-drop support and instant preview, stored on Cloudinary
-  - Delete with inline confirmation and loading state — no accidental deletions
+  - Create, edit, and delete products with category assignment
+  - Image upload with drag-and-drop support and instant preview, stored on Cloudinary (`noblecart/`)
+  - Optional GLB 3D model upload, stored on Cloudinary (`noblecart-models/`)
+  - Delete with inline confirmation and toast feedback — no accidental deletions
   - Deleting a product automatically removes it from all user carts
-  - Products are scoped to the authenticated admin user
 
-- **Shopping Cart**
-  - Add products without page reload — cart icon updates live with a badge counter
-  - Adjust quantity with + / − controls or remove items entirely with a trash icon
-  - Line totals and order summary update instantly without page reload
+- **3D Product Viewer**
+  - Interactive 3D viewer powered by Three.js for products with a GLB model
+  - OrbitControls with drag-to-rotate, scroll-to-zoom, and auto-dismiss hint overlay
+  - Falls back to standard image display when no model is available
+
+- **Product Categories**
+  - Products are tagged with a category: Electronics, Fashion, Home & Living, or Accessories
+  - Category filtering via navbar links with active underline state
+  - Breadcrumb navigation on category and product detail pages
+
+- **Cart Drawer**
+  - Slide-out cart drawer on all pages — no separate cart page
+  - Add products without page reload — cart badge updates live
+  - Adjust quantity with + / − controls or remove items from within the drawer
+  - Line totals and order total update instantly
   - Cart persists across sessions via MongoDB
 
 - **Orders & Payments**
   - Stripe Checkout integration for secure payments
   - Orders created automatically on successful payment
   - Paginated order history per user
-  - Downloadable PDF invoices generated server-side with PDFKit
+  - PDF invoices generated server-side with PDFKit — premium black/white design
 
 - **Security**
   - CSRF protection on all state-changing requests
   - HTTP security headers via Helmet
   - Server-side input validation with express-validator
-  - HTTPS for local development
 
 - **Other**
-  - Pagination on product listings and admin dashboard
+  - Pagination on product listings
+  - GLB product seed script with Puppeteer thumbnail capture
   - Morgan HTTP request logging to `access.log`
   - Response compression
 
@@ -63,19 +74,20 @@ A full-stack e-commerce web application built with Node.js and Express.js, follo
 | Sessions | express-session + connect-mongodb-session |
 | Auth | bcryptjs |
 | File Uploads | Multer + Cloudinary |
+| 3D Viewer | Three.js (self-hosted, bundled with esbuild) |
 | Payments | Stripe |
 | Email | Resend |
 | PDF | PDFKit |
 | Validation | express-validator |
 | Security | Helmet, csurf |
-| Dev | nodemon, morgan |
+| Dev | nodemon, morgan, Puppeteer |
 
 ## Architecture
 
 This project follows the **Model-View-Controller (MVC)** pattern:
 
-- **Models** (`/models`) — Mongoose schemas for `User`, `Product`, and `Order`. The `User` model includes cart methods (`addToCart`, `removeFromCart`, `clearCart`).
-- **Views** (`/views`) — EJS templates organized by feature (`shop/`, `admin/`, `auth/`), with shared partials in `includes/`.
+- **Models** (`/models`) — Mongoose schemas for `User`, `Product`, and `Order`. The `User` model includes cart methods (`addToCart`, `decrementFromCart`, `removeFromCart`, `clearCart`).
+- **Views** (`/views`) — EJS templates organized by feature (`shop/`, `admin/`, `auth/`), with shared partials in `includes/` including the cart drawer.
 - **Controllers** (`/controllers`) — Business logic separated into `shop.js`, `admin.js`, `auth.js`, and `error.js`.
 - **Routes** (`/routes`) — Express routers map HTTP methods/paths to controller functions, with `isAuth` middleware guarding protected routes.
 
@@ -84,9 +96,9 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 ```
 .
 ├── app.js                  # App entry point (HTTPS server, middleware, routes)
-├── nodemon.json            # Dev environment variables (gitignored — see below)
+├── nodemon.json            # Dev environment variables (gitignored)
 ├── middleware/
-│   └── is-auth.js          # Session-based auth guard
+│   └── is-auth.js
 ├── models/
 │   ├── user.js
 │   ├── product.js
@@ -104,7 +116,7 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 │   ├── auth/
 │   ├── shop/
 │   ├── admin/
-│   └── includes/
+│   └── includes/           # Shared partials (nav, head, cart drawer, etc.)
 ├── public/
 │   ├── css/
 │   └── js/
@@ -112,6 +124,13 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 │   ├── file.js             # Cloudinary delete helper
 │   ├── cloudinary.js       # Cloudinary SDK config
 │   └── paginationHelper.js
+├── scripts/
+│   ├── seed-glb-products.js  # Seed products from local GLB files
+│   └── products/             # Product data folders (gitignored)
+│       └── <slug>/
+│           ├── meta.txt      # title, price, category, description
+│           ├── model.glb     # 3D model (required)
+│           └── image.png     # Optional — auto-captured via Puppeteer if missing
 └── invoices/               # Generated PDF invoices (gitignored)
 ```
 
@@ -130,7 +149,7 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 
 3. **Configure environment variables**
 
-   Create a `nodemon.json` file in the project root (this file is gitignored — never commit it):
+   Create a `nodemon.json` file in the project root (gitignored — never commit it):
    ```json
    {
      "env": {
@@ -146,8 +165,6 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    }
    ```
 
-   See [Environment Variables](#environment-variables) for details on obtaining each value.
-
 4. **Generate local SSL certificates**
 
    The app runs on HTTPS locally. Generate a self-signed certificate:
@@ -156,14 +173,19 @@ This project follows the **Model-View-Controller (MVC)** pattern:
    ```
    When prompted for **Common Name (CN)**, enter `localhost`.
 
-5. **Start the development server**
+5. **Build the 3D viewer bundle**
+   ```bash
+   npm run build:viewer
+   ```
+
+6. **Start the development server**
    ```bash
    npm run dev
    ```
 
-6. Visit [https://localhost:3000](https://localhost:3000)
+7. Visit [https://localhost:3000](https://localhost:3000)
 
-   > Your browser will warn about the self-signed certificate. This is expected — proceed past the warning for local development.
+   > Your browser will warn about the self-signed certificate — proceed past it for local development.
 
 ## Environment Variables
 
@@ -186,3 +208,31 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 |---|---|---|
 | `start` | `node app.js` | Start the production server |
 | `dev` | `nodemon app.js` | Start with auto-reload (reads env from nodemon.json) |
+| `build:viewer` | `esbuild ...` | Bundle the Three.js 3D viewer for the browser |
+| `seed` | `node scripts/seed-glb-products.js` | Delete all products and re-seed from `scripts/products/` |
+
+### Seeding Products
+
+Place each product in its own folder under `scripts/products/<slug>/`:
+
+```
+scripts/products/
+└── sony-ps5/
+    ├── meta.txt      # Title, Price, Category, Description
+    └── model.glb     # 3D model (compressed to <10MB for Cloudinary free tier)
+```
+
+`meta.txt` format:
+```
+Title: Sony PlayStation 5
+Price: 499.99
+Category: electronics
+Description: ...
+```
+
+Then run:
+```bash
+npm run seed
+```
+
+If no `image.png` is provided, a thumbnail is auto-captured from the GLB via Puppeteer.
