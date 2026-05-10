@@ -330,7 +330,7 @@ form {
 
 .card__image {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
 }
 
@@ -444,6 +444,11 @@ form {
 .btn:active {
   background-color: #0f766e;
   color: white;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: 3px;
 }
 
 .btn--solid {
@@ -600,5 +605,23 @@ form {
 
   .user-message {
     width: 30rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  .hero__cta {
+    transition: none;
+  }
+
+  .hero__cta:hover {
+    transform: none;
   }
 }
