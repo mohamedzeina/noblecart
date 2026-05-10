@@ -6,12 +6,13 @@
         <%- include('../includes/navigation.ejs') %>
         <main>
             <% const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home & Living', accessories: 'Accessories' }; %>
-            <a href="/category/<%= product.category %>" class="product-detail__back">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                </svg>
-                Back to <%= catLabels[product.category] || product.category %>
-            </a>
+            <nav class="breadcrumb product-detail__breadcrumb" aria-label="Breadcrumb">
+                <a href="/" class="breadcrumb__item">All Products</a>
+                <span class="breadcrumb__sep">/</span>
+                <a href="/category/<%= product.category %>" class="breadcrumb__item"><%= catLabels[product.category] || product.category %></a>
+                <span class="breadcrumb__sep">/</span>
+                <span class="breadcrumb__item breadcrumb__item--current"><%= product.title %></span>
+            </nav>
             <div class="product-detail">
                 <div class="product-detail__image">
                     <% if (product.modelUrl) { %>
