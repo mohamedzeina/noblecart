@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const sectionHeader = document.querySelector('.products-section__header');
+  const categoryCards = document.querySelectorAll('.category-card');
   const cards = document.querySelectorAll('.card');
   const targets = [];
 
@@ -9,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
     sectionHeader.classList.add('fade-up');
     targets.push(sectionHeader);
   }
+
+  categoryCards.forEach((card, i) => {
+    card.classList.add('fade-up');
+    card.style.transitionDelay = `${i * 0.08}s`;
+    targets.push(card);
+  });
 
   cards.forEach((card, i) => {
     card.classList.add('fade-up');
