@@ -72,7 +72,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'img-src': ["'self'", 'data:', 'https://res.cloudinary.com'],
+        'img-src': ["'self'", 'data:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
         'script-src': ["'self'", 'https://js.stripe.com'],
         'frame-src': ["'self'", 'https://js.stripe.com'],
         'style-src': ["'self'", 'https://fonts.googleapis.com'],
