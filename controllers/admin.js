@@ -21,6 +21,7 @@ exports.postAddProduct = (req, res, next) => {
   const image = req.file;
   const description = req.body.description;
   const price = req.body.price;
+  const category = req.body.category;
 
   if (!image) {
     return res.status(422).render('admin/edit-product', {
@@ -32,6 +33,7 @@ exports.postAddProduct = (req, res, next) => {
         title: title,
         price: price,
         description: description,
+        category: category,
       },
       errorMessage: 'Attached file is not an image.',
       validationErrors: [],
@@ -50,6 +52,7 @@ exports.postAddProduct = (req, res, next) => {
         title: title,
         price: price,
         description: description,
+        category: category,
       },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
@@ -65,6 +68,7 @@ exports.postAddProduct = (req, res, next) => {
     imageUrl: imageUrl,
     imagePublicId: imagePublicId,
     description: description,
+    category: category,
     userId: req.user,
   });
   product
@@ -114,6 +118,7 @@ exports.postEditProduct = (req, res, next) => {
   const image = req.file;
   const updatedPrice = req.body.price;
   const updatedDesc = req.body.description;
+  const updatedCategory = req.body.category;
 
   const errors = validationResult(req);
 
@@ -128,6 +133,7 @@ exports.postEditProduct = (req, res, next) => {
         title: updatedTitle,
         price: updatedPrice,
         description: updatedDesc,
+        category: updatedCategory,
         _id: prodId,
       },
       errorMessage: errors.array()[0].msg,
@@ -136,6 +142,7 @@ exports.postEditProduct = (req, res, next) => {
   }
 
   Product.findById(prodId)
+
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
         return res.redirect('/');
@@ -148,6 +155,7 @@ exports.postEditProduct = (req, res, next) => {
         product.imagePublicId = image.filename;
       }
       product.description = updatedDesc;
+      product.category = updatedCategory;
 
       return product.save().then(() => {
         console.log('Updated Product Successfully');

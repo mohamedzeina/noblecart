@@ -52,6 +52,15 @@
                     value="<% if (editing || hasError) { %><%= product.price %><% } %>">
                 </div>
                 <div class="form-control">
+                    <label for="category">Category</label>
+                    <select name="category" id="category" class="<%= validationErrors.find(e => e.path === 'category') ? 'invalid' : '' %>">
+                        <option value="" disabled <%= (editing || hasError) && product.category ? '' : 'selected' %>>Select a category</option>
+                        <% ['electronics', 'fashion', 'home', 'accessories'].forEach(cat => { %>
+                            <option value="<%= cat %>" <%= (editing || hasError) && product.category === cat ? 'selected' : '' %>><%= cat.charAt(0).toUpperCase() + cat.slice(1) %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-control">
                     <label for="description">Description</label>
                     <textarea
                     class="<%= validationErrors.find(e => e.path === 'description') ? 'invalid' : '' %>"

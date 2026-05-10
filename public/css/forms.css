@@ -12,7 +12,8 @@
 }
 
 .form-control input,
-.form-control textarea {
+.form-control textarea,
+.form-control select {
   display: block;
   width: 100%;
   padding: 0.55rem 0.75rem;
@@ -25,14 +26,16 @@
 }
 
 .form-control input:focus,
-.form-control textarea:focus {
+.form-control textarea:focus,
+.form-control select:focus {
   outline: none;
   border-color: #0f766e;
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
 }
 
 .form-control input.invalid,
-.form-control textarea.invalid {
+.form-control textarea.invalid,
+.form-control select.invalid {
   border-color: #dc2626;
 }
 

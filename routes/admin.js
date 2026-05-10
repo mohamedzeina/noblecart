@@ -22,6 +22,7 @@ router.post(
       .trim(),
     body('price', 'Please enter a valid price.').isFloat(),
     body('description').isLength({ min: 5, max: 400 }).trim(),
+    body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'accessories']),
   ],
   isAuth,
   adminController.postAddProduct
@@ -49,6 +50,7 @@ router.post(
     )
       .isLength({ min: 5, max: 400 })
       .trim(),
+    body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'accessories']),
   ],
   isAuth,
   adminController.postEditProduct

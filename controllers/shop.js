@@ -32,6 +32,11 @@ exports.getIndex = (req, res, next) => {
   pg.paginationHelper(req, res, next, 'shop/index', 'Shop', '/', {});
 };
 
+exports.getCategory = (req, res, next) => {
+  const category = req.params.category;
+  pg.paginationHelper(req, res, next, 'shop/index', category.charAt(0).toUpperCase() + category.slice(1), '/', { category });
+};
+
 exports.getCart = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
