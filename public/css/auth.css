@@ -23,11 +23,13 @@ body:has(.auth-card) main {
 }
 
 .auth-card__title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: 'Cormorant', serif;
+  font-size: 2rem;
+  font-weight: 600;
   color: #f1f5f9;
   margin: 0 0 0.25rem;
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .auth-card__subtitle {
@@ -81,7 +83,10 @@ body:has(.auth-card) main {
 }
 
 .auth-card__footer {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 1.25rem;
   font-size: 0.875rem;
   color: #94a3b8;

@@ -18,7 +18,7 @@
             <h1 class="auth-card__title">Welcome back</h1>
             <p class="auth-card__subtitle">Sign in to your account</p>
             <% if (errorMessage) { %>
-            <p class="auth-card__error"><%= errorMessage %></p>
+            <p class="auth-card__error" role="alert"><%= errorMessage %></p>
             <% } %>
             <form action="/login" method="POST" novalidate>
                 <div class="form-control">
@@ -51,9 +51,8 @@
                 <button class="btn" type="submit">Login</button>
             </form>
             <div class="auth-card__footer">
-                <a href="/reset">Forgot your password?</a>
-                &nbsp;·&nbsp;
                 <a href="/signup">Create an account</a>
+                <a href="/reset">Forgot your password?</a>
             </div>
         </div>
     </main>

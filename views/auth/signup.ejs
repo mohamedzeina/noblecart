@@ -18,7 +18,7 @@
             <h1 class="auth-card__title">Create an account</h1>
             <p class="auth-card__subtitle">Start shopping today</p>
             <% if (errorMessage) { %>
-            <p class="auth-card__error"><%= errorMessage %></p>
+            <p class="auth-card__error" role="alert"><%= errorMessage %></p>
             <% } %>
             <form action="/signup" method="POST" novalidate>
                 <div class="form-control">
