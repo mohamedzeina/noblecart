@@ -61,7 +61,7 @@ function parseMeta(filePath) {
 
 async function uploadImage(filePath) {
   const result = await cloudinary.uploader.upload(filePath, {
-    folder: 'shop-products',
+    folder: 'noblecart',
     resource_type: 'image',
   });
   return { url: result.secure_url, publicId: result.public_id };
@@ -69,7 +69,7 @@ async function uploadImage(filePath) {
 
 async function uploadModel(filePath) {
   const result = await cloudinary.uploader.upload(filePath, {
-    folder: 'shop-models',
+    folder: 'noblecart-models',
     resource_type: 'raw',
     use_filename: true,
     unique_filename: true,

@@ -30,9 +30,9 @@ const fileStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
     if (file.fieldname === 'model') {
-      return { folder: 'online-shop-models', resource_type: 'raw', format: 'glb' };
+      return { folder: 'noblecart-models', resource_type: 'raw', format: 'glb' };
     }
-    return { folder: 'online-shop', allowed_formats: ['png', 'jpg', 'jpeg'] };
+    return { folder: 'noblecart', allowed_formats: ['png', 'jpg', 'jpeg'] };
   },
 });
 
