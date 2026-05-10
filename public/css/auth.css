@@ -1,12 +1,25 @@
+body:has(.auth-card) {
+  background: #0a0a0a;
+}
+
+body:has(.auth-card) main {
+  max-width: 100%;
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
 .auth-card {
   width: 24rem;
   max-width: 90%;
-  margin: 3rem auto;
-  background: #1a1a1a;
-  border-radius: 10px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  padding: 2rem 2.5rem;
-  border: 1px solid #2d2d2d;
+  margin: 0;
+  background: #141414;
+  border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  padding: 2.25rem 2.5rem;
+  border: 1px solid #3a3a3a;
 }
 
 .auth-card__title {
@@ -24,10 +37,31 @@
   margin: 0 0 1.75rem;
 }
 
+.auth-card .form-control label {
+  color: #94a3b8;
+}
+
 .auth-card .form-control input {
   padding: 0.55rem 0.75rem;
   border-radius: 6px;
   font-size: 0.95rem;
+  background: #252525;
+  border-color: #2d2d2d;
+  color: #f1f5f9;
+}
+
+.auth-card .form-control input::placeholder {
+  color: #4a5568;
+}
+
+.auth-card .form-control input:focus {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.15);
+  outline: none;
+}
+
+.auth-card .form-control input.invalid {
+  border-color: #f87171;
 }
 
 .auth-card .btn {
@@ -61,6 +95,70 @@
 
 .auth-card__footer a:hover {
   text-decoration: underline;
+}
+
+.auth-card__logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.auth-card__logo-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(45, 212, 191, 0.1);
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2dd4bf;
+}
+
+.input-wrapper {
+  position: relative;
+  display: block;
+}
+
+.auth-card .input-wrapper input {
+  padding-right: 2.75rem;
+}
+
+.input-toggle {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #2dd4bf;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  transition: color 0.2s;
+  z-index: 2;
+}
+
+.input-toggle:hover {
+  color: #14b8a6;
+}
+
+.input-toggle:focus {
+  outline: none;
+}
+
+.input-toggle .eye-hide {
+  display: none;
+}
+
+.input-toggle.is-visible .eye-show {
+  display: none;
+}
+
+.input-toggle.is-visible .eye-hide {
+  display: block;
 }
 
 .auth-card__success {
