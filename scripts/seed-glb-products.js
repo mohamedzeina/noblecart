@@ -4,19 +4,23 @@
  * Reads every folder inside scripts/products/, uploads its GLB and image
  * to Cloudinary, then inserts the product into MongoDB.
  *
+ * If no image file is present but a model.glb exists, Puppeteer renders
+ * the GLB via model-viewer and captures a thumbnail automatically.
+ *
  * Folder structure per product:
  *   scripts/products/<slug>/
  *     meta.txt        — Title, Price, Category, Description
  *     model.glb       — optional 3D model
- *     image.png/.jpg  — optional image (skipped if absent)
+ *     image.png/.jpg  — optional (auto-captured from GLB if absent)
  *
  * Usage:
- *   node scripts/seed-glb-products.js
  *   npm run seed
  */
 
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
+const os = require('os');
 const mongoose = require('mongoose');
 
 const { env } = require('../nodemon.json');
@@ -83,6 +87,69 @@ function findFile(dir, names) {
   return null;
 }
 
+// ── Puppeteer GLB thumbnail ───────────────────────────────────────────────────
+
+async function captureGlbThumbnail(glbPath) {
+  const puppeteer = require('puppeteer');
+  const glbBuffer = fs.readFileSync(glbPath);
+
+  // Serve GLB + HTML from a local server so model-viewer can load it
+  const server = http.createServer((req, res) => {
+    if (req.url === '/model.glb') {
+      res.writeHead(200, { 'Content-Type': 'model/gltf-binary' });
+      return res.end(glbBuffer);
+    }
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(`<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    * { margin: 0; padding: 0; }
+    body { background: #eef2f6; width: 600px; height: 600px; overflow: hidden; }
+    model-viewer { width: 600px; height: 600px; --progress-bar-color: transparent; }
+  </style>
+</head>
+<body>
+  <model-viewer
+    src="/model.glb"
+    camera-controls
+    interaction-prompt="none"
+    ar-modes=""
+    style="width:600px;height:600px;">
+  </model-viewer>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+</body>
+</html>`);
+  });
+
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address();
+
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 600, height: 600 });
+  await page.goto(`http://127.0.0.1:${port}/`);
+
+  // Wait for model-viewer to finish loading the model
+  await page.waitForFunction(
+    () => document.querySelector('model-viewer')?.loaded === true,
+    { timeout: 30000 }
+  );
+
+  // Give the renderer a moment to settle
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  const screenshot = await page.screenshot({ type: 'png' });
+
+  await browser.close();
+  await new Promise(resolve => server.close(resolve));
+
+  // Write to temp file for Cloudinary upload
+  const tmpPath = path.join(os.tmpdir(), `glb-thumb-${Date.now()}.png`);
+  fs.writeFileSync(tmpPath, screenshot);
+  return tmpPath;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function run() {
@@ -118,18 +185,7 @@ async function run() {
     }
 
     const meta = parseMeta(metaPath);
-    const doc = { ...meta, userId: user._id, imageUrl: '', imagePublicId: '', modelUrl: undefined, modelPublicId: undefined };
-
-    const imagePath = findFile(dir, ['image.png', 'image.jpg', 'image.jpeg', 'image.webp']);
-    if (imagePath) {
-      process.stdout.write('  Uploading image… ');
-      const { url, publicId } = await uploadImage(imagePath);
-      doc.imageUrl = url;
-      doc.imagePublicId = publicId;
-      console.log('done');
-    } else {
-      console.log('  No image file found — imageUrl will be empty');
-    }
+    const doc = { ...meta, userId: user._id, imageUrl: '', imagePublicId: '' };
 
     const modelPath = findFile(dir, ['model.glb']);
     if (modelPath) {
@@ -139,6 +195,29 @@ async function run() {
       doc.modelPublicId = publicId;
       console.log('done');
     }
+
+    let imagePath = findFile(dir, ['image.png', 'image.jpg', 'image.jpeg', 'image.webp']);
+    let tmpThumb = null;
+
+    if (!imagePath && modelPath) {
+      process.stdout.write('  Capturing thumbnail from GLB… ');
+      tmpThumb = await captureGlbThumbnail(modelPath);
+      imagePath = tmpThumb;
+      console.log('done');
+    }
+
+    if (!imagePath) {
+      console.warn(`  Skipping — no image or GLB found`);
+      continue;
+    }
+
+    process.stdout.write('  Uploading image… ');
+    const { url, publicId } = await uploadImage(imagePath);
+    doc.imageUrl = url;
+    doc.imagePublicId = publicId;
+    console.log('done');
+
+    if (tmpThumb) fs.unlinkSync(tmpThumb);
 
     await Product.create(doc);
     console.log(`  ✓ "${meta.title}" inserted`);

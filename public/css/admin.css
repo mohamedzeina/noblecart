@@ -142,6 +142,17 @@
   color: #fff;
 }
 
+.admin-product-item__actions .delete-confirm__yes {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.admin-product-item__actions .delete-confirm__yes:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
 /* Inline delete confirm — wrap into two rows */
 .admin-product-item__actions:has(.delete-confirm__label) {
   flex-wrap: wrap;

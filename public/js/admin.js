@@ -1,6 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
   const main = document.querySelector('main');
 
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'cart-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('cart-toast--show'));
+    setTimeout(() => {
+      toast.classList.remove('cart-toast--show');
+      toast.addEventListener('transitionend', () => toast.remove());
+    }, 2500);
+  }
+
   main.addEventListener('click', (e) => {
     // Delete button clicked — show inline confirmation
     if (e.target.closest('.delete-btn')) {
@@ -13,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       actions.innerHTML = `
         <span class="delete-confirm__label">Delete this product?</span>
-        <button class="btn danger delete-confirm__yes" type="button">Yes, delete</button>
+        <button class="btn delete-confirm__yes" type="button">Yes, delete</button>
         <button class="btn delete-confirm__no" type="button">Cancel</button>
       `;
     }
@@ -45,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(result => result.json())
         .then(({ totalItems }) => {
           prodElement.remove();
+          showToast('Product deleted');
 
           const ITEMS_PER_PAGE = 6;
           const params = new URLSearchParams(window.location.search);

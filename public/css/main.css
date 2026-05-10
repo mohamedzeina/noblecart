@@ -136,6 +136,27 @@ form {
   border-bottom-color: #2dd4bf;
 }
 
+.nav-admin-link {
+  font-size: 0.75rem !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-radius: 4px;
+  padding: 0.2rem 0.6rem !important;
+}
+
+.nav-admin-link:hover {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.nav-admin-link.active {
+  color: #2dd4bf !important;
+  border-color: #2dd4bf !important;
+}
+
 .mobile-nav {
   width: 30rem;
   height: 100vh;
