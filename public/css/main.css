@@ -629,6 +629,51 @@ form {
   }
 }
 
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__badge {
+    animation: fadeUp 0.55s ease-out both;
+    animation-delay: 0.1s;
+  }
+
+  .hero__title {
+    animation: fadeUp 0.55s ease-out both;
+    animation-delay: 0.22s;
+  }
+
+  .hero__subtitle {
+    animation: fadeUp 0.55s ease-out both;
+    animation-delay: 0.36s;
+  }
+
+  .hero__cta {
+    animation: fadeUp 0.55s ease-out both;
+    animation-delay: 0.5s;
+  }
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  will-change: opacity, transform;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card {
     transition: none;

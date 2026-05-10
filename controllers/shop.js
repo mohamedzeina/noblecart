@@ -270,7 +270,7 @@ exports.getInvoice = async (req, res, next) => {
     pdfDoc.rect(0, 0, pageWidth, 75).fill('#0f766e');
     pdfDoc.fillColor('white').fontSize(26).font('Helvetica-Bold').text('INVOICE', 50, 22);
     pdfDoc.fontSize(10).font('Helvetica')
-      .text('Online Shop', 0, 25, { align: 'right', width: contentRight })
+      .text('Noblecart', 0, 25, { align: 'right', width: contentRight })
       .text('online-shop-luts.onrender.com', 0, 40, { align: 'right', width: contentRight });
 
     // Order meta
