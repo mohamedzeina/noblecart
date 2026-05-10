@@ -16,6 +16,10 @@ body {
   color: #1e293b;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Rubik', sans-serif;
+}
+
 main {
   padding: 1rem;
   margin: auto;
@@ -724,6 +728,34 @@ form {
   color: #2dd4bf;
 }
 
+.category-page-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 0;
+}
+
+.category-page-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+  transition: color 0.2s;
+}
+
+.category-page-header__back:hover {
+  color: #0d9488;
+}
+
+.category-page-header__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -749,6 +781,23 @@ form {
   font-size: 0.95rem;
   color: #64748b;
   margin: 0 0 1.75rem;
+}
+
+.empty-state__cta {
+  background: #0d9488;
+  color: #fff;
+  border-color: #0d9488;
+  border-radius: 8px;
+  padding: 0.65rem 1.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.empty-state__cta:hover {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
 }
 
 .error-page {

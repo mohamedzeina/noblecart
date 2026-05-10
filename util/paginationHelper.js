@@ -8,7 +8,8 @@ const paginationHelper = (
   pageToRender,
   pageTitle,
   path,
-  filter
+  filter,
+  extraData = {}
 ) => {
   const page = +req.query.page || 1;
   let totalItems;
@@ -40,6 +41,7 @@ const paginationHelper = (
         nextPage: page + 1,
         prevPage: page - 1,
         lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+        ...extraData,
       }); // Passing options to the template
     })
     .catch((err) => {
