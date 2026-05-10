@@ -38,7 +38,7 @@ function initViewer() {
   wrap.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf8fafc);
+  scene.background = new THREE.Color(0xeef2f6);
 
   const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 1000);
 

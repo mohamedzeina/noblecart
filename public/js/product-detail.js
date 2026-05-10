@@ -33968,7 +33968,7 @@ function initViewer() {
   renderer.outputColorSpace = SRGBColorSpace;
   wrap.appendChild(renderer.domElement);
   const scene = new Scene();
-  scene.background = new Color(16317180);
+  scene.background = new Color(15659766);
   const camera = new PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 1e3);
   const pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
