@@ -29,7 +29,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  pg.paginationHelper(req, res, next, 'shop/index', 'Shop', '/', {});
+  pg.paginationHelper(req, res, next, 'shop/index', 'Noblecart', '/', {});
 };
 
 exports.getCategory = (req, res, next) => {
