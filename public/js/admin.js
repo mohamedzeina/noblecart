@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const lastPage = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
           if (totalItems === 0) {
-            document.querySelector('.grid')?.remove();
+            document.querySelector('.admin-product-list')?.remove();
             document.querySelector('.pagination')?.remove();
             const emptyState = document.createElement('div');
             emptyState.className = 'empty-state';

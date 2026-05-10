@@ -37,7 +37,7 @@
 .product-detail__image {
     border-radius: 16px;
     overflow: hidden;
-    background: #ffffff;
+    background: #eef2f6;
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
@@ -183,16 +183,16 @@
     font-family: 'Montserrat', sans-serif;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    background: #2dd4bf;
-    color: #0f172a;
-    border-color: #2dd4bf;
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
     border-radius: 8px;
 }
 
 .product-detail__info .btn:hover {
-    background: #14b8a6;
-    border-color: #14b8a6;
-    color: #0f172a;
+    background: #2a2a2a;
+    border-color: #2a2a2a;
+    color: #ffffff;
 }
 
 .product-detail__info .add-to-cart-form .btn {
