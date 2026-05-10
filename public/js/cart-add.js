@@ -28,7 +28,7 @@ document.addEventListener('submit', (e) => {
         badge = document.createElement('span');
         badge.className = 'cart-badge';
         badge.textContent = cartCount;
-        const icon = document.querySelector('.nav-icon');
+        const icon = document.querySelector('#cart-drawer-toggle');
         if (icon) icon.appendChild(badge);
       }
       showToast('Added to cart');
