@@ -46,8 +46,8 @@ form {
   position: absolute;
   top: -100%;
   left: 0;
-  background: #0d9488;
-  color: white;
+  background: #ffffff;
+  color: #0c0a09;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   text-decoration: none;
@@ -80,10 +80,7 @@ form {
   margin-right: 2rem;
   white-space: nowrap;
   text-decoration: none;
-  background: linear-gradient(to right, #2dd4bf, #0d9488);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
   transition: opacity 0.2s;
 }
 
@@ -133,7 +130,7 @@ form {
 .main-header__item a.active {
   color: white;
   font-weight: 600;
-  border-bottom-color: #2dd4bf;
+  border-bottom-color: rgba(255, 255, 255, 0.6);
 }
 
 .nav-cat {
@@ -159,8 +156,8 @@ form {
 }
 
 .nav-admin-link.active {
-  color: #2dd4bf !important;
-  border-color: #2dd4bf !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
 }
 
 .mobile-nav {
@@ -218,7 +215,7 @@ form {
 .mobile-nav__item button:hover,
 .mobile-nav__item button:active {
   background: #1e1e1e;
-  color: #2dd4bf;
+  color: #ffffff;
   border-radius: 3px;
 }
 
