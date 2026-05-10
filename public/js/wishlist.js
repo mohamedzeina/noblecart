@@ -1,6 +1,18 @@
 (function () {
   const isWishlistPage = window.location.pathname === '/wishlist';
 
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'cart-toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('cart-toast--show')));
+    setTimeout(() => {
+      toast.classList.remove('cart-toast--show');
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
+  }
+
   function updateBadge(count) {
     let badge = document.getElementById('wishlist-badge');
     if (!badge) {
@@ -38,6 +50,8 @@
           btn.classList.add('wishlist-btn--pop');
 
           updateBadge(data.wishlistCount);
+          showToast(data.inWishlist ? 'Saved to wishlist' : 'Removed from wishlist');
+
 
           if (isWishlistPage && !data.inWishlist) {
             const card = btn.closest('.card');

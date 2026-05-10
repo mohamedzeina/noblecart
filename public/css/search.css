@@ -218,11 +218,24 @@
   letter-spacing: 0.5px;
 }
 
+.search-suggestion__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .search-suggestion__price {
   font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.75);
-  flex-shrink: 0;
+}
+
+.search-suggestion__heart {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
 }
 
 .search-suggestions__footer {

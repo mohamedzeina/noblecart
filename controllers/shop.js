@@ -72,14 +72,22 @@ exports.getSearch = (req, res, next) => {
 
 exports.getSearchSuggest = (req, res, next) => {
   const query = (req.query.q || '').trim();
-  if (query.length < 2) return res.json({ results: [], query });
+  if (query.length < 2) return res.json({ results: [], query, wishlistedIds: [] });
 
   const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   Product.find({ $or: [{ title: regex }, { category: regex }] })
     .select('title price imageUrl category _id')
     .limit(6)
-    .then((products) => res.json({ results: products, query }))
-    .catch(() => res.json({ results: [], query }));
+    .then((products) => {
+      const wishlistSet = req.user
+        ? new Set(req.user.wishlist.map((i) => i.productId.toString()))
+        : new Set();
+      const wishlistedIds = products
+        .filter((p) => wishlistSet.has(p._id.toString()))
+        .map((p) => p._id.toString());
+      res.json({ results: products, query, wishlistedIds });
+    })
+    .catch(() => res.json({ results: [], query, wishlistedIds: [] }));
 };
 
 exports.getCartData = (req, res, next) => {

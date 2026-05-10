@@ -650,17 +650,19 @@ form {
   position: fixed;
   bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%) translateY(0.5rem);
-  background: #1e1e1e;
-  border: 1px solid #2d2d2d;
-  color: #e2e8f0;
+  transform: translateX(-50%) translateY(0.4rem);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
   padding: 0.6rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  white-space: nowrap;
   opacity: 0;
   transition: opacity 0.25s, transform 0.25s;
-  z-index: 100;
+  z-index: 1000;
   pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .cart-toast--show {
