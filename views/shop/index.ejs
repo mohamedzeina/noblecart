@@ -7,11 +7,24 @@
 
     <section class="hero">
         <div class="hero__content">
+            <span class="hero__badge">New arrivals every week</span>
             <h1 class="hero__title">Shop the latest products</h1>
             <p class="hero__subtitle">Discover our curated collection, updated regularly with new arrivals.</p>
-            <a href="#products" class="hero__cta">Browse All Products</a>
+            <a href="#products" class="hero__cta">Shop Now →</a>
+        </div>
+        <div class="hero__wave">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 56" preserveAspectRatio="none">
+                <path fill="#ffffff" d="M0,28 C360,56 1080,0 1440,28 L1440,56 L0,56 Z"/>
+            </svg>
         </div>
     </section>
+
+    <div class="products-section">
+        <div class="products-section__header">
+            <h2 class="products-section__title">Featured Products</h2>
+            <p class="products-section__subtitle">Handpicked items from our collection</p>
+        </div>
+    </div>
 
     <main id="products">
         <% if (prods.length > 0) { %>
@@ -19,7 +32,7 @@
                 <% for (let product of prods) { %>
                     <article class="card product-item">
                         <header class="card__header">
-                            <h1 class="product__title"><%= product.title %></h1>
+                            <h3 class="product__title"><%= product.title %></h3>
                         </header>
                         <div class="card__image">
                             <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
