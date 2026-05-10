@@ -136,6 +136,12 @@ form {
   border-bottom-color: #2dd4bf;
 }
 
+.nav-cat {
+  font-size: 0.78rem !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .nav-admin-link {
   font-size: 0.75rem !important;
   letter-spacing: 0.06em;
@@ -187,6 +193,11 @@ form {
 .mobile-nav__item {
   margin: 1rem;
   padding: 0;
+}
+
+.mobile-nav__sep {
+  margin: 0.5rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mobile-nav__item a,
