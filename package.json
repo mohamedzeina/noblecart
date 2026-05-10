@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "build:viewer": "esbuild public/js/product-detail-src.js --bundle --format=esm --outfile=public/js/product-detail.js"
+    "build:viewer": "esbuild public/js/product-detail-src.js --bundle --format=esm --outfile=public/js/product-detail.js",
+    "seed": "node scripts/seed-glb-products.js"
   },
   "author": "Mohamed Zeina",
   "license": "ISC",
