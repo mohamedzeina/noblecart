@@ -80,24 +80,22 @@
             <div class="grid">
                 <% for (let product of prods) { %>
                     <article class="card product-item">
-                        <a href="/products/<%= product._id %>" class="card__corner-link" aria-label="View <%= product.title %> details">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
-                        </a>
-                        <header class="card__header">
-                            <h3 class="product__title"><%= product.title %></h3>
-                        </header>
                         <div class="card__image">
                             <img src="<%= product.imageUrl %>" alt="<%= product.title %>" loading="lazy">
                         </div>
-                        <div class="card__content">
-                            <h2 class="product__price">$<%= product.price %></h2>
-                            <p class="product__description"><%= product.description %></p>
+                        <div class="card__static">
+                            <h3 class="product__title"><%= product.title %></h3>
+                            <p class="product__price">$<%= product.price %></p>
                         </div>
-                        <div class="card__actions">
-                            <a href="/products/<%= product._id %>" class="btn">Details</a>
-                            <% if (isAuthenticated) { %>
-                                <%- include('../includes/add-to-cart.ejs', {product: product}) %>
-                            <% } %>
+                        <div class="card__reveal">
+                            <p class="card__reveal-label">Product Details</p>
+                            <p class="card__reveal-desc"><%= product.description %></p>
+                            <div class="card__actions">
+                                <% if (isAuthenticated) { %>
+                                    <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                <% } %>
+                                <a href="/products/<%= product._id %>" class="btn card__details-btn">Details</a>
+                            </div>
                         </div>
                     </article>
                 <% } %>
