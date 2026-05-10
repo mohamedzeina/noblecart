@@ -33968,7 +33968,7 @@ function initViewer() {
   renderer.outputColorSpace = SRGBColorSpace;
   wrap.appendChild(renderer.domElement);
   const scene = new Scene();
-  scene.background = new Color(1710618);
+  scene.background = new Color(16317180);
   const camera = new PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 1e3);
   const pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
@@ -33992,7 +33992,7 @@ function initViewer() {
       const size = box.getSize(new Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
       const fov2 = camera.fov * (Math.PI / 180);
-      const dist = maxDim / 2 / Math.tan(fov2 / 2) * 1.6;
+      const dist = maxDim / 2 / Math.tan(fov2 / 2) * 1.15;
       camera.position.set(center.x, center.y + size.y * 0.1, center.z + dist);
       camera.near = dist / 100;
       camera.far = dist * 100;

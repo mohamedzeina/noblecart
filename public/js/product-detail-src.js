@@ -38,7 +38,7 @@ function initViewer() {
   wrap.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1a1a);
+  scene.background = new THREE.Color(0xf8fafc);
 
   const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 1000);
 
@@ -69,7 +69,7 @@ function initViewer() {
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
       const fov = camera.fov * (Math.PI / 180);
-      const dist = (maxDim / 2 / Math.tan(fov / 2)) * 1.6;
+      const dist = (maxDim / 2 / Math.tan(fov / 2)) * 1.15;
 
       camera.position.set(center.x, center.y + size.y * 0.1, center.z + dist);
       camera.near = dist / 100;

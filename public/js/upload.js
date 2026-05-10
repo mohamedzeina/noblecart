@@ -39,18 +39,15 @@ function lockImageSection() {
   if (labelHint) labelHint.textContent = '(auto-generated from 3D model)';
 }
 
-// Show loading spinner on form submit — two rAFs force a repaint before the upload starts
 const adminForm = document.querySelector('form');
 const submitBtn = adminForm && adminForm.querySelector('button[type="submit"]');
 if (adminForm && submitBtn) {
   adminForm.addEventListener('submit', (e) => {
     e.preventDefault();
     submitBtn.classList.add('btn--loading');
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        adminForm.submit();
-      });
-    });
+    // setTimeout(0) passes through the browser's rendering phase before submitting,
+    // guaranteeing the loading state is painted first
+    setTimeout(() => adminForm.submit(), 0);
   });
 }
 
