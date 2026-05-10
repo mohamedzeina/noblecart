@@ -269,62 +269,99 @@ exports.getInvoice = async (req, res, next) => {
     pdfDoc.pipe(res);
 
     const pageWidth = pdfDoc.page.width;
-    const contentRight = pageWidth - 50;
+    const margin = 50;
+    const contentRight = pageWidth - margin;
+    const contentWidth = pageWidth - margin * 2;
+    const invoiceDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const shortOrderId = '#' + orderId.toString().slice(-8).toUpperCase();
 
-    // Header bar
-    pdfDoc.rect(0, 0, pageWidth, 75).fill('#0f766e');
-    pdfDoc.fillColor('white').fontSize(26).font('Helvetica-Bold').text('INVOICE', 50, 22);
-    pdfDoc.fontSize(10).font('Helvetica')
-      .text('Noblecart', 0, 25, { align: 'right', width: contentRight })
-      .text('online-shop-luts.onrender.com', 0, 40, { align: 'right', width: contentRight });
+    // === HEADER ===
+    pdfDoc.rect(0, 0, pageWidth, 100).fill('#0c0a09');
+    pdfDoc.fillColor('#ffffff').fontSize(30).font('Helvetica-Bold').text('INVOICE', margin, 30);
+    pdfDoc.fillColor('#ffffff').fontSize(11).font('Helvetica-Bold')
+      .text('NOBLECART_', 0, 32, { align: 'right', width: contentRight });
+    pdfDoc.fillColor('rgba(255,255,255,0.45)').fontSize(8).font('Helvetica')
+      .text(invoiceDate, 0, 50, { align: 'right', width: contentRight });
 
-    // Order meta
-    pdfDoc.fillColor('#475569').fontSize(10).font('Helvetica-Bold').text('ORDER ID', 50, 100);
-    pdfDoc.font('Helvetica').fillColor('#1e293b').fontSize(10).text(orderId, 50, 114);
-    pdfDoc.fillColor('#475569').fontSize(10).font('Helvetica-Bold').text('BILLED TO', 50, 135);
-    pdfDoc.font('Helvetica').fillColor('#1e293b').text(order.user.email, 50, 149);
+    // Subtle separator below header
+    pdfDoc.rect(0, 100, pageWidth, 1).fill('#2a2a2a');
+
+    // === META: ORDER + BILLED TO side by side ===
+    const metaY = 124;
+    const col2X = margin + contentWidth * 0.5;
+
+    pdfDoc.fillColor('#94a3b8').fontSize(7).font('Helvetica-Bold')
+      .text('ORDER', margin, metaY, { characterSpacing: 1.5 });
+    pdfDoc.fillColor('#0c0a09').fontSize(14).font('Helvetica-Bold')
+      .text(shortOrderId, margin, metaY + 11);
+
+    pdfDoc.fillColor('#94a3b8').fontSize(7).font('Helvetica-Bold')
+      .text('BILLED TO', col2X, metaY, { characterSpacing: 1.5 });
+    pdfDoc.fillColor('#0c0a09').fontSize(10).font('Helvetica')
+      .text(order.user.email, col2X, metaY + 13);
 
     // Divider
-    pdfDoc.moveTo(50, 175).lineTo(contentRight, 175).strokeColor('#e2e8f0').lineWidth(1).stroke();
+    const dividerY = metaY + 46;
+    pdfDoc.moveTo(margin, dividerY).lineTo(contentRight, dividerY)
+      .strokeColor('#e2e8f0').lineWidth(1).stroke();
 
-    // Table header
-    const ROW_H = 32;
-    const COL_QTY = 340;
-    const COL_PRICE = 390;
-    const COL_TOTAL = 470;
+    // === TABLE HEADER ===
+    const tableY = dividerY + 12;
+    const ROW_H = 36;
+    const COL_QTY = margin + Math.round(contentWidth * 0.58);
+    const COL_PRICE = margin + Math.round(contentWidth * 0.71);
+    const COL_TOTAL = margin + Math.round(contentWidth * 0.85);
 
-    pdfDoc.rect(50, 182, pageWidth - 100, 22).fill('#f8fafc');
-    pdfDoc.fillColor('#64748b').fontSize(9).font('Helvetica-Bold')
-      .text('ITEM', 60, 189)
-      .text('QTY', COL_QTY, 189, { width: 44, align: 'center' })
-      .text('UNIT PRICE', COL_PRICE, 189, { width: 74, align: 'right' })
-      .text('TOTAL', COL_TOTAL, 189, { width: contentRight - COL_TOTAL, align: 'right' });
+    pdfDoc.rect(margin, tableY, contentWidth, 24).fill('#f8fafc');
+    pdfDoc.fillColor('#94a3b8').fontSize(7.5).font('Helvetica-Bold')
+      .text('ITEM', margin + 10, tableY + 9, { characterSpacing: 1 })
+      .text('QTY', COL_QTY, tableY + 9, { width: 40, align: 'center', characterSpacing: 1 })
+      .text('UNIT PRICE', COL_PRICE, tableY + 9, { width: 70, align: 'right', characterSpacing: 1 })
+      .text('TOTAL', COL_TOTAL, tableY + 9, { width: contentRight - COL_TOTAL, align: 'right', characterSpacing: 1 });
 
-    // Products
-    let y = 212;
+    // === PRODUCT ROWS ===
+    let y = tableY + 24;
     let totalPrice = 0;
 
     order.products.forEach((prod, i) => {
       const lineTotal = prod.quantity * prod.productData.price;
       totalPrice += lineTotal;
-      const midY = y + ROW_H / 2;
 
-      pdfDoc.fillColor('#1e293b').fontSize(11).font('Helvetica')
-        .text(prod.productData.title, 60, midY - 6, { width: 270 })
-        .text(String(prod.quantity), COL_QTY, midY - 6, { width: 44, align: 'center' })
-        .text('$' + prod.productData.price.toFixed(2), COL_PRICE, midY - 6, { width: 74, align: 'right' });
-      pdfDoc.fillColor('#0f766e').font('Helvetica-Bold')
-        .text('$' + lineTotal.toFixed(2), COL_TOTAL, midY - 6, { width: contentRight - COL_TOTAL, align: 'right' });
+      if (i % 2 === 1) {
+        pdfDoc.rect(margin, y, contentWidth, ROW_H).fill('#fafafa');
+      }
+
+      const textY = y + ROW_H / 2 - 5;
+      pdfDoc.fillColor('#334155').fontSize(10).font('Helvetica')
+        .text(prod.productData.title, margin + 10, textY, { width: COL_QTY - margin - 16 })
+        .text(String(prod.quantity), COL_QTY, textY, { width: 40, align: 'center' })
+        .text('$' + prod.productData.price.toFixed(2), COL_PRICE, textY, { width: 70, align: 'right' });
+      pdfDoc.fillColor('#0c0a09').font('Helvetica-Bold')
+        .text('$' + lineTotal.toFixed(2), COL_TOTAL, textY, { width: contentRight - COL_TOTAL, align: 'right' });
 
       y += ROW_H;
-      pdfDoc.moveTo(50, y).lineTo(contentRight, y).strokeColor('#f1f5f9').lineWidth(0.5).stroke();
+      pdfDoc.moveTo(margin, y).lineTo(contentRight, y)
+        .strokeColor('#f1f5f9').lineWidth(0.5).stroke();
     });
 
-    // Total row
-    pdfDoc.moveTo(50, y + 10).lineTo(contentRight, y + 10).strokeColor('#e2e8f0').lineWidth(1).stroke();
-    pdfDoc.fillColor('#0f766e').fontSize(13).font('Helvetica-Bold')
-      .text('TOTAL', COL_PRICE, y + 20, { width: 74, align: 'right' })
-      .text('$' + totalPrice.toFixed(2), COL_TOTAL, y + 20, { width: contentRight - COL_TOTAL, align: 'right' });
+    // === TOTAL ROW ===
+    const totalRowY = y + 14;
+    pdfDoc.moveTo(margin, totalRowY).lineTo(contentRight, totalRowY)
+      .strokeColor('#0c0a09').lineWidth(1.5).stroke();
+    pdfDoc.fillColor('#64748b').fontSize(8).font('Helvetica')
+      .text('TOTAL DUE', COL_PRICE, totalRowY + 10, { width: 70, align: 'right', characterSpacing: 0.8 });
+    pdfDoc.fillColor('#0c0a09').fontSize(15).font('Helvetica-Bold')
+      .text('$' + totalPrice.toFixed(2), COL_TOTAL, totalRowY + 7, { width: contentRight - COL_TOTAL, align: 'right' });
+
+    // === FOOTER ===
+    const footerY = totalRowY + 62;
+    pdfDoc.moveTo(margin, footerY).lineTo(contentRight, footerY)
+      .strokeColor('#e2e8f0').lineWidth(0.5).stroke();
+    pdfDoc.fillColor('#cbd5e1').fontSize(7.5).font('Helvetica')
+      .text('Thank you for your purchase — Noblecart_', margin, footerY + 10, {
+        align: 'center',
+        width: contentWidth,
+      });
 
     pdfDoc.end();
   } catch (err) {
