@@ -39,7 +39,7 @@ function lockImageSection() {
   if (labelHint) labelHint.textContent = '(auto-generated from 3D model)';
 }
 
-const adminForm = document.querySelector('form');
+const adminForm = document.querySelector('.form-card form');
 const submitBtn = adminForm && adminForm.querySelector('button[type="submit"]');
 if (adminForm && submitBtn) {
   adminForm.addEventListener('submit', (e) => {
