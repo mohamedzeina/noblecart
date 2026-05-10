@@ -24,11 +24,11 @@ const PRODUCTS = [
     imageUrl: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&q=80',
   },
   {
-    title: 'Smart LED Desk Lamp',
+    title: 'Brass Pendant Lamp Set',
     price: 34.99,
-    description: 'Touch-controlled desk lamp with adjustable color temperature, USB charging port, and memory function. Eye-care certified.',
-    category: 'electronics',
-    imageUrl: 'https://images.unsplash.com/photo-1534073737927-85f1ebff1f5d?w=600&q=80',
+    description: 'Set of cascading brushed brass pendant lights with warm Edison-style glow. Adjustable cord length, perfect for dining rooms and kitchen islands.',
+    category: 'home',
+    imageUrl: 'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=600&q=80',
   },
   {
     title: 'Portable Bluetooth Speaker',
@@ -104,7 +104,7 @@ const PRODUCTS = [
     price: 44.99,
     description: 'Classic aviator sunglasses with polarized UV400 lenses and lightweight metal frame. Reduces glare for driving and outdoor activities.',
     category: 'accessories',
-    imageUrl: 'https://images.unsplash.com/photo-1511499767150-a4d1dc0769e2?w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&q=80',
   },
   {
     title: 'Stainless Steel Minimalist Watch',

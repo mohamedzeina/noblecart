@@ -14,3 +14,8 @@ function menuToggleClickHandler() {
 
 backdrop.addEventListener('click', backdropClickHandler);
 menuToggle.addEventListener('click', menuToggleClickHandler);
+
+if (new URLSearchParams(window.location.search).has('page')) {
+  const products = document.getElementById('products');
+  if (products) products.scrollIntoView({ behavior: 'instant', block: 'start' });
+}
