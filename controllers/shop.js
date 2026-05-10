@@ -37,6 +37,24 @@ exports.getCategory = (req, res, next) => {
   pg.paginationHelper(req, res, next, 'shop/index', category.charAt(0).toUpperCase() + category.slice(1), `/category/${category}`, { category }, { activeCategory: category });
 };
 
+exports.getCartData = (req, res, next) => {
+  req.user
+    .populate('cart.items.productId')
+    .then((user) => {
+      const items = user.cart.items.map((i) => ({
+        productId: i.productId._id,
+        title: i.productId.title,
+        price: i.productId.price,
+        imageUrl: i.productId.imageUrl,
+        quantity: i.quantity,
+      }));
+      res.json({ items });
+    })
+    .catch((err) => {
+      res.status(500).json({ error: 'Failed to load cart' });
+    });
+};
+
 exports.getCart = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
@@ -108,7 +126,10 @@ exports.postCartDeleteProduct = (req, res, next) => {
   req.user
     .removeFromCart(prodId)
     .then(() => {
-      console.log('Product Removed from Cart Successfully');
+      const cartCount = req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0);
+      if (req.headers['x-requested-with'] === 'fetch') {
+        return res.json({ success: true, cartCount });
+      }
       res.redirect('/cart');
     })
     .catch((err) => {

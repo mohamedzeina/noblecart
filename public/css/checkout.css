@@ -1,0 +1,17 @@
+.checkout__pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.checkout__secure-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.65rem;
+  margin-bottom: 0;
+}
