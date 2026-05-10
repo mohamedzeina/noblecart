@@ -1,0 +1,51 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main id="products">
+        <div class="search-results__header">
+            <h1 class="search-results__title">Results for <em><%= query %></em></h1>
+            <p class="search-results__count"><%= products.length %> product<%= products.length !== 1 ? 's' : '' %> found</p>
+        </div>
+
+        <% if (products.length > 0) { %>
+            <div class="grid">
+                <% for (let product of products) { %>
+                    <article class="card product-item">
+                        <div class="card__image">
+                            <img src="<%= product.imageUrl %>" alt="<%= product.title %>" loading="lazy">
+                        </div>
+                        <div class="card__static">
+                            <h3 class="product__title"><%= product.title %></h3>
+                            <p class="product__price">$<%= product.price %></p>
+                        </div>
+                        <div class="card__reveal">
+                            <p class="card__reveal-label">Product Details</p>
+                            <p class="card__reveal-desc"><%= product.description %></p>
+                            <div class="card__actions">
+                                <% if (isAuthenticated) { %>
+                                    <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                <% } %>
+                                <a href="/products/<%= product._id %>" class="btn card__details-btn">Details</a>
+                            </div>
+                        </div>
+                    </article>
+                <% } %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <div class="empty-state__icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="40" height="40">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0Z" />
+                    </svg>
+                </div>
+                <h2 class="empty-state__title">No results for "<%= query %>"</h2>
+                <p class="empty-state__subtitle">Try different keywords or browse our categories.</p>
+                <a href="/" class="btn empty-state__cta">Browse all products</a>
+            </div>
+        <% } %>
+    </main>
+<%- include('../includes/end.ejs') %>

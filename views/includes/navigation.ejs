@@ -19,6 +19,13 @@
       </li>
     </ul>
     <ul class="main-header__item-list">
+      <li class="main-header__item">
+        <button class="nav-icon nav-search-toggle search-toggle" aria-label="Open search">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="22" height="22">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0Z" />
+          </svg>
+        </button>
+      </li>
       <% if (!isAuthenticated) { %>
       <li class="main-header__item">
         <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
@@ -56,8 +63,32 @@
 
 <%- include('./cart-drawer.ejs') %>
 
+<div id="search-overlay" class="search-overlay" role="dialog" aria-label="Search" aria-modal="true">
+  <div class="search-overlay__panel">
+    <form id="search-form" class="search-overlay__form" action="/search" method="GET">
+      <button type="submit" class="search-overlay__submit" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0Z" />
+        </svg>
+      </button>
+      <input id="search-input" class="search-overlay__input" type="search" name="q" placeholder="Search products..." autocomplete="off" />
+      <button id="search-close" type="button" class="search-overlay__close" aria-label="Close search">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </form>
+    <div id="search-suggestions" class="search-suggestions"></div>
+  </div>
+  <div id="search-backdrop" class="search-overlay__backdrop"></div>
+</div>
+
 <nav class="mobile-nav">
   <ul class="mobile-nav__item-list">
+    <li class="mobile-nav__item">
+      <button class="mobile-search-toggle search-toggle">Search</button>
+    </li>
+    <li class="mobile-nav__sep"></li>
     <li class="mobile-nav__item">
       <a class="<%= path === '/category/electronics' ? 'active' : '' %>" href="/category/electronics">Electronics</a>
     </li>

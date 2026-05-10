@@ -37,6 +37,39 @@ exports.getCategory = (req, res, next) => {
   pg.paginationHelper(req, res, next, 'shop/index', category.charAt(0).toUpperCase() + category.slice(1), `/category/${category}`, { category }, { activeCategory: category });
 };
 
+exports.getSearch = (req, res, next) => {
+  const query = (req.query.q || '').trim();
+  if (!query) return res.redirect('/');
+
+  const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  Product.find({ $or: [{ title: regex }, { category: regex }, { description: regex }] })
+    .then((products) => {
+      res.render('shop/search', {
+        pageTitle: `"${query}"`,
+        path: '/search',
+        products,
+        query,
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
+exports.getSearchSuggest = (req, res, next) => {
+  const query = (req.query.q || '').trim();
+  if (query.length < 2) return res.json({ results: [], query });
+
+  const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  Product.find({ $or: [{ title: regex }, { category: regex }] })
+    .select('title price imageUrl category _id')
+    .limit(6)
+    .then((products) => res.json({ results: products, query }))
+    .catch(() => res.json({ results: [], query }));
+};
+
 exports.getCartData = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
