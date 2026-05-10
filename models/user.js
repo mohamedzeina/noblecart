@@ -25,6 +25,15 @@ const userSchema = new Schema({
       },
     ],
   },
+  wishlist: [
+    {
+      productId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+      },
+    },
+  ],
 });
 
 userSchema.methods.addToCart = function (product) {
@@ -78,6 +87,18 @@ userSchema.methods.removeFromCart = function (productId) {
 
 userSchema.methods.clearCart = function () {
   this.cart = { items: [] };
+  return this.save();
+};
+
+userSchema.methods.toggleWishlist = function (productId) {
+  const idx = this.wishlist.findIndex(
+    (i) => i.productId.toString() === productId.toString()
+  );
+  if (idx >= 0) {
+    this.wishlist.splice(idx, 1);
+  } else {
+    this.wishlist.push({ productId });
+  }
   return this.save();
 };
 

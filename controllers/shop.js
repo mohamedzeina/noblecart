@@ -313,6 +313,39 @@ exports.postOrder = (req, res, next) => {
 };
 
 
+exports.postWishlistToggle = (req, res, next) => {
+  const prodId = req.body.productId;
+  req.user
+    .toggleWishlist(prodId)
+    .then(() => {
+      const inWishlist = req.user.wishlist.some(
+        (i) => i.productId.toString() === prodId.toString()
+      );
+      res.json({ success: true, inWishlist, wishlistCount: req.user.wishlist.length });
+    })
+    .catch(() => res.status(500).json({ error: 'Failed to update wishlist' }));
+};
+
+exports.getWishlist = (req, res, next) => {
+  req.user
+    .populate('wishlist.productId')
+    .then((user) => {
+      const products = user.wishlist
+        .filter((i) => i.productId)
+        .map((i) => i.productId);
+      res.render('shop/wishlist', {
+        path: '/wishlist',
+        pageTitle: 'Wishlist',
+        products,
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
 exports.getInvoice = async (req, res, next) => {
   try {
     const orderId = req.params.orderId;

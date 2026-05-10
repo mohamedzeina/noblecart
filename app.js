@@ -130,6 +130,10 @@ app.use((req, res, next) => {
   res.locals.cartCount = req.user
     ? req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0)
     : 0;
+  res.locals.wishlistIds = req.user
+    ? req.user.wishlist.map((i) => i.productId.toString())
+    : [];
+  res.locals.wishlistCount = req.user ? req.user.wishlist.length : 0;
   next();
 });
 
