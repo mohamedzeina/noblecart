@@ -42,6 +42,19 @@
     activeIndex = -1;
   }
 
+  function showLoading() {
+    const row = `
+      <div class="search-skeleton__item">
+        <div class="search-skeleton__img"></div>
+        <div class="search-skeleton__text">
+          <div class="search-skeleton__line search-skeleton__line--title"></div>
+          <div class="search-skeleton__line search-skeleton__line--meta"></div>
+        </div>
+        <div class="search-skeleton__price"></div>
+      </div>`;
+    suggestions.innerHTML = `<div class="search-skeleton">${row}${row}${row}</div>`;
+  }
+
   function escHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -95,6 +108,7 @@
     clearTimeout(debounceTimer);
     const q = input.value.trim();
     if (q.length < 2) { clearSuggestions(); return; }
+    showLoading();
     debounceTimer = setTimeout(() => {
       fetch('/search/suggest?q=' + encodeURIComponent(q))
         .then((r) => r.json())

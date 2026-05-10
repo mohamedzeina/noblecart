@@ -99,6 +99,60 @@
   color: #ffffff;
 }
 
+/* Skeleton loading state */
+.search-skeleton__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.search-skeleton__item:last-child {
+  border-bottom: none;
+}
+
+.search-skeleton__img {
+  width: 42px;
+  height: 42px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.search-skeleton__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.search-skeleton__line {
+  height: 9px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.search-skeleton__line--title { width: 58%; }
+.search-skeleton__line--meta  { width: 32%; animation-delay: 0.1s; }
+
+.search-skeleton__price {
+  width: 48px;
+  height: 11px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.9; }
+}
+
 /* Suggestions */
 .search-suggestions {
   max-width: 680px;
