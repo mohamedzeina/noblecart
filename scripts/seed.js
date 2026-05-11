@@ -5,7 +5,7 @@
  * 2. Clears every MongoDB collection
  * 3. Creates admin
  * 4. Uploads products from scripts/products/
- * 5. Creates 4 test customers (test@test.com … test4@test.com, password: 123456)
+ * 5. Creates 12 test customers (test@test.com … test12@test.com, password: 123456)
  * 6. Creates orders across customers
  * 7. Creates reviews — both verified purchases and unverified
  *
@@ -221,12 +221,16 @@ async function run() {
   // Step 5: Create customers
   console.log('\n── Creating customers…');
   const customerHash = await bcrypt.hash(CUSTOMER_PASSWORD, 12);
-  const [u1, u2, u3, u4] = await Promise.all(
-    ['test@test.com', 'test2@test.com', 'test3@test.com', 'test4@test.com'].map(email =>
+  const [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12] = await Promise.all(
+    [
+      'test@test.com',  'test2@test.com',  'test3@test.com',  'test4@test.com',
+      'test5@test.com', 'test6@test.com',  'test7@test.com',  'test8@test.com',
+      'test9@test.com', 'test10@test.com', 'test11@test.com', 'test12@test.com',
+    ].map(email =>
       User.create({ email, password: customerHash, cart: { items: [] }, wishlist: [] })
     )
   );
-  [u1, u2, u3, u4].forEach(u => console.log(`  ✓ ${u.email}  (password: ${CUSTOMER_PASSWORD})`));
+  [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12].forEach(u => console.log(`  ✓ ${u.email}  (password: ${CUSTOMER_PASSWORD})`));
 
   // Step 6: Create orders
   console.log('\n── Creating orders…');
@@ -244,9 +248,42 @@ async function run() {
     // u3 — bought Vapor IV + Tiempo Legend (delivered)
     makeOrder(u3, [{ product: p['mercurial-vapor-iv'], quantity: 1 }, { product: p['tiempo-legend-2014'], quantity: 1 }], 'delivered'),
 
-    // u4 — bought Nockeby (delivered) and MacBook (pending, not yet delivered)
+    // u4 — bought Nockeby (delivered) and MacBook (pending)
     makeOrder(u4, [{ product: p['ikea-nockeby'], quantity: 1 }], 'delivered'),
     makeOrder(u4, [{ product: p['macbook-pro-m3-16-2024'], quantity: 1 }], 'pending'),
+
+    // u5 — bought PS5 + Mercurial IC (delivered), Kallax (out for delivery)
+    makeOrder(u5, [{ product: p['sony-ps5'], quantity: 1 }], 'delivered'),
+    makeOrder(u5, [{ product: p['mercurial-ic-2014'], quantity: 1 }], 'delivered'),
+    makeOrder(u5, [{ product: p['ikea-kallax-147x147'], quantity: 1 }], 'out_for_delivery'),
+
+    // u6 — bought Vittsjo + Nockeby (delivered), Air Zoom (confirmed)
+    makeOrder(u6, [{ product: p['ikea-vittsjo'], quantity: 1 }, { product: p['ikea-nockeby'], quantity: 1 }], 'delivered'),
+    makeOrder(u6, [{ product: p['air-zoom-citizen-1999'], quantity: 1 }], 'confirmed'),
+
+    // u7 — bought Tiempo Legend + Vapor IV (delivered), MacBook (shipped)
+    makeOrder(u7, [{ product: p['tiempo-legend-2014'], quantity: 1 }, { product: p['mercurial-vapor-iv'], quantity: 1 }], 'delivered'),
+    makeOrder(u7, [{ product: p['macbook-pro-m3-16-2024'], quantity: 1 }], 'shipped'),
+
+    // u8 — bought PS5 + Mercurial IC (delivered)
+    makeOrder(u8, [{ product: p['sony-ps5'], quantity: 1 }, { product: p['mercurial-ic-2014'], quantity: 1 }], 'delivered'),
+
+    // u9 — bought MacBook + PS5 (both delivered)
+    makeOrder(u9, [{ product: p['macbook-pro-m3-16-2024'], quantity: 1 }], 'delivered'),
+    makeOrder(u9, [{ product: p['sony-ps5'], quantity: 1 }], 'delivered'),
+
+    // u10 — bought MacBook + Vapor IV (both delivered)
+    makeOrder(u10, [{ product: p['macbook-pro-m3-16-2024'], quantity: 1 }], 'delivered'),
+    makeOrder(u10, [{ product: p['mercurial-vapor-iv'], quantity: 1 }], 'delivered'),
+
+    // u11 — bought PS5 + Tiempo Legend (both delivered)
+    makeOrder(u11, [{ product: p['sony-ps5'], quantity: 1 }], 'delivered'),
+    makeOrder(u11, [{ product: p['tiempo-legend-2014'], quantity: 1 }], 'delivered'),
+
+    // u12 — bought MacBook + PS5 + Vapor IV (all delivered)
+    makeOrder(u12, [{ product: p['macbook-pro-m3-16-2024'], quantity: 1 }], 'delivered'),
+    makeOrder(u12, [{ product: p['sony-ps5'], quantity: 1 }], 'delivered'),
+    makeOrder(u12, [{ product: p['mercurial-vapor-iv'], quantity: 1 }], 'delivered'),
   ]);
   console.log(`  ✓ ${orders.length} orders created`);
 
@@ -259,42 +296,150 @@ async function run() {
       comment: "Absolutely incredible machine. The M3 chip handles everything I throw at it — video editing, Xcode builds, even running local AI models. Battery genuinely lasts all day. Best laptop I've ever owned." },
     { slug: 'macbook-pro-m3-16-2024', user: u2, rating: 2, verifiedPurchase: false,
       comment: "Overpriced for what it is. The base RAM isn't enough for serious workloads and you're paying the Apple premium for features that matter less than the spec sheet implies. Build quality is nice, value isn't." },
+    { slug: 'macbook-pro-m3-16-2024', user: u7, rating: 5, verifiedPurchase: true,
+      comment: "The performance leap over my old Intel MacBook is insane. Compiling large projects that used to take minutes now finish in seconds. The display is stunning and the battery life is real-world excellent." },
+    { slug: 'macbook-pro-m3-16-2024', user: u5, rating: 4, verifiedPurchase: false,
+      comment: "Genuinely great machine. My only gripe is the notch and the fact that upgrading RAM after purchase is impossible — plan ahead. If you need a workhorse laptop this is hard to beat." },
+    { slug: 'macbook-pro-m3-16-2024', user: u6, rating: 3, verifiedPurchase: false,
+      comment: "It's good but the price-to-spec ratio feels off compared to what Windows machines offer at this price point. The ecosystem lock-in is real. Great if you're already in the Apple world." },
 
     // ── PS5 ───────────────────────────────────────────────────────────────────
     { slug: 'sony-ps5', user: u1, rating: 4, verifiedPurchase: true,
       comment: "Great console — the SSD makes load times almost non-existent and DualSense haptics are genuinely impressive in supported games. Docking a star because the UI is still a confusing mess." },
     { slug: 'sony-ps5', user: u3, rating: 5, verifiedPurchase: false,
       comment: "The hardware is phenomenal. Spider-Man 2, Astro's Playroom — nothing else delivers this kind of experience right now. If you have a 4K TV this is a must-buy." },
+    { slug: 'sony-ps5', user: u5, rating: 5, verifiedPurchase: true,
+      comment: "Exactly what next-gen should feel like. The haptic feedback on the DualSense is the first genuinely new controller innovation in years. Game library is finally strong enough to justify the purchase." },
+    { slug: 'sony-ps5', user: u8, rating: 3, verifiedPurchase: true,
+      comment: "Hardware is undeniably impressive but the exclusive lineup is still thin if you're not into first-party Sony titles. Good console, but the value depends heavily on what you play." },
+    { slug: 'sony-ps5', user: u6, rating: 4, verifiedPurchase: false,
+      comment: "Runs whisper quiet compared to the PS4. Load times are basically gone. The UI takes getting used to but once you do it's fine. Solid upgrade if you're coming from last gen." },
 
     // ── IKEA Kallax ───────────────────────────────────────────────────────────
     { slug: 'ikea-kallax-147x147', user: u2, rating: 4, verifiedPurchase: true,
       comment: "Solid shelving unit. Assembly took about an hour but the instructions are clear. Really versatile — using mine for books, plants, and as a room divider. Would definitely buy again." },
     { slug: 'ikea-kallax-147x147', user: u3, rating: 1, verifiedPurchase: false,
       comment: "Just from looking at the dimensions — this will not fit in a standard apartment bedroom without careful planning. The product photos use wide-angle lenses to make it look much smaller than it is." },
+    { slug: 'ikea-kallax-147x147', user: u5, rating: 5, verifiedPurchase: true,
+      comment: "Exactly what I needed. Sturdy, looks great, incredibly versatile with the insert options. I've set it up as a TV unit with storage boxes and it's been perfect for over a year now." },
+    { slug: 'ikea-kallax-147x147', user: u7, rating: 3, verifiedPurchase: false,
+      comment: "Decent enough but the particleboard isn't the most durable — dropped a heavy book on a shelf and it dented. Fine for light use, wouldn't rely on it for anything particularly heavy." },
+
+    // ── IKEA Vittsjo ──────────────────────────────────────────────────────────
+    { slug: 'ikea-vittsjo', user: u2, rating: 4, verifiedPurchase: true,
+      comment: "Love the open industrial look. Super easy to assemble — maybe 20 minutes. The metal and glass combo is striking. Just make sure you anchor it to the wall since it's quite tall." },
+    { slug: 'ikea-vittsjo', user: u6, rating: 5, verifiedPurchase: true,
+      comment: "Exactly what I was looking for — minimal, modern, and doesn't make a small room feel cramped. The glass shelves show off everything nicely. Surprisingly sturdy for the price." },
+    { slug: 'ikea-vittsjo', user: u4, rating: 2, verifiedPurchase: false,
+      comment: "Looks nice in photos but the glass shelves scratch easily and the unit wobbles unless anchored. For the price it's OK but I expected better stability. Not great if you have kids or pets." },
 
     // ── IKEA Nockeby ──────────────────────────────────────────────────────────
     { slug: 'ikea-nockeby', user: u4, rating: 3, verifiedPurchase: true,
       comment: "Looks great and very Scandinavian. The cushions are comfortable initially but lose their shape after a few weeks. Slipcover system is clever but slides around more than I'd like." },
+    { slug: 'ikea-nockeby', user: u6, rating: 4, verifiedPurchase: true,
+      comment: "Really comfortable once the cushions are broken in and the slipcover is a game-changer for keeping it clean with kids. Looks a lot more expensive than it is. Assembly is straightforward." },
+    { slug: 'ikea-nockeby', user: u3, rating: 2, verifiedPurchase: false,
+      comment: "The slipcover bunches up constantly and the seat cushions flatten out quickly with regular use. Looks great in the showroom but the long-term comfort isn't there. Disappointed." },
 
     // ── Nike Air Zoom Citizen ─────────────────────────────────────────────────
     { slug: 'air-zoom-citizen-1999', user: u1, rating: 3, verifiedPurchase: false,
       comment: "Decent retro runner but sizing runs narrow. If you have wide feet size up. The colorways are cool but for this price I expected better cushioning — the Air Zoom unit feels dated vs modern alternatives." },
     { slug: 'air-zoom-citizen-1999', user: u2, rating: 5, verifiedPurchase: true,
       comment: "Exactly what I wanted — a clean low-profile runner that looks as good off the track as on it. Comfortable from day one, zero break-in. The 1999 colorway is perfect." },
+    { slug: 'air-zoom-citizen-1999', user: u6, rating: 4, verifiedPurchase: true,
+      comment: "Really clean silhouette. I wear these mostly as a lifestyle shoe and they've held up great over several months. Cushioning is decent for casual wear, not ideal for long runs." },
+    { slug: 'air-zoom-citizen-1999', user: u7, rating: 2, verifiedPurchase: false,
+      comment: "Stylish but the build quality let me down — the glue started separating at the toe box after two months. Nike's quality control on retro lines isn't what it used to be." },
 
     // ── Mercurial Vapor IV ────────────────────────────────────────────────────
     { slug: 'mercurial-vapor-iv', user: u3, rating: 5, verifiedPurchase: true,
       comment: "Absolute rockets. The TPU soleplate gives incredible energy return and the NikeSkin upper molds to your foot after a few sessions. Scored in my first game wearing these. Pure nostalgia." },
     { slug: 'mercurial-vapor-iv', user: u4, rating: 3, verifiedPurchase: false,
       comment: "Looks amazing in photos but the fit is really narrow — anything wider than a D width will be uncomfortable. The soleplate is also very firm, best on soft ground only, not great on FG." },
+    { slug: 'mercurial-vapor-iv', user: u7, rating: 5, verifiedPurchase: true,
+      comment: "One of the most iconic boots ever made and this reproduction is faithful to the original. The NikeSkin upper is butter soft and the speed plate is insane. Wore these in a 5-a-side and felt unstoppable." },
+    { slug: 'mercurial-vapor-iv', user: u8, rating: 4, verifiedPurchase: false,
+      comment: "Beautifully made and genuinely fast-feeling on the pitch. Sizing is true to Nike's usual fit — go half up if you're between sizes. The only downside is they're not very durable beyond 20-30 games." },
 
     // ── Tiempo Legend 2014 ────────────────────────────────────────────────────
     { slug: 'tiempo-legend-2014', user: u3, rating: 4, verifiedPurchase: true,
       comment: "Classic leather feel that no synthetic can replicate. Soft touch on the ball, great for close control. Traction is solid on natural grass. A bit heavier than modern options but that's the trade-off you accept." },
+    { slug: 'tiempo-legend-2014', user: u7, rating: 5, verifiedPurchase: true,
+      comment: "The kangaroo leather upper is a thing of beauty. These mold to your foot perfectly after a few sessions and the touch on the ball is incomparable. Old school comfort for players who value feel over speed." },
+    { slug: 'tiempo-legend-2014', user: u5, rating: 3, verifiedPurchase: false,
+      comment: "Great leather quality but the outsole is stiff out of the box and takes a while to break in. If you're patient it rewards you — just don't expect to feel great in your first session." },
+    { slug: 'tiempo-legend-2014', user: u8, rating: 4, verifiedPurchase: false,
+      comment: "Solid boot. The leather upper is the real deal and traction on natural grass is excellent. Goes narrow in the toe box so size up if you have wide feet. A classic for a reason." },
 
     // ── Mercurial IC 2014 ─────────────────────────────────────────────────────
     { slug: 'mercurial-ic-2014', user: u4, rating: 4, verifiedPurchase: false,
       comment: "Great futsal shoe. Non-marking rubber outsole grips well on sport court and the upper is tight enough for quick direction changes. Runs about half a size small so order up." },
+    { slug: 'mercurial-ic-2014', user: u5, rating: 5, verifiedPurchase: true,
+      comment: "Best indoor shoe I've owned. The grip on sport court is exceptional and the low profile gives you great court feel. Light enough that you barely notice them. Highly recommend for serious futsal players." },
+    { slug: 'mercurial-ic-2014', user: u8, rating: 4, verifiedPurchase: true,
+      comment: "Really solid futsal shoe. Quick pivot support is great, the upper wraps the foot well. Only issue is the toe area is a little stiff initially — wear them around the house a few times first." },
+    { slug: 'mercurial-ic-2014', user: u6, rating: 3, verifiedPurchase: false,
+      comment: "Decent performance but the sizing is very off — I normally take a 10.5 and had to go up to an 11.5. Once sized correctly they're comfortable enough, but the inconsistency is frustrating." },
+
+    // ── MacBook Pro — additional reviews (→ 11 total) ─────────────────────────
+    { slug: 'macbook-pro-m3-16-2024', user: u9, rating: 5, verifiedPurchase: true,
+      comment: "The performance is in a different league from anything Windows at this price. Silent under load, buttery smooth display, and the battery holds up through a full workday without breaking a sweat." },
+    { slug: 'macbook-pro-m3-16-2024', user: u10, rating: 4, verifiedPurchase: true,
+      comment: "M3 chip is a genuine leap. Docker containers that used to throttle my old machine run without a hitch, and the 16-inch Liquid Retina display is gorgeous for design work." },
+    { slug: 'macbook-pro-m3-16-2024', user: u12, rating: 5, verifiedPurchase: true,
+      comment: "Apple finally made a laptop that doesn't need to be plugged in all day. The fan barely kicks in even during heavy tasks. Premium price but the machine earns every penny." },
+    { slug: 'macbook-pro-m3-16-2024', user: u11, rating: 2, verifiedPurchase: false,
+      comment: "Would love to own one but the non-upgradeable memory is a deal-breaker for long-term value. You're locked in the moment you buy — plan accordingly or you'll be unhappy in two years." },
+    { slug: 'macbook-pro-m3-16-2024', user: u3, rating: 5, verifiedPurchase: false,
+      comment: "Borrowed a colleague's for a week — the trackpad alone is worth the price of admission. Nothing I've used comes close. Saving up to buy one and I'm already impatient." },
+    { slug: 'macbook-pro-m3-16-2024', user: u8, rating: 4, verifiedPurchase: false,
+      comment: "Display and build are genuinely flawless. My hesitation is macOS — if you're coming from Windows the learning curve is steeper than Apple marketing suggests. Worth the switch though." },
+
+    // ── PS5 — additional reviews (→ 11 total) ────────────────────────────────
+    { slug: 'sony-ps5', user: u9, rating: 5, verifiedPurchase: true,
+      comment: "Day one purchase and I haven't regretted it once. The adaptive triggers alone changed how I experience games. Spider-Man 2 and God of War look absolutely stunning on this hardware." },
+    { slug: 'sony-ps5', user: u11, rating: 4, verifiedPurchase: true,
+      comment: "Huge upgrade over last gen. The DualSense is genuinely innovative and games load in seconds. Still waiting for more first-party exclusives but what's there is excellent." },
+    { slug: 'sony-ps5', user: u12, rating: 5, verifiedPurchase: true,
+      comment: "Hardware is exceptional — silent, fast, and the controller is unlike anything else. Game Pass offers better value but nothing matches the quality of PS5 exclusives when they land." },
+    { slug: 'sony-ps5', user: u2, rating: 4, verifiedPurchase: false,
+      comment: "The UI is genuinely bad but the games more than compensate. Demon's Souls and Returnal justify this purchase alone if you enjoy challenging games. Hardware is flawless." },
+    { slug: 'sony-ps5', user: u4, rating: 3, verifiedPurchase: false,
+      comment: "Impressive hardware held back by a confusing interface and a still-thin exclusive library if you're not a Sony franchise fan. Hardware-wise it's a marvel, software-wise it needs work." },
+    { slug: 'sony-ps5', user: u7, rating: 5, verifiedPurchase: false,
+      comment: "Tried one at a friend's — the haptic feedback is not a gimmick, it's genuinely immersive. Returnal alone sold me. On my list as soon as I can justify the spend." },
+
+    // ── Mercurial Vapor IV — additional reviews (→ 11 total) ─────────────────
+    { slug: 'mercurial-vapor-iv', user: u10, rating: 5, verifiedPurchase: true,
+      comment: "First match in these and I felt electric. The TPU soleplate snaps back energy on every stride and the NikeSkin locks your foot in perfectly. Worth every penny for a speed player." },
+    { slug: 'mercurial-vapor-iv', user: u12, rating: 4, verifiedPurchase: true,
+      comment: "Incredible boot. The NikeSkin upper locks your foot in without being restrictive. These run narrow — worth going half a size up — but once dialed in they are phenomenal." },
+    { slug: 'mercurial-vapor-iv', user: u1, rating: 4, verifiedPurchase: false,
+      comment: "Iconic design and era-accurate colorway. The soleplate geometry is exactly as I remember from watching Ronaldo wear these. Narrower than modern Mercurials so size accordingly." },
+    { slug: 'mercurial-vapor-iv', user: u2, rating: 3, verifiedPurchase: false,
+      comment: "Pure speed when the fit works. I tape my toes for longer sessions due to the narrow last, but on the pitch the feeling is unmatched. Not for wide-footed players." },
+    { slug: 'mercurial-vapor-iv', user: u5, rating: 4, verifiedPurchase: false,
+      comment: "Not for wide feet — had to return my first pair and size up. After that adjustment they were great. The NikeSkin upper molds beautifully to the foot over time." },
+    { slug: 'mercurial-vapor-iv', user: u6, rating: 5, verifiedPurchase: false,
+      comment: "Everything a retro speed boot should be. The gold and black colorway is stunning on the pitch and the feel on the ball is exactly what legends are made of." },
+    { slug: 'mercurial-vapor-iv', user: u11, rating: 5, verifiedPurchase: false,
+      comment: "The myth, the legend. These boots carry serious history and the feel reflects it. Tight fit but if you're a speed merchant they are absolutely worth it." },
+
+    // ── Tiempo Legend 2014 — additional reviews (→ 11 total) ─────────────────
+    { slug: 'tiempo-legend-2014', user: u11, rating: 5, verifiedPurchase: true,
+      comment: "Proper leather boot. The kangaroo upper breaks in beautifully and the touch on the ball is something no synthetic can replicate. Worth every penny for a touch player." },
+    { slug: 'tiempo-legend-2014', user: u9, rating: 4, verifiedPurchase: false,
+      comment: "The weight is noticeable compared to modern boots but the control you get from the leather upper makes up for it. Classic choice for technical midfielders who value feel." },
+    { slug: 'tiempo-legend-2014', user: u12, rating: 4, verifiedPurchase: false,
+      comment: "Tried these at a friend's session — the leather feel is genuinely different to anything modern. If you value touch over pace these are hard to argue with." },
+    { slug: 'tiempo-legend-2014', user: u1, rating: 5, verifiedPurchase: false,
+      comment: "Kangaroo leather is becoming rarer in football boots so these feel special. Soft, responsive, and they get better with every session. A classic that still holds up." },
+    { slug: 'tiempo-legend-2014', user: u2, rating: 3, verifiedPurchase: false,
+      comment: "The leather upper delivers on its promise but the outsole is stiff and the boot feels dated compared to modern options. Good if heritage is what you're after." },
+    { slug: 'tiempo-legend-2014', user: u4, rating: 3, verifiedPurchase: false,
+      comment: "Beautiful heritage boot and the touch is exceptional. My issue is the weight — modern alternatives like the Predator give similar control at a fraction of the mass." },
+    { slug: 'tiempo-legend-2014', user: u6, rating: 4, verifiedPurchase: false,
+      comment: "Classic leather craftsmanship that feels like it was made by someone who actually played the game. Heavy, yes, but for a number 10 the close control is worth it." },
   ];
 
   for (const { slug, user, rating, verifiedPurchase, comment } of reviews) {

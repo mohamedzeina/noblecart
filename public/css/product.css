@@ -402,17 +402,27 @@
 
 .reviews-load-more {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding-top: 1rem;
+  gap: 0.6rem;
+  padding-top: 1.5rem;
 }
 
 .reviews-load-more__btn {
-  flex-shrink: 0;
+  padding: 0.6rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-radius: 6px;
+  min-width: 180px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .reviews-load-more__count {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #94a3b8;
 }
 
