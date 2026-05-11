@@ -216,6 +216,20 @@
   margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.search-suggestion__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #f59e0b;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .search-suggestion__right {

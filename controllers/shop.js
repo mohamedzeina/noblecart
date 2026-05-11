@@ -132,13 +132,32 @@ exports.getSearchSuggest = (req, res, next) => {
     .select('title price imageUrl category _id')
     .limit(6)
     .then((products) => {
-      const wishlistSet = req.user
-        ? new Set(req.user.wishlist.map((i) => i.productId.toString()))
-        : new Set();
-      const wishlistedIds = products
-        .filter((p) => wishlistSet.has(p._id.toString()))
-        .map((p) => p._id.toString());
-      res.json({ results: products, query, wishlistedIds });
+      const productIds = products.map((p) => p._id);
+      return Review.aggregate([
+        { $match: { productId: { $in: productIds } } },
+        { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+      ]).then((agg) => {
+        const ratingsMap = {};
+        agg.forEach((r) => { ratingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
+
+        const wishlistSet = req.user
+          ? new Set(req.user.wishlist.map((i) => i.productId.toString()))
+          : new Set();
+        const wishlistedIds = products
+          .filter((p) => wishlistSet.has(p._id.toString()))
+          .map((p) => p._id.toString());
+
+        const results = products.map((p) => ({
+          _id: p._id,
+          title: p.title,
+          price: p.price,
+          imageUrl: p.imageUrl,
+          category: p.category,
+          rating: ratingsMap[p._id.toString()] || null,
+        }));
+
+        res.json({ results, query, wishlistedIds });
+      });
     })
     .catch(() => res.json({ results: [], query, wishlistedIds: [] }));
 };
