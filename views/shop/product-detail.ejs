@@ -89,8 +89,11 @@
                 }
             %>
             <section class="reviews-section">
-                <div class="reviews-section__header">
-                    <h2 class="reviews-section__title">Reviews</h2>
+                <!-- Left: summary + breakdown -->
+                <div class="reviews-section__left">
+                    <div class="reviews-section__header">
+                        <h2 class="reviews-section__title">Reviews</h2>
+                    </div>
                     <% if (avgRating) { %>
                     <div class="reviews-section__summary">
                         <div class="stars-display"><%- stars(Math.round(avgRating)) %></div>
@@ -98,112 +101,116 @@
                         <span class="reviews-section__count">(<%= reviews.length %> review<%= reviews.length !== 1 ? 's' : '' %>)</span>
                     </div>
                     <% } %>
-                </div>
-                <% if (reviews.length > 0) { %>
-                <div class="rating-breakdown">
-                    <% ratingBreakdown.forEach(({ star, count }) => { %>
-                    <div class="rating-breakdown__row">
-                        <span class="rating-breakdown__label"><%= star %>★</span>
-                        <div class="rating-breakdown__bar-track">
-                            <div class="rating-breakdown__bar-fill" style="width:<%= reviews.length ? Math.round(count / reviews.length * 100) : 0 %>%"></div>
+                    <% if (reviews.length > 0) { %>
+                    <div class="rating-breakdown">
+                        <% ratingBreakdown.forEach(({ star, count }) => { %>
+                        <div class="rating-breakdown__row">
+                            <span class="rating-breakdown__label"><%= star %>★</span>
+                            <div class="rating-breakdown__bar-wrap"><svg class="rating-breakdown__bar" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="100" height="10" fill="#e2e8f0"/><rect x="0" y="0" width="<%= reviews.length ? Math.round(count / reviews.length * 100) : 0 %>" height="10" fill="#f59e0b"/></svg></div>
+                            <span class="rating-breakdown__count"><%= count %></span>
                         </div>
-                        <span class="rating-breakdown__count"><%= count %></span>
+                        <% }) %>
                     </div>
-                    <% }) %>
-                </div>
-                <% } %>
-                <% if (isAuthenticated) { %>
-                <% if (!userReview) { %>
-                <form class="review-form" action="/products/<%= product._id %>/review" method="POST">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <p class="review-form__label">Your Rating</p>
-                    <div class="star-picker" role="group" aria-label="Rating">
-                        <% for (let i = 1; i <= 5; i++) { %>
-                        <input type="radio" name="rating" id="star<%= i %>" value="<%= i %>" class="star-picker__input" <%= i === 5 ? 'required' : '' %>>
-                        <label for="star<%= i %>" class="star-picker__label" aria-label="<%= i %> star<%= i !== 1 ? 's' : '' %>">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        </label>
-                        <% } %>
-                    </div>
-                    <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" placeholder="Share your thoughts on this product…" required></textarea>
-                    <% if (reviewError) { %>
-                    <p class="review-form__error"><%= reviewError %></p>
                     <% } %>
-                    <button class="btn btn--solid review-form__submit" type="submit">Submit Review</button>
-                </form>
-                <% } else { %>
-                <div class="review-form review-form--existing">
-                    <div class="review-form__your-label">Your Review</div>
-                    <div class="stars-display"><%- stars(userReview.rating) %></div>
-                    <p class="review-form__existing-comment"><%= userReview.comment %></p>
-                    <div class="review-form__actions">
-                        <button class="btn btn--solid review-form__edit-btn" type="button">Edit</button>
-                        <form action="/products/<%= product._id %>/review/delete" method="POST" style="display:inline">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <button class="btn review-form__delete-btn" type="submit">Delete</button>
-                        </form>
-                    </div>
-                    <form class="review-form__edit-fields" action="/products/<%= product._id %>/review/update" method="POST" style="display:none">
+                </div>
+
+                <!-- Right: form + reviews -->
+                <div class="reviews-section__right">
+                    <% if (isAuthenticated) { %>
+                    <% if (!userReview) { %>
+                    <form class="review-form" action="/products/<%= product._id %>/review" method="POST">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <p class="review-form__label">Your Rating</p>
                         <div class="star-picker" role="group" aria-label="Rating">
-                            <% for (let i = 1; i <= 5; i++) { %>
-                            <input type="radio" name="rating" id="edit-star<%= i %>" value="<%= i %>" class="star-picker__input" <%= i === userReview.rating ? 'checked' : '' %>>
-                            <label for="edit-star<%= i %>" class="star-picker__label">
+                            <% for (let i = 5; i >= 1; i--) { %>
+                            <input type="radio" name="rating" id="star<%= i %>" value="<%= i %>" class="star-picker__input">
+                            <label for="star<%= i %>" class="star-picker__label" aria-label="<%= i %> star<%= i !== 1 ? 's' : '' %>">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                             </label>
                             <% } %>
                         </div>
-                        <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" required><%= userReview.comment %></textarea>
-                        <div class="review-form__actions">
-                            <button class="btn btn--solid review-form__submit" type="submit">Save</button>
-                            <button class="btn review-form__cancel-btn" type="button">Cancel</button>
-                        </div>
+                        <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" placeholder="Share your thoughts on this product…" required></textarea>
+                        <p class="review-form__error" id="review-error-msg"<%= reviewError ? '' : ' style="display:none"' %>><%= reviewError || '' %></p>
+                        <button class="btn btn--solid review-form__submit" type="submit">Submit Review</button>
                     </form>
-                </div>
-                <% } %>
-                <% } %>
-
-                <% if (reviews.length > 0) { %>
-                <ul class="review-list">
-                    <% reviews.forEach(review => { %>
-                    <% if (!userReview || review._id.toString() !== userReview._id.toString()) { %>
-                    <li class="review-item">
-                        <div class="review-item__header">
-                            <div class="stars-display"><%- stars(review.rating) %></div>
-                            <span class="review-item__author"><%= review.userName %></span>
-                            <% if (review.verifiedPurchase) { %>
-                            <span class="review-item__verified">Verified Purchase</span>
-                            <% } %>
-                            <span class="review-item__date"><%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                    <% } else { %>
+                    <div class="review-form review-form--existing">
+                        <div class="review-form__view">
+                            <div class="review-form__your-label">Your Review</div>
+                            <div class="stars-display"><%- stars(userReview.rating) %></div>
+                            <p class="review-form__existing-comment"><%= userReview.comment %></p>
+                            <div class="review-form__actions">
+                                <button class="btn btn--solid review-form__edit-btn" type="button">Edit</button>
+                                <form action="/products/<%= product._id %>/review/delete" method="POST" style="display:inline">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button class="btn review-form__delete-btn" type="submit">Delete</button>
+                                </form>
+                            </div>
                         </div>
-                        <p class="review-item__comment"><%= review.comment %></p>
-                    </li>
+                        <form class="review-form__edit-fields" action="/products/<%= product._id %>/review/update" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <div class="star-picker" role="group" aria-label="Rating">
+                                <% for (let i = 5; i >= 1; i--) { %>
+                                <input type="radio" name="rating" id="edit-star<%= i %>" value="<%= i %>" class="star-picker__input" <%= i === userReview.rating ? 'checked' : '' %>>
+                                <label for="edit-star<%= i %>" class="star-picker__label">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </label>
+                                <% } %>
+                            </div>
+                            <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" required><%= userReview.comment %></textarea>
+                            <div class="review-form__actions">
+                                <button class="btn btn--solid review-form__submit" type="submit">Save</button>
+                                <button class="btn review-form__cancel-btn" type="button">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
                     <% } %>
-                    <% }) %>
-                </ul>
-                <% } else { %>
-                <p class="reviews-section__empty">No reviews yet. Be the first to share your thoughts.</p>
-                <% } %>
+                    <% } %>
+
+                    <% if (reviews.length > 0) { %>
+                    <ul class="review-list">
+                        <% reviews.forEach(review => { %>
+                        <% if (!userReview || review._id.toString() !== userReview._id.toString()) { %>
+                        <li class="review-item">
+                            <div class="review-item__header">
+                                <div class="review-item__avatar"><%= review.userName.charAt(0).toUpperCase() %></div>
+                                <div class="review-item__meta">
+                                    <div class="stars-display"><%- stars(review.rating) %></div>
+                                    <div class="review-item__author-row">
+                                        <span class="review-item__author"><%= review.userName %></span>
+                                        <% if (review.verifiedPurchase) { %>
+                                        <span class="review-item__verified">Verified Purchase</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <span class="review-item__date"><%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                            </div>
+                            <p class="review-item__comment">"<%= review.comment %>"</p>
+                        </li>
+                        <% } %>
+                        <% }) %>
+                    </ul>
+                    <% } else if (!isAuthenticated) { %>
+                    <p class="reviews-section__empty">No reviews yet. Be the first to share your thoughts.</p>
+                    <% } %>
+                </div>
             </section>
         </main>
         <% if (product.modelUrl) { %>
         <script type="module" src="/js/product-detail.js"></script>
         <% } %>
         <script>
-          const editBtn = document.querySelector('.review-form__edit-btn');
-          const cancelBtn = document.querySelector('.review-form__cancel-btn');
-          const editFields = document.querySelector('.review-form__edit-fields');
-          const existingView = document.querySelector('.review-form__existing-comment');
-          if (editBtn) {
-            editBtn.addEventListener('click', () => {
-              editFields.style.display = 'block';
-              editBtn.style.display = 'none';
-              existingView && (existingView.style.display = 'none');
+          const reviewCard = document.querySelector('.review-form--existing');
+          if (reviewCard) {
+            document.querySelector('.review-form__edit-btn').addEventListener('click', () => {
+              reviewCard.setAttribute('data-editing', '');
             });
-            cancelBtn.addEventListener('click', () => {
-              editFields.style.display = 'none';
-              editBtn.style.display = '';
-              existingView && (existingView.style.display = '');
+            document.querySelector('.review-form__cancel-btn').addEventListener('click', () => {
+              reviewCard.removeAttribute('data-editing');
+            });
+            // Reset on bfcache restore
+            window.addEventListener('pageshow', (e) => {
+              if (e.persisted) reviewCard.removeAttribute('data-editing');
             });
           }
         </script>
