@@ -132,7 +132,8 @@ if (loadMoreBtn) {
     loadMoreBtn.disabled = true;
     loadMoreBtn.innerHTML = SPINNER + ' Loading…';
 
-    fetch(`/products/${productId}/reviews?skip=${skip}`)
+    const reviewSort = loadMoreBtn.dataset.reviewSort || 'newest';
+    fetch(`/products/${productId}/reviews?skip=${skip}&reviewSort=${reviewSort}`)
       .then((r) => r.json())
       .then(({ reviews, hasMore }) => {
         reviews.forEach((review) => {

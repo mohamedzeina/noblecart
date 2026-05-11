@@ -761,6 +761,51 @@
   flex-shrink: 0;
 }
 
+/* Review sort chips */
+.review-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.review-sort-chip {
+  display: inline-block;
+  font-size: 0.73rem;
+  font-weight: 500;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.review-sort-chip:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.review-sort-chip--active {
+  background: #1e293b;
+  border-color: #1e293b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.review-sort-chip--active:hover {
+  background: #0f172a;
+  border-color: #0f172a;
+}
+
 /* Sort bar */
 .sort-bar {
   display: flex;

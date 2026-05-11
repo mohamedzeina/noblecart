@@ -14,11 +14,18 @@ const pg = require('../util/paginationHelper');
 
 const REVIEWS_PER_PAGE = 5;
 
+const REVIEW_SORT_OPTS = {
+  newest:  { createdAt: -1 },
+  highest: { rating: -1, createdAt: -1 },
+  lowest:  { rating: 1,  createdAt: -1 },
+};
+
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
+  const activeReviewSort = REVIEW_SORT_OPTS[req.query.reviewSort] ? req.query.reviewSort : 'newest';
   Promise.all([
     Product.findById(prodId),
-    Review.find({ productId: prodId }).sort({ createdAt: -1 }),
+    Review.find({ productId: prodId }).sort(REVIEW_SORT_OPTS[activeReviewSort]),
   ])
     .then(([product, reviews]) => {
       const avgRating = reviews.length
@@ -45,6 +52,7 @@ exports.getProduct = (req, res, next) => {
         avgRating,
         userReview,
         ratingBreakdown,
+        activeReviewSort,
         reviewError: reviewError.length > 0 ? reviewError[0] : null,
       });
     })
@@ -58,11 +66,12 @@ exports.getProduct = (req, res, next) => {
 exports.getProductReviews = (req, res, next) => {
   const { productId } = req.params;
   const skip = parseInt(req.query.skip, 10) || 0;
+  const activeReviewSort = REVIEW_SORT_OPTS[req.query.reviewSort] ? req.query.reviewSort : 'newest';
   const filter = { productId };
   if (req.user) filter.userId = { $ne: req.user._id };
 
   Review.find(filter)
-    .sort({ createdAt: -1 })
+    .sort(REVIEW_SORT_OPTS[activeReviewSort])
     .skip(skip)
     .limit(REVIEWS_PER_PAGE)
     .then((reviews) => {

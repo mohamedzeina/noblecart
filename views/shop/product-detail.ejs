@@ -208,6 +208,18 @@
                     <% } %>
 
                     <% if (reviewsListTotal > 0) { %>
+                    <div class="review-sort">
+                        <% [
+                            { value: 'newest',  label: 'Newest' },
+                            { value: 'highest', label: 'Highest Rated' },
+                            { value: 'lowest',  label: 'Lowest Rated' },
+                        ].forEach(chip => { %>
+                        <a href="?reviewSort=<%= chip.value %>#reviews"
+                           class="review-sort-chip<%= activeReviewSort === chip.value ? ' review-sort-chip--active' : '' %>">
+                            <%= chip.label %>
+                        </a>
+                        <% }) %>
+                    </div>
                     <ul class="review-list" id="review-list">
                         <% displayedReviews.forEach(review => { %>
                         <li class="review-item">
@@ -232,7 +244,8 @@
                     <div class="reviews-load-more">
                         <button class="btn reviews-load-more__btn"
                                 data-product-id="<%= product._id %>"
-                                data-skip="<%= displayedReviews.length %>">
+                                data-skip="<%= displayedReviews.length %>"
+                                data-review-sort="<%= activeReviewSort %>">
                             Load more reviews
                         </button>
                         <span class="reviews-load-more__count"><%= displayedReviews.length %> of <%= reviewsListTotal %></span>
