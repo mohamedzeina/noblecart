@@ -15,7 +15,7 @@ function menuToggleClickHandler() {
 backdrop.addEventListener('click', backdropClickHandler);
 menuToggle.addEventListener('click', menuToggleClickHandler);
 
-document.querySelectorAll('form[action="/logout"]').forEach((form) => {
+document.querySelectorAll('form[action="/logout"], form[action="/admin/logout"]').forEach((form) => {
   form.addEventListener('submit', () => {
     const btn = form.querySelector('button[type="submit"]');
     if (btn) {
