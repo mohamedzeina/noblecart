@@ -24,8 +24,9 @@
                     <% orders.forEach(order => { %>
                         <li class="order-card">
                             <div class="order-card__header">
-                                <div>
+                                <div class="order-card__header-left">
                                     <p class="order-card__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></p>
+                                    <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
                                 </div>
                                 <a href="/orders/<%= order._id %>" class="order-card__invoice-btn" target="_blank" rel="noopener noreferrer">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
