@@ -415,6 +415,10 @@
   fill: #f59e0b;
 }
 
+.star--half path {
+  fill: url(#hsg);
+}
+
 /* Star picker (interactive) */
 .star-picker {
   display: inline-flex;
