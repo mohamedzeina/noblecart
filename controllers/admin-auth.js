@@ -7,6 +7,9 @@ exports.getLogin = (req, res, next) => {
   if (req.admin !== undefined) {
     return res.redirect('/admin/orders');
   }
+  if (req.user !== undefined) {
+    return res.redirect('/');
+  }
   let message = req.flash('adminLoginError');
   res.render('admin/login', {
     path: '/admin/login',
