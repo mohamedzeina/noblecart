@@ -31,6 +31,13 @@
                 <div class="product-detail__info">
                     <span class="product-detail__badge"><%= catLabels[product.category] || product.category %></span>
                     <h1 class="product-detail__title"><%= product.title %></h1>
+                    <% if (avgRating) { %>
+                    <a href="#reviews" class="product-detail__rating">
+                        <span class="stars-display"><%- stars(Math.round(avgRating)) %></span>
+                        <span class="product-detail__rating-avg"><%= avgRating.toFixed(1) %></span>
+                        <span class="product-detail__rating-count">(<%= reviews.length %> review<%= reviews.length !== 1 ? 's' : '' %>)</span>
+                    </a>
+                    <% } %>
                     <p class="product-detail__price">$<%= product.price.toFixed(2) %></p>
                     <p class="product-detail__description"><%= product.description %></p>
 
@@ -88,7 +95,7 @@
                     return s;
                 }
             %>
-            <section class="reviews-section">
+            <section class="reviews-section" id="reviews">
                 <!-- Left: summary + breakdown -->
                 <div class="reviews-section__left">
                     <div class="reviews-section__header">

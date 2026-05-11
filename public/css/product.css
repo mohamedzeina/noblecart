@@ -171,6 +171,29 @@
     letter-spacing: -0.01em;
 }
 
+.product-detail__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    text-decoration: none;
+}
+
+.product-detail__rating:hover .product-detail__rating-count {
+    text-decoration: underline;
+}
+
+.product-detail__rating-avg {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.product-detail__rating-count {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
 .product-detail__price {
     font-size: 1.5rem;
     font-weight: 700;
