@@ -22,6 +22,11 @@ A full-stack luxury e-commerce web application built with Node.js and Express.js
   - Email-based password reset via tokenized links (expires after 1 hour)
   - Welcome email on signup via Resend
 
+- **Admin Authentication**
+  - Separate admin login at `/admin/login` — independent session from customer accounts
+  - Admin sessions stored in MongoDB; `isAdmin` middleware guards all admin routes
+  - `isNotAdmin` middleware prevents admins from accessing customer-only routes
+
 - **Product Management** (Admin only)
   - Create, edit, and delete products with category assignment
   - Image upload with drag-and-drop support and instant preview, stored on Cloudinary (`noblecart/`)
@@ -121,8 +126,8 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 
 - **Models** (`/models`) — Mongoose schemas for `Admin`, `User`, `Product`, `Order`, and `Review`. The `User` model includes cart methods (`addToCart`, `decrementFromCart`, `removeFromCart`, `clearCart`).
 - **Views** (`/views`) — EJS templates organized by feature (`shop/`, `admin/`, `auth/`), with shared partials in `includes/` including the cart drawer and pagination.
-- **Controllers** (`/controllers`) — Business logic separated into `shop.js`, `admin.js`, `auth.js`, and `error.js`.
-- **Routes** (`/routes`) — Express routers map HTTP methods/paths to controller functions, with `isAuth` and `isAdmin` middleware guarding protected routes.
+- **Controllers** (`/controllers`) — Business logic separated into `shop.js`, `admin.js`, `auth.js`, `admin-auth.js`, and `error.js`.
+- **Routes** (`/routes`) — Express routers map HTTP methods/paths to controller functions, with `isAuth`, `isAdmin`, and `isNotAdmin` middleware guarding protected routes.
 
 ## Project Structure
 
@@ -131,7 +136,9 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 ├── app.js                  # App entry point (HTTPS server, middleware, routes)
 ├── nodemon.json            # Dev environment variables (gitignored)
 ├── middleware/
-│   └── is-auth.js
+│   ├── is-auth.js
+│   ├── is-admin.js
+│   └── is-not-admin.js
 ├── models/
 │   ├── admin.js
 │   ├── user.js
@@ -140,18 +147,23 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 │   └── review.js
 ├── controllers/
 │   ├── auth.js
+│   ├── admin-auth.js
 │   ├── shop.js
 │   ├── admin.js
 │   └── error.js
 ├── routes/
 │   ├── auth.js
+│   ├── admin-auth.js
 │   ├── shop.js
 │   └── admin.js
 ├── views/
 │   ├── auth/
 │   ├── shop/
 │   ├── admin/
-│   └── includes/           # Shared partials (nav, head, cart drawer, pagination, etc.)
+│   ├── includes/           # Shared partials (nav, head, cart drawer, pagination, etc.)
+│   ├── 403.ejs
+│   ├── 404.ejs
+│   └── 500.ejs
 ├── public/
 │   ├── css/
 │   └── js/
