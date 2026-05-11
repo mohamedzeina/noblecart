@@ -126,6 +126,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.isAdmin = req.user ? req.user.role === 'admin' : false;
   res.locals.csrfToken = req.csrfToken();
   res.locals.cartCount = req.user
     ? req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0)
