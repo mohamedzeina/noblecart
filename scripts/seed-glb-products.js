@@ -27,7 +27,7 @@ const { env } = require('../nodemon.json');
 Object.assign(process.env, env);
 
 const cloudinary = require('../util/cloudinary');
-const User = require('../models/user');
+const Admin = require('../models/admin');
 const Product = require('../models/product');
 
 const PRODUCTS_DIR = path.join(__dirname, 'products');
@@ -156,13 +156,13 @@ async function run() {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log('Connected to MongoDB');
 
-  const user = await User.findOne({ email: 'test@test.com' });
-  if (!user) {
-    console.error('User test@test.com not found. Create the account first.');
+  const admin = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
+  if (!admin) {
+    console.error(`Admin ${process.env.ADMIN_EMAIL} not found. Run npm run seed:admin first.`);
     process.exit(1);
   }
 
-  await Product.deleteMany({ userId: user._id });
+  await Product.deleteMany({ adminId: admin._id });
   console.log('Cleared existing products');
 
   const slugs = fs.readdirSync(PRODUCTS_DIR).filter(name =>
@@ -185,7 +185,7 @@ async function run() {
     }
 
     const meta = parseMeta(metaPath);
-    const doc = { ...meta, userId: user._id, imageUrl: '', imagePublicId: '' };
+    const doc = { ...meta, adminId: admin._id, imageUrl: '', imagePublicId: '' };
 
     const modelPath = findFile(dir, ['model.glb']);
     if (modelPath) {
