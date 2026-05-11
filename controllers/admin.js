@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
 const Product = require('../models/product');
 const Order = require('../models/order');
@@ -183,12 +184,30 @@ const ORDERS_PER_PAGE = 10;
 
 exports.getAdminOrders = (req, res, next) => {
   const page = parseInt(req.query.page, 10) || 1;
-  let totalOrders;
+  const activeStatus = req.query.status || '';
+  const activeDate = req.query.date || '';
 
-  Order.countDocuments()
+  const filter = {};
+  if (activeStatus) filter.status = activeStatus;
+
+  if (activeDate) {
+    const now = new Date();
+    const fromDate =
+      activeDate === 'today' ? new Date(now.getFullYear(), now.getMonth(), now.getDate()) :
+      activeDate === '7d'    ? new Date(now - 7  * 24 * 60 * 60 * 1000) :
+      activeDate === '30d'   ? new Date(now - 30 * 24 * 60 * 60 * 1000) :
+      null;
+    if (fromDate) {
+      const hex = Math.floor(fromDate.getTime() / 1000).toString(16).padStart(8, '0');
+      filter._id = { $gte: new mongoose.Types.ObjectId(hex + '0000000000000000') };
+    }
+  }
+
+  let totalOrders;
+  Order.countDocuments(filter)
     .then((count) => {
       totalOrders = count;
-      return Order.find()
+      return Order.find(filter)
         .sort({ _id: -1 })
         .skip((page - 1) * ORDERS_PER_PAGE)
         .limit(ORDERS_PER_PAGE);
@@ -198,6 +217,8 @@ exports.getAdminOrders = (req, res, next) => {
         pageTitle: 'All Orders',
         path: '/admin/orders',
         orders,
+        activeStatus,
+        activeDate,
         currentPage: page,
         hasNextPage: ORDERS_PER_PAGE * page < totalOrders,
         hasPrevPage: page > 1,
