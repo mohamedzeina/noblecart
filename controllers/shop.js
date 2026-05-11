@@ -8,6 +8,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const Product = require('../models/product');
 const Order = require('../models/order');
+const { sendOrderConfirmation } = require('../util/email');
 const pg = require('../util/paginationHelper');
 
 
@@ -258,7 +259,8 @@ exports.getCheckoutSuccess = (req, res, next) => {
       });
       return order.save();
     })
-    .then(() => {
+    .then((order) => {
+      sendOrderConfirmation(order, order.user.email).catch(() => {});
       return req.user.clearCart();
     })
     .then(() => {
