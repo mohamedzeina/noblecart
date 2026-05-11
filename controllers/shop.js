@@ -26,6 +26,10 @@ exports.getProduct = (req, res, next) => {
       const userReview = req.user
         ? reviews.find((r) => r.userId.toString() === req.user._id.toString())
         : null;
+      const ratingBreakdown = [5, 4, 3, 2, 1].map((star) => ({
+        star,
+        count: reviews.filter((r) => r.rating === star).length,
+      }));
       res.render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
@@ -33,6 +37,7 @@ exports.getProduct = (req, res, next) => {
         reviews,
         avgRating,
         userReview,
+        ratingBreakdown,
       });
     })
     .catch((err) => {
@@ -447,14 +452,15 @@ exports.postReview = (req, res, next) => {
   const { productId } = req.params;
   const { rating, comment } = req.body;
 
-  new Review({
-    productId,
-    userId: req.user._id,
-    userName: req.user.name || req.user.email.split('@')[0],
-    rating: parseInt(rating, 10),
-    comment,
-  })
-    .save()
+  Order.findOne({ 'user.userId': req.user._id, 'products.productData._id': productId })
+    .then((order) => new Review({
+      productId,
+      userId: req.user._id,
+      userName: req.user.name || req.user.email.split('@')[0],
+      rating: parseInt(rating, 10),
+      comment,
+      verifiedPurchase: !!order,
+    }).save())
     .then(() => res.redirect('/products/' + productId))
     .catch((err) => {
       if (err.code === 11000) return res.redirect('/products/' + productId);

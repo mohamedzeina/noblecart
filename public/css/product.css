@@ -377,6 +377,7 @@
   cursor: pointer;
   color: #e2e8f0;
   transition: color 0.1s;
+  line-height: 1;
 }
 
 .star-picker__label svg path {
@@ -512,9 +513,65 @@
   margin-left: auto;
 }
 
+.review-item__verified {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+
 .review-item__comment {
   font-size: 0.875rem;
   color: #475569;
   margin: 0;
   line-height: 1.6;
+}
+
+/* Rating breakdown */
+.rating-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  max-width: 320px;
+}
+
+.rating-breakdown__row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.rating-breakdown__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.rating-breakdown__bar-track {
+  flex: 1;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.rating-breakdown__bar-fill {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.rating-breakdown__count {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  width: 16px;
+  text-align: right;
+  flex-shrink: 0;
 }

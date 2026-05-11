@@ -27,6 +27,10 @@ const reviewSchema = new mongoose.Schema({
     trim: true,
     maxlength: 1000,
   },
+  verifiedPurchase: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 reviewSchema.index({ productId: 1, userId: 1 }, { unique: true });

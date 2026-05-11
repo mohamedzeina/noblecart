@@ -99,7 +99,19 @@
                     </div>
                     <% } %>
                 </div>
-
+                <% if (reviews.length > 0) { %>
+                <div class="rating-breakdown">
+                    <% ratingBreakdown.forEach(({ star, count }) => { %>
+                    <div class="rating-breakdown__row">
+                        <span class="rating-breakdown__label"><%= star %>★</span>
+                        <div class="rating-breakdown__bar-track">
+                            <div class="rating-breakdown__bar-fill" style="width:<%= reviews.length ? Math.round(count / reviews.length * 100) : 0 %>%"></div>
+                        </div>
+                        <span class="rating-breakdown__count"><%= count %></span>
+                    </div>
+                    <% }) %>
+                </div>
+                <% } %>
                 <% if (isAuthenticated) { %>
                 <% if (!userReview) { %>
                 <form class="review-form" action="/products/<%= product._id %>/review" method="POST">
@@ -156,6 +168,9 @@
                         <div class="review-item__header">
                             <div class="stars-display"><%- stars(review.rating) %></div>
                             <span class="review-item__author"><%= review.userName %></span>
+                            <% if (review.verifiedPurchase) { %>
+                            <span class="review-item__verified">Verified Purchase</span>
+                            <% } %>
                             <span class="review-item__date"><%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
                         </div>
                         <p class="review-item__comment"><%= review.comment %></p>
