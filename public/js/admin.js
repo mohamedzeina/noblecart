@@ -20,12 +20,36 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify({ status: newStatus }),
     })
       .then((res) => res.json())
-      .then(({ status }) => {
+      .then(({ status, orderId: returnedId, csrf: returnedCsrf }) => {
         const badge = statusContainer.querySelector('.order-status-badge');
         badge.className = `order-status-badge order-status-badge--${status}`;
         badge.textContent = status.replace(/_/g, ' ');
-        statusContainer.querySelector('.order-status-actions')?.remove();
         statusContainer.querySelector('.order-cancel-confirm')?.remove();
+
+        const nextStatuses = VALID_TRANSITIONS[status] ?? [];
+        const existingActions = statusContainer.querySelector('.order-status-actions');
+        if (nextStatuses.length === 0) {
+          existingActions?.remove();
+        } else {
+          const actionsHtml = nextStatuses.map((s) => `
+            <button class="order-status-btn${s === 'canceled' ? ' order-status-btn--danger' : ''}"
+                    type="button"
+                    data-order-id="${orderId}"
+                    data-csrf="${csrf}"
+                    data-status="${s}">
+              ${STATUS_LABELS[s]}
+            </button>
+          `).join('');
+          if (existingActions) {
+            existingActions.innerHTML = actionsHtml;
+            existingActions.style.display = '';
+          } else {
+            const div = document.createElement('div');
+            div.className = 'order-status-actions';
+            div.innerHTML = actionsHtml;
+            statusContainer.appendChild(div);
+          }
+        }
         showToast('Order status updated');
       })
       .catch(() => {
@@ -37,6 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const STATUS_LABELS = {
     confirmed: 'Confirmed', shipped: 'Shipped',
     out_for_delivery: 'Out for delivery', delivered: 'Delivered', canceled: 'Canceled',
+  };
+
+  const VALID_TRANSITIONS = {
+    pending:          ['confirmed', 'canceled'],
+    confirmed:        ['shipped', 'canceled'],
+    shipped:          ['out_for_delivery'],
+    out_for_delivery: ['delivered'],
+    delivered:        [],
+    canceled:         [],
   };
 
   main.addEventListener('click', (e) => {

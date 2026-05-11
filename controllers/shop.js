@@ -175,7 +175,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  Order.find({ 'user.userId': req.user._id })
+  Order.find({ 'user.userId': req.user._id }).sort({ _id: -1 })
     .then((orders) => {
       res.render('shop/orders', {
         path: '/orders',

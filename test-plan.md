@@ -6,24 +6,24 @@
 
 ---
 
-## 2. Admin orders page — status dropdown
+## 2. Admin orders page — action buttons
 - [ ] Visit `/admin/orders` — new order appears with a **Pending** badge
-- [ ] Dropdown beside it shows **Confirmed** and **Canceled** only
-- [ ] Delivered and canceled orders have no dropdown
+- [ ] Buttons beside it show **Confirmed** and **Canceled** only
+- [ ] Delivered and canceled orders have no buttons
 
 ---
 
 ## 3. Status transition — happy path
-- [ ] Select **Confirmed** — badge updates in place, toast appears, dropdown now shows Shipped + Canceled
-- [ ] Select **Shipped** — badge updates, dropdown shows Out for delivery only
-- [ ] Select **Out for delivery** — badge updates, dropdown shows Delivered only
-- [ ] Select **Delivered** — badge updates, dropdown disappears (terminal state)
+- [ ] Click **Confirmed** → confirm → badge updates, buttons now show Shipped + Canceled
+- [ ] Click **Shipped** → confirm → badge updates, button shows Out for delivery only
+- [ ] Click **Out for delivery** → confirm → badge updates, button shows Delivered only
+- [ ] Click **Delivered** → confirm → badge updates, no buttons (terminal state)
 
 ---
 
 ## 4. Cancel path
 - [ ] Place a second order
-- [ ] On admin orders, select **Canceled** — badge updates, dropdown disappears
+- [ ] Click **Canceled** → confirm → badge updates, no buttons
 
 ---
 
