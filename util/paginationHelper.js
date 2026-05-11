@@ -9,6 +9,14 @@ const SORT_OPTS = {
   'price-desc': { price: -1 },
 };
 
+const VALID_PRICES = ['0-50', '50-200', '200-500', '500up'];
+const PRICE_FILTERS = {
+  '0-50':    { $lt: 50 },
+  '50-200':  { $gte: 50, $lte: 200 },
+  '200-500': { $gte: 200, $lte: 500 },
+  '500up':   { $gte: 500 },
+};
+
 const paginationHelper = (
   req,
   res,
@@ -21,7 +29,15 @@ const paginationHelper = (
 ) => {
   const page = parseInt(req.query.page, 10) || 1;
   const activeSort = VALID_SORTS.includes(req.query.sort) ? req.query.sort : 'newest';
-  const extraQuery = (extraData.extraQuery || '') + (activeSort !== 'newest' ? `&sort=${activeSort}` : '');
+  const activePrice = VALID_PRICES.includes(req.query.price) ? req.query.price : 'all';
+
+  if (activePrice !== 'all') {
+    filter = { ...filter, price: PRICE_FILTERS[activePrice] };
+  }
+
+  const extraQuery = (extraData.extraQuery || '')
+    + (activeSort !== 'newest' ? `&sort=${activeSort}` : '')
+    + (activePrice !== 'all' ? `&price=${activePrice}` : '');
 
   let totalItems;
   let productsPromise;
@@ -69,6 +85,7 @@ const paginationHelper = (
           prevPage: page - 1,
           lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
           activeSort,
+          activePrice,
           ...extraData,
           extraQuery,
         });

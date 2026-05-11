@@ -73,8 +73,8 @@
 
         <div class="products-section">
             <div class="products-section__header">
-                <h2 class="products-section__title">Featured Products</h2>
-                <p class="products-section__subtitle">Handpicked items from our collection</p>
+                <h2 class="products-section__title">All Products</h2>
+                <p class="products-section__subtitle">Browse our full collection</p>
             </div>
         </div>
     <% } else { %>
@@ -97,20 +97,42 @@
         </defs>
     </svg>
     <main id="products">
+        <% const _priceSuffix = activePrice !== 'all' ? '&price=' + activePrice : ''; %>
+        <% const _sortSuffix  = activeSort  !== 'newest' ? '&sort=' + activeSort : ''; %>
         <div class="sort-bar">
-            <span class="sort-bar__label">Sort by</span>
-            <div class="sort-bar__chips">
-                <% [
-                    { value: 'newest',     label: 'Newest' },
-                    { value: 'price-asc',  label: 'Price: Low to High' },
-                    { value: 'price-desc', label: 'Price: High to Low' },
-                    { value: 'top-rated',  label: 'Top Rated' },
-                ].forEach(chip => { %>
-                <a href="?sort=<%= chip.value %>"
-                   class="sort-chip<%= activeSort === chip.value ? ' sort-chip--active' : '' %>">
-                    <%= chip.label %>
-                </a>
-                <% }) %>
+            <div class="sort-bar__row">
+                <span class="sort-bar__label">Sort by</span>
+                <div class="sort-bar__chips">
+                    <% [
+                        { value: 'newest',     label: 'Newest' },
+                        { value: 'price-asc',  label: 'Price: Low to High' },
+                        { value: 'price-desc', label: 'Price: High to Low' },
+                        { value: 'top-rated',  label: 'Top Rated' },
+                    ].forEach(chip => { %>
+                    <a href="?sort=<%= chip.value %><%= _priceSuffix %>"
+                       class="sort-chip<%= activeSort === chip.value ? ' sort-chip--active' : '' %>">
+                        <%= chip.label %>
+                    </a>
+                    <% }) %>
+                </div>
+            </div>
+            <div class="sort-bar__row">
+                <span class="sort-bar__label">Price</span>
+                <div class="sort-bar__chips">
+                    <a href="?<%= _sortSuffix ? _sortSuffix.slice(1) : '' %>"
+                       class="sort-chip<%= activePrice === 'all' ? ' sort-chip--active' : '' %>">All</a>
+                    <% [
+                        { value: '0-50',    label: 'Under $50' },
+                        { value: '50-200',  label: '$50 – $200' },
+                        { value: '200-500', label: '$200 – $500' },
+                        { value: '500up',   label: '$500+' },
+                    ].forEach(chip => { %>
+                    <a href="?price=<%= chip.value %><%= _sortSuffix %>"
+                       class="sort-chip<%= activePrice === chip.value ? ' sort-chip--active' : '' %>">
+                        <%= chip.label %>
+                    </a>
+                    <% }) %>
+                </div>
             </div>
         </div>
         <% if (prods.length > 0) { %>
@@ -159,7 +181,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z" />
                     </svg>
                 </div>
-                <% if (locals.activeCategory) { %>
+                <% if (activePrice !== 'all') { %>
+                    <h2 class="empty-state__title">No products in that price range</h2>
+                    <p class="empty-state__subtitle">Try a different price range or clear the filter.</p>
+                    <a href="?<%= activeSort !== 'newest' ? 'sort=' + activeSort : '' %>" class="btn empty-state__cta">Clear price filter</a>
+                <% } else if (locals.activeCategory) { %>
                     <h2 class="empty-state__title">No <%= categoryLabels[activeCategory] %> products yet</h2>
                     <p class="empty-state__subtitle">Nothing here yet — check out our other categories.</p>
                     <a href="/" class="btn empty-state__cta">View all products</a>
