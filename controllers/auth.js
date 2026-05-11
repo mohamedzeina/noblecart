@@ -9,6 +9,9 @@ const User = require('../models/user');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 exports.getLogin = (req, res, next) => {
+  if (req.user !== undefined) {
+    return res.redirect('/');
+  }
   let message = req.flash('loginError');
   if (message.length > 0) {
     message = message[0];
@@ -100,6 +103,9 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.getSignup = (req, res, next) => {
+  if (req.user !== undefined) {
+    return res.redirect('/');
+  }
   let message = req.flash('signUpError');
   if (message.length > 0) {
     message = message[0];

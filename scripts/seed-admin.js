@@ -1,4 +1,5 @@
-require('dotenv').config();
+const { env } = require('../nodemon.json');
+Object.assign(process.env, env);
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');

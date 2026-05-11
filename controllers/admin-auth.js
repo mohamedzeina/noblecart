@@ -4,6 +4,9 @@ const { validationResult } = require('express-validator');
 const Admin = require('../models/admin');
 
 exports.getLogin = (req, res, next) => {
+  if (req.admin !== undefined) {
+    return res.redirect('/admin/orders');
+  }
   let message = req.flash('adminLoginError');
   res.render('admin/login', {
     path: '/admin/login',
