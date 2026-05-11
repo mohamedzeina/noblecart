@@ -53,7 +53,7 @@
                             %>
                             <div class="order-stepper">
                                 <% displaySteps.forEach((step, i) => {
-                                    const isActive  = order.status === step;
+                                    const isActive  = order.status === step && step !== 'delivered';
                                     const isDone    = !isActive && order.statusHistory.some(h => h.status === step);
                                     const isLast    = i === displaySteps.length - 1;
                                     const histEntry = order.statusHistory.find(h => h.status === step);

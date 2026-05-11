@@ -38,11 +38,25 @@
                             const shortId = '#' + order._id.toString().slice(-8).toUpperCase();
                             const itemCount = order.products.reduce((sum, p) => sum + p.quantity, 0);
                             const nextStatuses = VALID_TRANSITIONS[order.status] || [];
+                            const placedEntry = order.statusHistory.find(h => h.status === 'pending');
+                            let placedDate = '—';
+                            if (placedEntry) {
+                                const diff = Date.now() - new Date(placedEntry.timestamp).getTime();
+                                const mins  = Math.floor(diff / 60000);
+                                const hours = Math.floor(diff / 3600000);
+                                const days  = Math.floor(diff / 86400000);
+                                if (mins < 1)        placedDate = 'Just now';
+                                else if (mins < 60)  placedDate = `${mins}m ago`;
+                                else if (hours < 24) placedDate = `${hours}h ago`;
+                                else if (days < 7)   placedDate = `${days}d ago`;
+                                else                 placedDate = new Date(placedEntry.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            }
                         %>
                         <article class="admin-order-item">
                             <div class="admin-order-item__info">
                                 <p class="admin-order-item__id"><%= shortId %></p>
                                 <p class="admin-order-item__email"><%= order.user.email %></p>
+                                <p class="admin-order-item__date"><%= placedDate %></p>
                             </div>
                             <div class="admin-order-item__meta">
                                 <span class="admin-order-item__items"><%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %></span>
