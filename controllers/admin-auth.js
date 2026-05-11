@@ -50,10 +50,16 @@ exports.postLogin = (req, res, next) => {
             validationErrors: [],
           });
         }
-        req.session.adminId = admin._id;
-        return req.session.save((err) => {
-          if (err) console.log(err);
-          res.redirect('/admin/orders');
+        return req.session.regenerate((err) => {
+          if (err) {
+            console.log(err);
+            return res.redirect('/admin/login');
+          }
+          req.session.adminId = admin._id;
+          req.session.save((saveErr) => {
+            if (saveErr) console.log(saveErr);
+            res.redirect('/admin/orders');
+          });
         });
       });
     })

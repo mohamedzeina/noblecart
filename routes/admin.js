@@ -1,14 +1,13 @@
 const express = require('express');
 
 const adminController = require('../controllers/admin');
-const isAuth = require('../middleware/is-auth');
 const isAdmin = require('../middleware/is-admin');
 const { body } = require('express-validator');
 
 const router = express.Router();
 
 // /admin/add-product => GET
-router.get('/add-product', isAuth, isAdmin, adminController.getAddProduct);
+router.get('/add-product', isAdmin, adminController.getAddProduct);
 
 // /admin/add-product => POST
 router.post(
@@ -25,18 +24,17 @@ router.post(
     body('description').isLength({ min: 5, max: 400 }).trim(),
     body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'accessories']),
   ],
-  isAuth,
   isAdmin,
   adminController.postAddProduct
 );
 
 // /admin/products => GET
-router.get('/products', isAuth, isAdmin, adminController.getProducts);
+router.get('/products', isAdmin, adminController.getProducts);
 
 // /admin/orders => GET
-router.get('/orders', isAuth, isAdmin, adminController.getAdminOrders);
+router.get('/orders', isAdmin, adminController.getAdminOrders);
 
-router.get('/edit-product/:productId', isAuth, isAdmin, adminController.getEditProduct);
+router.get('/edit-product/:productId', isAdmin, adminController.getEditProduct);
 
 router.post(
   '/edit-product',
@@ -57,11 +55,10 @@ router.post(
       .trim(),
     body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'accessories']),
   ],
-  isAuth,
   isAdmin,
   adminController.postEditProduct
 );
 
-router.delete('/product/:prodId', isAuth, isAdmin, adminController.deleteProduct);
+router.delete('/product/:prodId', isAdmin, adminController.deleteProduct);
 
 module.exports = router;

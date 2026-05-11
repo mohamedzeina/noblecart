@@ -64,14 +64,16 @@ exports.postLogin = (req, res, next) => {
         .compare(password, user.password)
         .then((doMatch) => {
           if (doMatch) {
-            req.session.userId = user._id;
-            return req.session.save((err) => {
+            return req.session.regenerate((err) => {
               if (err) {
                 console.log(err);
-              } else {
-                console.log('Login Successful');
+                return res.redirect('/login');
               }
-              res.redirect('/');
+              req.session.userId = user._id;
+              req.session.save((saveErr) => {
+                if (saveErr) console.log(saveErr);
+                res.redirect('/');
+              });
             });
           }
           return res.status(422).render('auth/login', {
