@@ -16,6 +16,7 @@ const compression = require('compression');
 const morgan = require('morgan');
 
 const adminRoutes = require('./routes/admin');
+const adminAuthRoutes = require('./routes/admin-auth');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
@@ -138,6 +139,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/admin', adminAuthRoutes);
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
