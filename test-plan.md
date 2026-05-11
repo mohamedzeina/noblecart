@@ -1,8 +1,8 @@
 # Order Status — Test Plan
 
 ## 1. Setup
-- [ ] Log in as a customer and place an order through checkout
-- [ ] Log in as admin at `/admin/login`
+- [x] Log in as a customer and place an order through checkout
+- [x] Log in as admin at `/admin/login`
 
 ---
 

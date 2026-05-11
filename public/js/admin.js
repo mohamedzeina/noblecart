@@ -13,15 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2500);
   }
 
-  main.addEventListener('change', (e) => {
-    const select = e.target.closest('.order-status-select');
-    if (!select || !select.value) return;
-
-    const orderId = select.dataset.orderId;
-    const csrf = select.dataset.csrf;
-    const newStatus = select.value;
-    select.disabled = true;
-
+  function updateOrderStatus(statusContainer, orderId, csrf, newStatus) {
     fetch(`/admin/order/${orderId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'csrf-token': csrf },
@@ -29,17 +21,66 @@ document.addEventListener('DOMContentLoaded', () => {
     })
       .then((res) => res.json())
       .then(({ status }) => {
-        const badge = select.closest('.admin-order-item__status').querySelector('.order-status-badge');
+        const badge = statusContainer.querySelector('.order-status-badge');
         badge.className = `order-status-badge order-status-badge--${status}`;
         badge.textContent = status.replace(/_/g, ' ');
-        select.remove();
+        statusContainer.querySelector('.order-status-actions')?.remove();
+        statusContainer.querySelector('.order-cancel-confirm')?.remove();
         showToast('Order status updated');
       })
       .catch(() => {
-        select.disabled = false;
-        select.value = '';
+        statusContainer.innerHTML = statusContainer.dataset.original;
         showToast('Failed to update status');
       });
+  }
+
+  const STATUS_LABELS = {
+    confirmed: 'Confirmed', shipped: 'Shipped',
+    out_for_delivery: 'Out for delivery', delivered: 'Delivered', canceled: 'Canceled',
+  };
+
+  main.addEventListener('click', (e) => {
+    if (e.target.closest('.order-status-btn')) {
+      const btn = e.target.closest('.order-status-btn');
+      const statusContainer = btn.closest('.admin-order-item__status');
+      const newStatus = btn.dataset.status;
+      const label = STATUS_LABELS[newStatus] || newStatus;
+
+      statusContainer.dataset.pendingStatus = newStatus;
+      statusContainer.dataset.csrf = btn.dataset.csrf;
+      statusContainer.dataset.orderId = btn.dataset.orderId;
+      statusContainer.dataset.original = statusContainer.innerHTML;
+
+      statusContainer.querySelector('.order-status-actions').style.display = 'none';
+
+      const confirmEl = document.createElement('div');
+      confirmEl.className = 'order-cancel-confirm';
+      confirmEl.innerHTML = `
+        <span class="order-cancel-confirm__label">Move to <strong>${label}</strong>?</span>
+        <button class="btn order-cancel-confirm__yes" type="button">Yes</button>
+        <button class="btn order-cancel-confirm__no" type="button">Cancel</button>
+      `;
+      statusContainer.appendChild(confirmEl);
+      return;
+    }
+
+    if (e.target.closest('.order-cancel-confirm__no')) {
+      const statusContainer = e.target.closest('.admin-order-item__status');
+      statusContainer.innerHTML = statusContainer.dataset.original;
+      return;
+    }
+
+    if (e.target.closest('.order-cancel-confirm__yes')) {
+      const yesBtn = e.target.closest('.order-cancel-confirm__yes');
+      const statusContainer = yesBtn.closest('.admin-order-item__status');
+      const orderId = statusContainer.dataset.orderId;
+      const csrf = statusContainer.dataset.csrf;
+      const newStatus = statusContainer.dataset.pendingStatus;
+      yesBtn.disabled = true;
+      yesBtn.textContent = 'Updating…';
+      updateOrderStatus(statusContainer, orderId, csrf, newStatus);
+      return;
+    }
   });
 
   main.addEventListener('click', (e) => {

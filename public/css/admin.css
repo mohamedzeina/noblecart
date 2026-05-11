@@ -285,25 +285,41 @@
   flex-shrink: 0;
 }
 
-.order-status-select {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #1e293b;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.3rem 0.5rem;
+.order-status-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.order-status-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  background: #334155;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
 
-.order-status-select:hover {
-  border-color: #94a3b8;
+.order-status-btn:hover {
+  background: #111111;
+  border-color: #111111;
+  color: #fff;
 }
 
-.order-status-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.order-status-btn--danger {
+  color: #ef4444;
+  background: transparent;
+  border-color: #fca5a5;
+}
+
+.order-status-btn--danger:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
 }
 
 @media (max-width: 560px) {
@@ -323,4 +339,45 @@
   .admin-product-item__actions .delete-confirm__label {
     text-align: left;
   }
+}
+
+.order-cancel-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.order-cancel-confirm__label {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.order-cancel-confirm__yes {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  background: #334155;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.order-cancel-confirm__yes:hover:not(:disabled) {
+  background: #111111;
+  color: #fff;
+}
+
+.order-cancel-confirm__no {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 8px;
+}
+
+.order-cancel-confirm__no:hover {
+  background: #e2e8f0;
 }

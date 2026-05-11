@@ -53,6 +53,7 @@ const store = mongoDBStore({
   uri: process.env.MONGODB_URI,
   collection: 'sessions',
 });
+store.on('error', (err) => console.error('Session store error:', err));
 
 const csrfProtection = csrf();
 
@@ -88,6 +89,7 @@ app.use(compression());
 app.use(morgan('combined', { stream: accessLogStream }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(
   multer({ storage: fileStorage, fileFilter }).fields([
     { name: 'image', maxCount: 1 },
@@ -157,7 +159,9 @@ mongoose
     const server = sslKeyExists
       ? https.createServer({ key: privateKey, cert: certificate }, app)
       : app;
-    server.listen(process.env.PORT || 3000);
+    server.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+      console.log(`Server listening on port ${process.env.PORT || 3000}`);
+    });
    
   })
   .catch((err) => {

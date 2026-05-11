@@ -51,12 +51,17 @@
                             <div class="admin-order-item__status">
                                 <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
                                 <% if (nextStatuses.length > 0) { %>
-                                <select class="order-status-select" data-order-id="<%= order._id %>" data-csrf="<%= csrfToken %>">
-                                    <option value="">Move to…</option>
+                                <div class="order-status-actions">
                                     <% nextStatuses.forEach(s => { %>
-                                    <option value="<%= s %>"><%= STATUS_LABELS[s] %></option>
+                                    <button class="order-status-btn<%= s === 'canceled' ? ' order-status-btn--danger' : '' %>"
+                                            type="button"
+                                            data-order-id="<%= order._id %>"
+                                            data-csrf="<%= csrfToken %>"
+                                            data-status="<%= s %>">
+                                        <%= STATUS_LABELS[s] %>
+                                    </button>
                                     <% }) %>
-                                </select>
+                                </div>
                                 <% } %>
                             </div>
                         </article>
@@ -75,4 +80,5 @@
                 </div>
             <% } %>
         </main>
+        <script src="/js/admin.js"></script>
         <%- include('../includes/end.ejs') %>
