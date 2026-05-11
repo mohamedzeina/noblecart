@@ -19,8 +19,31 @@
                 </a>
             </div>
 
+            <%
+                const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home', accessories: 'Accessories' };
+                const categoryChips = [
+                    { value: '', label: 'All' },
+                    { value: 'electronics', label: 'Electronics' },
+                    { value: 'fashion', label: 'Fashion' },
+                    { value: 'home', label: 'Home' },
+                    { value: 'accessories', label: 'Accessories' },
+                ];
+            %>
+            <div class="admin-filters">
+                <div class="admin-filters__group">
+                    <span class="admin-filters__label">Category</span>
+                    <div class="admin-filters__chips">
+                        <% categoryChips.forEach(chip => { %>
+                        <a href="/admin/products?category=<%= chip.value %>"
+                           class="admin-filter-chip<%= activeCategory === chip.value ? ' admin-filter-chip--active' : '' %>">
+                            <%= chip.label %>
+                        </a>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
             <% if (prods.length > 0) { %>
-                <% const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home', accessories: 'Accessories' }; %>
                 <div class="admin-product-list">
                     <% for (let product of prods) { %>
                         <article class="admin-product-item">
@@ -56,7 +79,7 @@
                         </article>
                     <% } %>
                 </div>
-                <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, prevPage: prevPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPrevPage: hasPrevPage}) %>
+                <%- include('../includes/pagination.ejs', {currentPage, nextPage, prevPage, lastPage, hasNextPage, hasPrevPage, extraQuery}) %>
             <% } else { %>
                 <div class="empty-state">
                     <div class="empty-state__icon">
@@ -64,8 +87,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
                     </div>
-                    <h2 class="empty-state__title">No products yet</h2>
-                    <p class="empty-state__subtitle">Get started by adding your first product.</p>
+                    <h2 class="empty-state__title"><%= activeCategory ? 'No products in this category' : 'No products yet' %></h2>
+                    <p class="empty-state__subtitle"><%= activeCategory ? 'Try a different category or add a new product.' : 'Get started by adding your first product.' %></p>
                 </div>
             <% } %>
         </main>

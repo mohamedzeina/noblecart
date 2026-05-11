@@ -122,7 +122,8 @@
                         </article>
                     <% }) %>
                 </div>
-                <%- include('../includes/pagination.ejs', {currentPage, nextPage, prevPage, lastPage, hasNextPage, hasPrevPage}) %>
+                <% const ordersExtraQuery = (activeStatus ? `&status=${activeStatus}` : '') + (activeDate ? `&date=${activeDate}` : ''); %>
+                <%- include('../includes/pagination.ejs', {currentPage, nextPage, prevPage, lastPage, hasNextPage, hasPrevPage, extraQuery: ordersExtraQuery}) %>
             <% } else { %>
                 <div class="empty-state">
                     <div class="empty-state__icon">

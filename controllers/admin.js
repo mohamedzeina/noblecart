@@ -169,6 +169,13 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
+  const activeCategory = req.query.category || '';
+
+  const filter = { adminId: req.admin._id };
+  if (activeCategory) filter.category = activeCategory;
+
+  const extraQuery = activeCategory ? `&category=${activeCategory}` : '';
+
   pg.paginationHelper(
     req,
     res,
@@ -176,7 +183,8 @@ exports.getProducts = (req, res, next) => {
     'admin/products',
     'Admin Products',
     '/admin/products',
-    { adminId: req.admin._id }
+    filter,
+    { activeCategory, extraQuery }
   );
 };
 

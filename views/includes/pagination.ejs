@@ -1,13 +1,14 @@
+<% const _pq = typeof extraQuery !== 'undefined' ? extraQuery : ''; %>
 <section class="pagination">
   <% if (currentPage !== 1 && prevPage !== 1) { %>
-  <a href="?page=1">1</a>
+  <a href="?page=1<%= _pq %>">1</a>
   <% } %> <% if (hasPrevPage) { %>
-  <a href="?page=<%= prevPage %>"><%= prevPage %></a>
+  <a href="?page=<%= prevPage %><%= _pq %>"><%= prevPage %></a>
   <% } %>
-  <a href="?page=<%= currentPage %>" class="active"><%= currentPage %></a>
+  <a href="?page=<%= currentPage %><%= _pq %>" class="active"><%= currentPage %></a>
   <% if (hasNextPage) { %>
-  <a href="?page=<%= nextPage %>"><%= nextPage %></a>
+  <a href="?page=<%= nextPage %><%= _pq %>"><%= nextPage %></a>
   <% } %> <% if (lastPage !== currentPage && nextPage !== lastPage) { %>
-  <a href="?page=<%= lastPage %>"><%= lastPage %></a>
+  <a href="?page=<%= lastPage %><%= _pq %>"><%= lastPage %></a>
   <% } %>
 </section>
