@@ -41,7 +41,7 @@ router.get('/wishlist', isAuth, shopController.getWishlist);
 router.get('/orders/:orderId', isAuth, shopController.getInvoice);
 
 router.post('/products/:productId/review', isAuth, shopController.postReview);
-router.put('/products/:productId/review', isAuth, shopController.putReview);
-router.delete('/products/:productId/review', isAuth, shopController.deleteReview);
+router.post('/products/:productId/review/update', isAuth, shopController.putReview);
+router.post('/products/:productId/review/delete', isAuth, shopController.deleteReview);
 
 module.exports = router;

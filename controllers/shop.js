@@ -14,13 +14,25 @@ const pg = require('../util/paginationHelper');
 
 
 exports.getProduct = (req, res, next) => {
-  const prodId = req.params.productId; // Extracting dynamic parameter from path
-  Product.findById(prodId)
-    .then((product) => {
+  const prodId = req.params.productId;
+  Promise.all([
+    Product.findById(prodId),
+    Review.find({ productId: prodId }).sort({ createdAt: -1 }),
+  ])
+    .then(([product, reviews]) => {
+      const avgRating = reviews.length
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : null;
+      const userReview = req.user
+        ? reviews.find((r) => r.userId.toString() === req.user._id.toString())
+        : null;
       res.render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
-        product: product,
+        product,
+        reviews,
+        avgRating,
+        userReview,
       });
     })
     .catch((err) => {

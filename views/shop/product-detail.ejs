@@ -79,8 +79,114 @@
                     </div>
                 </div>
             </div>
+            <%
+                function stars(rating) {
+                    let s = '';
+                    for (let i = 1; i <= 5; i++) {
+                        s += `<svg class="star${i <= rating ? ' star--filled' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+                    }
+                    return s;
+                }
+            %>
+            <section class="reviews-section">
+                <div class="reviews-section__header">
+                    <h2 class="reviews-section__title">Reviews</h2>
+                    <% if (avgRating) { %>
+                    <div class="reviews-section__summary">
+                        <div class="stars-display"><%- stars(Math.round(avgRating)) %></div>
+                        <span class="reviews-section__avg"><%= avgRating.toFixed(1) %></span>
+                        <span class="reviews-section__count">(<%= reviews.length %> review<%= reviews.length !== 1 ? 's' : '' %>)</span>
+                    </div>
+                    <% } %>
+                </div>
+
+                <% if (isAuthenticated) { %>
+                <% if (!userReview) { %>
+                <form class="review-form" action="/products/<%= product._id %>/review" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <p class="review-form__label">Your Rating</p>
+                    <div class="star-picker" role="group" aria-label="Rating">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                        <input type="radio" name="rating" id="star<%= i %>" value="<%= i %>" class="star-picker__input" <%= i === 5 ? 'required' : '' %>>
+                        <label for="star<%= i %>" class="star-picker__label" aria-label="<%= i %> star<%= i !== 1 ? 's' : '' %>">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </label>
+                        <% } %>
+                    </div>
+                    <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" placeholder="Share your thoughts on this product…" required></textarea>
+                    <button class="btn btn--solid review-form__submit" type="submit">Submit Review</button>
+                </form>
+                <% } else { %>
+                <div class="review-form review-form--existing">
+                    <div class="review-form__your-label">Your Review</div>
+                    <div class="stars-display"><%- stars(userReview.rating) %></div>
+                    <p class="review-form__existing-comment"><%= userReview.comment %></p>
+                    <div class="review-form__actions">
+                        <button class="btn btn--solid review-form__edit-btn" type="button">Edit</button>
+                        <form action="/products/<%= product._id %>/review/delete" method="POST" style="display:inline">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button class="btn review-form__delete-btn" type="submit">Delete</button>
+                        </form>
+                    </div>
+                    <form class="review-form__edit-fields" action="/products/<%= product._id %>/review/update" method="POST" style="display:none">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="star-picker" role="group" aria-label="Rating">
+                            <% for (let i = 1; i <= 5; i++) { %>
+                            <input type="radio" name="rating" id="edit-star<%= i %>" value="<%= i %>" class="star-picker__input" <%= i === userReview.rating ? 'checked' : '' %>>
+                            <label for="edit-star<%= i %>" class="star-picker__label">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </label>
+                            <% } %>
+                        </div>
+                        <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" required><%= userReview.comment %></textarea>
+                        <div class="review-form__actions">
+                            <button class="btn btn--solid review-form__submit" type="submit">Save</button>
+                            <button class="btn review-form__cancel-btn" type="button">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <% } %>
+                <% } %>
+
+                <% if (reviews.length > 0) { %>
+                <ul class="review-list">
+                    <% reviews.forEach(review => { %>
+                    <% if (!userReview || review._id.toString() !== userReview._id.toString()) { %>
+                    <li class="review-item">
+                        <div class="review-item__header">
+                            <div class="stars-display"><%- stars(review.rating) %></div>
+                            <span class="review-item__author"><%= review.userName %></span>
+                            <span class="review-item__date"><%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                        </div>
+                        <p class="review-item__comment"><%= review.comment %></p>
+                    </li>
+                    <% } %>
+                    <% }) %>
+                </ul>
+                <% } else { %>
+                <p class="reviews-section__empty">No reviews yet. Be the first to share your thoughts.</p>
+                <% } %>
+            </section>
         </main>
         <% if (product.modelUrl) { %>
         <script type="module" src="/js/product-detail.js"></script>
         <% } %>
+        <script>
+          const editBtn = document.querySelector('.review-form__edit-btn');
+          const cancelBtn = document.querySelector('.review-form__cancel-btn');
+          const editFields = document.querySelector('.review-form__edit-fields');
+          const existingView = document.querySelector('.review-form__existing-comment');
+          if (editBtn) {
+            editBtn.addEventListener('click', () => {
+              editFields.style.display = 'block';
+              editBtn.style.display = 'none';
+              existingView && (existingView.style.display = 'none');
+            });
+            cancelBtn.addEventListener('click', () => {
+              editFields.style.display = 'none';
+              editBtn.style.display = '';
+              existingView && (existingView.style.display = '');
+            });
+          }
+        </script>
         <%- include('../includes/end.ejs') %>
