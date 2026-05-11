@@ -35,6 +35,57 @@
                                     Invoice
                                 </a>
                             </div>
+                            <%
+                                const STEPS = ['pending', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'];
+                                const STEP_LABELS = {
+                                    pending: 'Order Placed',
+                                    confirmed: 'Order Confirmed',
+                                    shipped: 'Shipped',
+                                    out_for_delivery: 'Out for Delivery',
+                                    delivered: 'Delivered',
+                                };
+                                const isCanceled = order.status === 'canceled';
+                                const cancelEntry = order.statusHistory.find(h => h.status === 'canceled');
+                                const displaySteps = isCanceled
+                                    ? [...STEPS.filter(s => order.statusHistory.some(h => h.status === s)), 'canceled']
+                                    : STEPS;
+                                const displayLabels = { ...STEP_LABELS, canceled: 'Canceled' };
+                            %>
+                            <div class="order-stepper">
+                                <% displaySteps.forEach((step, i) => {
+                                    const histEntry = order.statusHistory.find(h => h.status === step);
+                                    const isCompleted = histEntry !== undefined;
+                                    const isLast = i === displaySteps.length - 1;
+                                    const timestamp = histEntry
+                                        ? new Date(histEntry.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                        : null;
+                                %>
+                                <div class="order-stepper__step">
+                                    <div class="order-stepper__track">
+                                        <div class="order-stepper__circle <%= isCompleted ? (step === 'canceled' ? 'order-stepper__circle--canceled' : 'order-stepper__circle--done') : 'order-stepper__circle--upcoming' %>">
+                                            <% if (isCompleted && step !== 'canceled') { %>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 6 9 17l-5-5"/>
+                                            </svg>
+                                            <% } else if (isCompleted && step === 'canceled') { %>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M18 6 6 18M6 6l12 12"/>
+                                            </svg>
+                                            <% } %>
+                                        </div>
+                                        <% if (!isLast) { %>
+                                        <div class="order-stepper__line <%= isCompleted ? (step === 'canceled' ? 'order-stepper__line--canceled' : 'order-stepper__line--done') : '' %>"></div>
+                                        <% } %>
+                                    </div>
+                                    <div class="order-stepper__content">
+                                        <p class="order-stepper__label <%= isCompleted ? '' : 'order-stepper__label--upcoming' %>"><%= displayLabels[step] %></p>
+                                        <% if (timestamp) { %>
+                                        <p class="order-stepper__timestamp"><%= timestamp %></p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <% }) %>
+                            </div>
                             <ul class="order-card__products">
                                 <% order.products.forEach(p => { %>
                                     <li class="order-card__product">

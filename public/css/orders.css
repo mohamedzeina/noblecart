@@ -1,3 +1,84 @@
+.order-stepper {
+  padding: 1.25rem 1.25rem 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-stepper__step {
+  display: flex;
+  gap: 0.875rem;
+}
+
+.order-stepper__track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.order-stepper__circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.order-stepper__circle--done {
+  background: #1e293b;
+  color: #fff;
+}
+
+.order-stepper__circle--upcoming {
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+}
+
+.order-stepper__circle--canceled {
+  background: #ef4444;
+  color: #fff;
+}
+
+.order-stepper__line {
+  width: 1.5px;
+  flex: 1;
+  min-height: 20px;
+  background: #e2e8f0;
+  margin: 3px 0;
+}
+
+.order-stepper__line--done {
+  background: #1e293b;
+}
+
+.order-stepper__line--canceled {
+  background: #ef4444;
+}
+
+.order-stepper__content {
+  padding-bottom: 1.25rem;
+}
+
+.order-stepper__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.15rem;
+  line-height: 1.4;
+}
+
+.order-stepper__label--upcoming {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.order-stepper__timestamp {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
 .orders-header {
   max-width: 800px;
   margin: 0 auto;
