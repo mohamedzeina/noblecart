@@ -31,6 +31,9 @@ router.post(
 // /admin/products => GET
 router.get('/products', isAuth, adminController.getProducts);
 
+// /admin/orders => GET
+router.get('/orders', isAuth, adminController.getAdminOrders);
+
 router.get('/edit-product/:productId', isAuth, adminController.getEditProduct);
 
 router.post(

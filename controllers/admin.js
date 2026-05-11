@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const Product = require('../models/product');
+const Order = require('../models/order');
 const User = require('../models/user');
 const fileHelper = require('../util/file');
 const pg = require('../util/paginationHelper');
@@ -177,6 +178,40 @@ exports.getProducts = (req, res, next) => {
     '/admin/products',
     { userId: req.user._id }
   );
+};
+
+const ORDERS_PER_PAGE = 10;
+
+exports.getAdminOrders = (req, res, next) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  let totalOrders;
+
+  Order.countDocuments()
+    .then((count) => {
+      totalOrders = count;
+      return Order.find()
+        .sort({ _id: -1 })
+        .skip((page - 1) * ORDERS_PER_PAGE)
+        .limit(ORDERS_PER_PAGE);
+    })
+    .then((orders) => {
+      res.render('admin/orders', {
+        pageTitle: 'All Orders',
+        path: '/admin/orders',
+        orders,
+        currentPage: page,
+        hasNextPage: ORDERS_PER_PAGE * page < totalOrders,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        lastPage: Math.ceil(totalOrders / ORDERS_PER_PAGE),
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.deleteProduct = (req, res, next) => {

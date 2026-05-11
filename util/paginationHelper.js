@@ -11,7 +11,7 @@ const paginationHelper = (
   filter,
   extraData = {}
 ) => {
-  const page = +req.query.page || 1;
+  const page = parseInt(req.query.page, 10) || 1;
   let totalItems;
 
   Product.find(filter)
