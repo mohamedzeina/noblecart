@@ -22,6 +22,7 @@ const authRoutes = require('./routes/auth');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
+const Admin = require('./models/admin');
 
 
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -109,25 +110,22 @@ app.use(csrfProtection); // CSRF middleware
 app.use(flash());
 
 app.use((req, res, next) => {
-  if (!req.session.user) {
-    return next();
-  }
-  User.findById(req.session.user._id)
-    .then((user) => {
-      if (!user) {
-        return next();
-      }
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      next(new Error(err));
-    });
-}); // Storing dummy user from session in request to get full mongoose user object
+  const loadUser = req.session.userId
+    ? User.findById(req.session.userId).then((user) => { if (user) req.user = user; })
+    : Promise.resolve();
+
+  const loadAdmin = req.session.adminId
+    ? Admin.findById(req.session.adminId).then((admin) => { if (admin) req.admin = admin; })
+    : Promise.resolve();
+
+  Promise.all([loadUser, loadAdmin])
+    .then(() => next())
+    .catch((err) => next(new Error(err)));
+});
 
 app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.isAdmin = req.user ? req.user.role === 'admin' : false;
+  res.locals.isAuthenticated = req.user !== undefined;
+  res.locals.isAdmin = req.admin !== undefined;
   res.locals.csrfToken = req.csrfToken();
   res.locals.cartCount = req.user
     ? req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0)

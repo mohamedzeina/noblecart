@@ -64,15 +64,14 @@ exports.postLogin = (req, res, next) => {
         .compare(password, user.password)
         .then((doMatch) => {
           if (doMatch) {
-            req.session.user = user;
-            req.session.isLoggedIn = true;
+            req.session.userId = user._id;
             return req.session.save((err) => {
               if (err) {
                 console.log(err);
               } else {
                 console.log('Login Successful');
               }
-              res.redirect('/'); // Only redirect once session is saved to the db
+              res.redirect('/');
             });
           }
           return res.status(422).render('auth/login', {
