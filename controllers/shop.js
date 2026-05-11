@@ -94,27 +94,43 @@ exports.getSearch = (req, res, next) => {
   const query = (req.query.q || '').trim();
   if (!query) return res.redirect('/');
 
+  const buildRatingsMap = (ids) =>
+    Review.aggregate([
+      { $match: { productId: { $in: ids } } },
+      { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+    ]).then((agg) => {
+      const map = {};
+      agg.forEach((r) => { map[r._id.toString()] = { avg: r.avg, count: r.count }; });
+      return map;
+    });
+
   const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   Product.find({ $or: [{ title: regex }, { category: regex }, { description: regex }] })
     .then((products) => {
       if (products.length > 0) {
-        return res.render('shop/search', {
-          pageTitle: `"${query}"`,
-          path: '/search',
-          products,
-          query,
-          suggestions: [],
-        });
+        return buildRatingsMap(products.map((p) => p._id)).then((ratingsMap) =>
+          res.render('shop/search', {
+            pageTitle: `"${query}"`,
+            path: '/search',
+            products,
+            query,
+            suggestions: [],
+            ratingsMap,
+          })
+        );
       }
-      return Product.find({}).limit(4).then((suggestions) => {
-        res.render('shop/search', {
-          pageTitle: `"${query}"`,
-          path: '/search',
-          products: [],
-          query,
-          suggestions,
-        });
-      });
+      return Product.find({}).limit(4).then((suggestions) =>
+        buildRatingsMap(suggestions.map((p) => p._id)).then((ratingsMap) =>
+          res.render('shop/search', {
+            pageTitle: `"${query}"`,
+            path: '/search',
+            products: [],
+            query,
+            suggestions,
+            ratingsMap,
+          })
+        )
+      );
     })
     .catch((err) => {
       const error = new Error(err);
@@ -364,10 +380,19 @@ exports.getWishlist = (req, res, next) => {
       const products = user.wishlist
         .filter((i) => i.productId)
         .map((i) => i.productId);
-      res.render('shop/wishlist', {
-        path: '/wishlist',
-        pageTitle: 'Wishlist',
-        products,
+      const productIds = products.map((p) => p._id);
+      return Review.aggregate([
+        { $match: { productId: { $in: productIds } } },
+        { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+      ]).then((agg) => {
+        const ratingsMap = {};
+        agg.forEach((r) => { ratingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
+        res.render('shop/wishlist', {
+          path: '/wishlist',
+          pageTitle: 'Wishlist',
+          products,
+          ratingsMap,
+        });
       });
     })
     .catch((err) => {
