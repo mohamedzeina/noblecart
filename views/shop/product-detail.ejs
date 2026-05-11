@@ -126,6 +126,9 @@
                         <% } %>
                     </div>
                     <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" placeholder="Share your thoughts on this product…" required></textarea>
+                    <% if (reviewError) { %>
+                    <p class="review-form__error"><%= reviewError %></p>
+                    <% } %>
                     <button class="btn btn--solid review-form__submit" type="submit">Submit Review</button>
                 </form>
                 <% } else { %>

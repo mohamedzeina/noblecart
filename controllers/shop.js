@@ -30,6 +30,7 @@ exports.getProduct = (req, res, next) => {
         star,
         count: reviews.filter((r) => r.rating === star).length,
       }));
+      const reviewError = req.flash('reviewError');
       res.render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
@@ -38,6 +39,7 @@ exports.getProduct = (req, res, next) => {
         avgRating,
         userReview,
         ratingBreakdown,
+        reviewError: reviewError.length > 0 ? reviewError[0] : null,
       });
     })
     .catch((err) => {
@@ -451,13 +453,19 @@ exports.getInvoice = async (req, res, next) => {
 exports.postReview = (req, res, next) => {
   const { productId } = req.params;
   const { rating, comment } = req.body;
+  const ratingNum = parseInt(rating, 10);
+
+  if (!ratingNum || ratingNum < 1 || ratingNum > 5 || !comment || !comment.trim()) {
+    req.flash('reviewError', 'Please select a star rating and write a comment.');
+    return res.redirect('/products/' + productId);
+  }
 
   Order.findOne({ 'user.userId': req.user._id, 'products.productData._id': productId })
     .then((order) => new Review({
       productId,
       userId: req.user._id,
       userName: req.user.name || req.user.email.split('@')[0],
-      rating: parseInt(rating, 10),
+      rating: ratingNum,
       comment,
       verifiedPurchase: !!order,
     }).save())
@@ -471,10 +479,16 @@ exports.postReview = (req, res, next) => {
 exports.putReview = (req, res, next) => {
   const { productId } = req.params;
   const { rating, comment } = req.body;
+  const ratingNum = parseInt(rating, 10);
+
+  if (!ratingNum || ratingNum < 1 || ratingNum > 5 || !comment || !comment.trim()) {
+    req.flash('reviewError', 'Please select a star rating and write a comment.');
+    return res.redirect('/products/' + productId);
+  }
 
   Review.findOneAndUpdate(
     { productId, userId: req.user._id },
-    { rating: parseInt(rating, 10), comment },
+    { rating: ratingNum, comment },
     { new: true }
   )
     .then(() => res.redirect('/products/' + productId))

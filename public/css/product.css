@@ -302,7 +302,7 @@
 /* ── Reviews ─────────────────────────────────────── */
 
 .reviews-section {
-  max-width: 860px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
   border-top: 1px solid #e2e8f0;
@@ -393,11 +393,14 @@
 
 /* Review form */
 .review-form {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  display: block;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
   margin-bottom: 2rem;
+  max-width: 600px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 
 .review-form__label {
@@ -427,9 +430,16 @@
   border-color: #94a3b8;
 }
 
+.review-form__error {
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin: 0 0 0.75rem;
+}
+
 .review-form__submit {
   font-size: 0.875rem;
   padding: 0.5rem 1.25rem;
+  border-radius: 8px;
 }
 
 .review-form--existing .review-form__your-label {
@@ -462,6 +472,7 @@
   border-color: #fca5a5;
   font-size: 0.8rem;
   padding: 0.4rem 0.875rem;
+  border-radius: 8px;
 }
 
 .review-form__delete-btn:hover {
@@ -474,6 +485,7 @@
 .review-form__cancel-btn {
   font-size: 0.8rem;
   padding: 0.4rem 0.875rem;
+  border-radius: 8px;
 }
 
 /* Review list */
@@ -489,8 +501,9 @@
 .review-item {
   padding: 1rem 1.25rem;
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 
 .review-item__header {
