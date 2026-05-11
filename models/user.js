@@ -34,11 +34,6 @@ const userSchema = new Schema({
       },
     },
   ],
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
-  },
 });
 
 userSchema.methods.addToCart = function (product) {
