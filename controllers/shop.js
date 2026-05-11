@@ -42,18 +42,38 @@ exports.getProduct = (req, res, next) => {
         (r) => !userReview || r._id.toString() !== userReview._id.toString()
       );
       const reviewError = req.flash('reviewError');
-      res.render('shop/product-detail', {
-        pageTitle: product.title,
-        path: '/products',
-        product,
-        reviews,
-        displayedReviews: otherReviews.slice(0, REVIEWS_PER_PAGE),
-        reviewsListTotal: otherReviews.length,
-        avgRating,
-        userReview,
-        ratingBreakdown,
-        activeReviewSort,
-        reviewError: reviewError.length > 0 ? reviewError[0] : null,
+
+      return Product.aggregate([
+        { $match: { category: product.category, _id: { $ne: product._id } } },
+        { $lookup: { from: 'reviews', localField: '_id', foreignField: 'productId', as: '_r' } },
+        { $addFields: { _avg: { $ifNull: [{ $avg: '$_r.rating' }, 0] } } },
+        { $sort: { _avg: -1, _id: -1 } },
+        { $project: { _r: 0, _avg: 0 } },
+        { $limit: 4 },
+      ]).then((relatedProducts) => {
+        const relatedIds = relatedProducts.map((p) => p._id);
+        return Review.aggregate([
+          { $match: { productId: { $in: relatedIds } } },
+          { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+        ]).then((agg) => {
+          const relatedRatingsMap = {};
+          agg.forEach((r) => { relatedRatingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
+          res.render('shop/product-detail', {
+            pageTitle: product.title,
+            path: '/products',
+            product,
+            reviews,
+            displayedReviews: otherReviews.slice(0, REVIEWS_PER_PAGE),
+            reviewsListTotal: otherReviews.length,
+            avgRating,
+            userReview,
+            ratingBreakdown,
+            activeReviewSort,
+            reviewError: reviewError.length > 0 ? reviewError[0] : null,
+            relatedProducts,
+            relatedRatingsMap,
+          });
+        });
       });
     })
     .catch((err) => {

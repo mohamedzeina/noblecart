@@ -106,6 +106,48 @@
                     return s;
                 }
             %>
+            <% if (relatedProducts && relatedProducts.length > 0) { %>
+            <section class="related-products">
+                <h2 class="related-products__title">You might also like</h2>
+                <div class="related-products__grid">
+                    <% for (const rp of relatedProducts) { %>
+                    <article class="card product-item">
+                        <div class="card__image">
+                            <img src="<%= rp.imageUrl %>" alt="<%= rp.title %>" loading="lazy">
+                            <%- include('../includes/wishlist-btn.ejs', { product: rp }) %>
+                        </div>
+                        <div class="card__static">
+                            <% const rpr = relatedRatingsMap && relatedRatingsMap[rp._id.toString()]; %>
+                            <% if (rpr) { %>
+                            <% const rpFull = rpr.avg % 1 >= 0.75 ? Math.ceil(rpr.avg) : Math.floor(rpr.avg); %>
+                            <% const rpHalf = rpr.avg % 1 >= 0.25 && rpr.avg % 1 < 0.75; %>
+                            <div class="card__rating">
+                                <div class="card__rating-stars">
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <svg class="star<%= i <= rpFull ? ' star--filled' : (i === rpFull + 1 && rpHalf ? ' star--half' : '') %>" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    <% } %>
+                                </div>
+                                <span class="card__rating-count"><%= rpr.avg.toFixed(1) %> (<%= rpr.count %>)</span>
+                            </div>
+                            <% } %>
+                            <h3 class="product__title"><%= rp.title %></h3>
+                            <p class="product__price">$<%= rp.price %></p>
+                        </div>
+                        <div class="card__reveal">
+                            <p class="card__reveal-label">Product Details</p>
+                            <p class="card__reveal-desc"><%= rp.description %></p>
+                            <div class="card__actions">
+                                <% if (isAuthenticated) { %>
+                                    <%- include('../includes/add-to-cart.ejs', { product: rp }) %>
+                                <% } %>
+                                <a href="/products/<%= rp._id %>" class="btn card__details-btn">Details</a>
+                            </div>
+                        </div>
+                    </article>
+                    <% } %>
+                </div>
+            </section>
+            <% } %>
             <section class="reviews-section" id="reviews">
                 <!-- Left: summary + breakdown -->
                 <div class="reviews-section__left">

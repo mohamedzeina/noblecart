@@ -324,6 +324,39 @@
 
 /* ── Reviews ─────────────────────────────────────── */
 
+.related-products {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.related-products__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.related-products__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .related-products__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .related-products__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
 .reviews-section {
   max-width: 1200px;
   margin: 0 auto;
