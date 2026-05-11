@@ -8,6 +8,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const Product = require('../models/product');
 const Order = require('../models/order');
+const Review = require('../models/review');
 const { sendOrderConfirmation } = require('../util/email');
 const pg = require('../util/paginationHelper');
 
@@ -428,4 +429,44 @@ exports.getInvoice = async (req, res, next) => {
     error.httpStatusCode = 500;
     return next(error);
   }
+};
+
+exports.postReview = (req, res, next) => {
+  const { productId } = req.params;
+  const { rating, comment } = req.body;
+
+  new Review({
+    productId,
+    userId: req.user._id,
+    userName: req.user.name || req.user.email.split('@')[0],
+    rating: parseInt(rating, 10),
+    comment,
+  })
+    .save()
+    .then(() => res.redirect('/products/' + productId))
+    .catch((err) => {
+      if (err.code === 11000) return res.redirect('/products/' + productId);
+      next(new Error(err));
+    });
+};
+
+exports.putReview = (req, res, next) => {
+  const { productId } = req.params;
+  const { rating, comment } = req.body;
+
+  Review.findOneAndUpdate(
+    { productId, userId: req.user._id },
+    { rating: parseInt(rating, 10), comment },
+    { new: true }
+  )
+    .then(() => res.redirect('/products/' + productId))
+    .catch((err) => next(new Error(err)));
+};
+
+exports.deleteReview = (req, res, next) => {
+  const { productId } = req.params;
+
+  Review.findOneAndDelete({ productId, userId: req.user._id })
+    .then(() => res.redirect('/products/' + productId))
+    .catch((err) => next(new Error(err)));
 };
