@@ -95,3 +95,17 @@ if (deleteReviewBtn) {
     deleteReviewBtn.innerHTML = SPINNER;
   });
 }
+
+// Edit review toggle
+const reviewCard = document.querySelector('.review-form--existing');
+if (reviewCard) {
+  reviewCard.querySelector('.review-form__edit-btn')?.addEventListener('click', () => {
+    reviewCard.classList.add('review-form--editing');
+  });
+  reviewCard.querySelector('.review-form__cancel-btn')?.addEventListener('click', () => {
+    reviewCard.classList.remove('review-form--editing');
+  });
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) reviewCard.classList.remove('review-form--editing');
+  });
+}

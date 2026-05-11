@@ -136,9 +136,19 @@
                     <% } else { %>
                     <div class="review-form review-form--existing">
                         <div class="review-form__view">
-                            <div class="review-form__your-label">Your Review</div>
-                            <div class="stars-display"><%- stars(userReview.rating) %></div>
-                            <p class="review-form__existing-comment"><%= userReview.comment %></p>
+                            <div class="review-item__header">
+                                <div class="review-item__avatar"><%= userReview.userName.charAt(0).toUpperCase() %></div>
+                                <div class="review-item__meta">
+                                    <div class="stars-display"><%- stars(userReview.rating) %></div>
+                                    <div class="review-item__author-row">
+                                        <span class="review-item__author"><%= userReview.userName %></span>
+                                        <span class="review-form__your-badge">Your review</span>
+                                        <% if (userReview.verifiedPurchase) { %><span class="review-item__verified">Verified Purchase</span><% } %>
+                                    </div>
+                                </div>
+                                <span class="review-item__date"><%= new Date(userReview.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                            </div>
+                            <p class="review-item__comment">"<%= userReview.comment %>"</p>
                             <div class="review-form__actions">
                                 <button class="btn btn--solid review-form__edit-btn" type="button">Edit</button>
                                 <form action="/products/<%= product._id %>/review/delete" method="POST" style="display:inline">
@@ -149,6 +159,7 @@
                         </div>
                         <form class="review-form__edit-fields" action="/products/<%= product._id %>/review/update" method="POST">
                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <p class="review-form__label">Your Rating</p>
                             <div class="star-picker" role="group" aria-label="Rating">
                                 <% for (let i = 5; i >= 1; i--) { %>
                                 <input type="radio" name="rating" id="edit-star<%= i %>" value="<%= i %>" class="star-picker__input" <%= i === userReview.rating ? 'checked' : '' %>>
@@ -199,19 +210,4 @@
         <% if (product.modelUrl) { %>
         <script type="module" src="/js/product-detail.js"></script>
         <% } %>
-        <script>
-          const reviewCard = document.querySelector('.review-form--existing');
-          if (reviewCard) {
-            document.querySelector('.review-form__edit-btn').addEventListener('click', () => {
-              reviewCard.setAttribute('data-editing', '');
-            });
-            document.querySelector('.review-form__cancel-btn').addEventListener('click', () => {
-              reviewCard.removeAttribute('data-editing');
-            });
-            // Reset on bfcache restore
-            window.addEventListener('pageshow', (e) => {
-              if (e.persisted) reviewCard.removeAttribute('data-editing');
-            });
-          }
-        </script>
-        <%- include('../includes/end.ejs') %>
+<%- include('../includes/end.ejs') %>
