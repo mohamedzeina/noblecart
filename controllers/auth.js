@@ -13,7 +13,7 @@ exports.getLogin = (req, res, next) => {
     return res.redirect('/');
   }
   if (req.admin !== undefined) {
-    return res.redirect('/admin/orders');
+    return res.redirect('/admin/products');
   }
   const message = req.flash('loginError');
   res.render('auth/login', {
@@ -104,7 +104,7 @@ exports.getSignup = (req, res, next) => {
     return res.redirect('/');
   }
   if (req.admin !== undefined) {
-    return res.redirect('/admin/orders');
+    return res.redirect('/admin/products');
   }
   const message = req.flash('signUpError');
   res.render('auth/signup', {
