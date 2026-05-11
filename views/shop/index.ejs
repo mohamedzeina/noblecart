@@ -97,6 +97,22 @@
         </defs>
     </svg>
     <main id="products">
+        <div class="sort-bar">
+            <span class="sort-bar__label">Sort by</span>
+            <div class="sort-bar__chips">
+                <% [
+                    { value: 'newest',     label: 'Newest' },
+                    { value: 'price-asc',  label: 'Price: Low to High' },
+                    { value: 'price-desc', label: 'Price: High to Low' },
+                    { value: 'top-rated',  label: 'Top Rated' },
+                ].forEach(chip => { %>
+                <a href="?sort=<%= chip.value %>"
+                   class="sort-chip<%= activeSort === chip.value ? ' sort-chip--active' : '' %>">
+                    <%= chip.label %>
+                </a>
+                <% }) %>
+            </div>
+        </div>
         <% if (prods.length > 0) { %>
             <div class="grid">
                 <% for (let product of prods) { %>
@@ -135,7 +151,7 @@
                     </article>
                 <% } %>
             </div>
-            <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, prevPage: prevPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPrevPage: hasPrevPage}) %>
+            <%- include('../includes/pagination.ejs', {currentPage, nextPage, prevPage, lastPage, hasNextPage, hasPrevPage, extraQuery}) %>
         <% } else { %>
             <div class="empty-state">
                 <div class="empty-state__icon">

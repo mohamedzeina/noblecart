@@ -2,6 +2,13 @@ const Product = require('../models/product');
 const Review = require('../models/review');
 
 const ITEMS_PER_PAGE = 6;
+const VALID_SORTS = ['newest', 'price-asc', 'price-desc', 'top-rated'];
+const SORT_OPTS = {
+  'newest':     { _id: -1 },
+  'price-asc':  { price: 1 },
+  'price-desc': { price: -1 },
+};
+
 const paginationHelper = (
   req,
   res,
@@ -13,15 +20,34 @@ const paginationHelper = (
   extraData = {}
 ) => {
   const page = parseInt(req.query.page, 10) || 1;
-  let totalItems;
+  const activeSort = VALID_SORTS.includes(req.query.sort) ? req.query.sort : 'newest';
+  const extraQuery = (extraData.extraQuery || '') + (activeSort !== 'newest' ? `&sort=${activeSort}` : '');
 
-  Product.find(filter)
-    .countDocuments()
+  let totalItems;
+  let productsPromise;
+
+  Product.countDocuments(filter)
     .then((numProds) => {
       totalItems = numProds;
-      return Product.find(filter)
-        .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE);
+
+      if (activeSort === 'top-rated') {
+        productsPromise = Product.aggregate([
+          { $match: filter },
+          { $lookup: { from: 'reviews', localField: '_id', foreignField: 'productId', as: '_r' } },
+          { $addFields: { _avg: { $ifNull: [{ $avg: '$_r.rating' }, 0] } } },
+          { $sort: { _avg: -1, _id: -1 } },
+          { $project: { _r: 0, _avg: 0 } },
+          { $skip: (page - 1) * ITEMS_PER_PAGE },
+          { $limit: ITEMS_PER_PAGE },
+        ]);
+      } else {
+        productsPromise = Product.find(filter)
+          .sort(SORT_OPTS[activeSort])
+          .skip((page - 1) * ITEMS_PER_PAGE)
+          .limit(ITEMS_PER_PAGE);
+      }
+
+      return productsPromise;
     })
     .then((products) => {
       const productIds = products.map((p) => p._id);
@@ -42,7 +68,9 @@ const paginationHelper = (
           nextPage: page + 1,
           prevPage: page - 1,
           lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+          activeSort,
           ...extraData,
+          extraQuery,
         });
       });
     })
