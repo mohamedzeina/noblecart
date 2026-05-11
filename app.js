@@ -63,7 +63,7 @@ const certificate = sslKeyExists ? fs.readFileSync('server.cert') : null;
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-const acessLogStream = fs.createWriteStream(
+const accessLogStream = fs.createWriteStream(
   path.join(__dirname, 'access.log'),
   { flags: 'a' }
 ); // Creating a write stream to log requests
@@ -85,7 +85,7 @@ app.use(
   })
 );
 app.use(compression()); // Compression middleware for performance
-app.use(morgan('combined', {stream: acessLogStream})); // Morgan middleware for logging
+app.use(morgan('combined', {stream: accessLogStream})); // Morgan middleware for logging
 
 app.use(bodyParser.urlencoded({ extended: false })); // Parses body like we used to do manually in previous http version of this project
 app.use(

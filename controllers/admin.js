@@ -67,7 +67,6 @@ exports.postAddProduct = (req, res, next) => {
   product
     .save()
     .then(() => {
-      console.log('Created Product Successfully');
       res.redirect('/admin/products');
     })
     .catch((err) => {
@@ -157,7 +156,6 @@ exports.postEditProduct = (req, res, next) => {
       product.category = updatedCategory;
 
       return product.save().then(() => {
-        console.log('Updated Product Successfully');
         res.redirect('/admin/products');
       });
     })
@@ -240,7 +238,6 @@ exports.deleteProduct = (req, res, next) => {
       return Product.countDocuments({ adminId: req.admin._id });
     })
     .then((totalItems) => {
-      console.log('Deleted Product Successfully');
       res.status(200).json({ message: 'Deleting product succeeded.', totalItems });
     })
     .catch((err) => {
