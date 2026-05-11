@@ -272,6 +272,8 @@ exports.getCheckoutSuccess = (req, res, next) => {
           userId: req.user._id,
         },
         products: products,
+        status: 'pending',
+        statusHistory: [{ status: 'pending', timestamp: new Date() }],
       });
       return order.save();
     })
