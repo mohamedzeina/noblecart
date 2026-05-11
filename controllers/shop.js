@@ -108,24 +108,6 @@ exports.getCartData = (req, res, next) => {
     });
 };
 
-exports.getCart = (req, res, next) => {
-  req.user
-    .populate('cart.items.productId')
-    .then((user) => {
-      const cartProducts = user.cart.items;
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: cartProducts,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    });
-};
-
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
@@ -290,38 +272,6 @@ exports.getCheckoutSuccess = (req, res, next) => {
       return next(error);
     });
 };
-
-exports.postOrder = (req, res, next) => {
-  req.user
-    .populate('cart.items.productId')
-    .then((user) => {
-      const products = user.cart.items.map((i) => {
-        return { quantity: i.quantity, productData: { ...i.productId._doc } }; // _doc to pull out all the data inside the object
-      });
-
-      const order = new Order({
-        user: {
-          email: req.user.email,
-          userId: req.user._id,
-        },
-        products: products,
-      });
-      return order.save();
-    })
-    .then(() => {
-      return req.user.clearCart();
-    })
-    .then(() => {
-      console.log('Order Placed Successfully');
-      res.redirect('/orders');
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    });
-};
-
 
 exports.postWishlistToggle = (req, res, next) => {
   const prodId = req.body.productId;

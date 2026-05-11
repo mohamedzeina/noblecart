@@ -219,7 +219,7 @@ exports.deleteProduct = (req, res, next) => {
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
-        return new Error('Product not found.');
+        return res.status(404).json({ message: 'Product not found.' });
       }
 
       fileHelper.deleteFile(product.imagePublicId);
