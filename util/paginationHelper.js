@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Review = require('../models/review');
 
 const ITEMS_PER_PAGE = 6;
 const paginationHelper = (
@@ -23,18 +24,27 @@ const paginationHelper = (
         .limit(ITEMS_PER_PAGE);
     })
     .then((products) => {
-      res.render(pageToRender, {
-        prods: products,
-        pageTitle: pageTitle,
-        path: path,
-        currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-        hasPrevPage: page > 1,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-        ...extraData,
-      }); // Passing options to the template
+      const productIds = products.map((p) => p._id);
+      return Review.aggregate([
+        { $match: { productId: { $in: productIds } } },
+        { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+      ]).then((agg) => {
+        const ratingsMap = {};
+        agg.forEach((r) => { ratingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
+        res.render(pageToRender, {
+          prods: products,
+          ratingsMap,
+          pageTitle: pageTitle,
+          path: path,
+          currentPage: page,
+          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+          hasPrevPage: page > 1,
+          nextPage: page + 1,
+          prevPage: page - 1,
+          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+          ...extraData,
+        });
+      });
     })
     .catch((err) => {
       const error = new Error(err);

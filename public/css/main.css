@@ -517,6 +517,23 @@ form {
   gap: 0.2rem;
 }
 
+.card__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card__rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.card__rating-count {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
 .card__reveal {
   position: absolute;
   inset: 0;
