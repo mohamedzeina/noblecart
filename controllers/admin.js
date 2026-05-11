@@ -62,7 +62,7 @@ exports.postAddProduct = (req, res, next) => {
     modelPublicId: model ? model.filename : undefined,
     description,
     category,
-    userId: req.user,
+    adminId: req.admin._id,
   });
   product
     .save()
@@ -138,7 +138,7 @@ exports.postEditProduct = (req, res, next) => {
 
   Product.findById(prodId)
     .then((product) => {
-      if (product.userId.toString() !== req.user._id.toString()) {
+      if (product.adminId.toString() !== req.admin._id.toString()) {
         return res.redirect('/');
       }
       product.title = updatedTitle;
@@ -176,7 +176,7 @@ exports.getProducts = (req, res, next) => {
     'admin/products',
     'Admin Products',
     '/admin/products',
-    { userId: req.user._id }
+    { adminId: req.admin._id }
   );
 };
 
@@ -225,7 +225,7 @@ exports.deleteProduct = (req, res, next) => {
       fileHelper.deleteFile(product.imagePublicId);
       fileHelper.deleteModel(product.modelPublicId);
       return Promise.all([
-        Product.deleteOne({ _id: prodId, userId: req.user._id }),
+        Product.deleteOne({ _id: prodId, adminId: req.admin._id }),
         User.updateMany(
           { 'cart.items.productId': prodId },
           { $pull: { 'cart.items': { productId: prodId } } }
@@ -237,7 +237,7 @@ exports.deleteProduct = (req, res, next) => {
       ]);
     })
     .then(() => {
-      return Product.countDocuments({ userId: req.user._id });
+      return Product.countDocuments({ adminId: req.admin._id });
     })
     .then((totalItems) => {
       console.log('Deleted Product Successfully');
