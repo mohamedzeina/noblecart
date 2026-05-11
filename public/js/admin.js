@@ -13,6 +13,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2500);
   }
 
+  main.addEventListener('change', (e) => {
+    const select = e.target.closest('.order-status-select');
+    if (!select || !select.value) return;
+
+    const orderId = select.dataset.orderId;
+    const csrf = select.dataset.csrf;
+    const newStatus = select.value;
+    select.disabled = true;
+
+    fetch(`/admin/order/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'csrf-token': csrf },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((res) => res.json())
+      .then(({ status }) => {
+        const badge = select.closest('.admin-order-item__status').querySelector('.order-status-badge');
+        badge.className = `order-status-badge order-status-badge--${status}`;
+        badge.textContent = status.replace(/_/g, ' ');
+        select.remove();
+        showToast('Order status updated');
+      })
+      .catch(() => {
+        select.disabled = false;
+        select.value = '';
+        showToast('Failed to update status');
+      });
+  });
+
   main.addEventListener('click', (e) => {
     // Delete button clicked — show inline confirmation
     if (e.target.closest('.delete-btn')) {

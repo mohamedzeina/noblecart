@@ -61,4 +61,6 @@ router.post(
 
 router.delete('/product/:prodId', isAdmin, adminController.deleteProduct);
 
+router.patch('/order/:orderId/status', isAdmin, adminController.patchOrderStatus);
+
 module.exports = router;

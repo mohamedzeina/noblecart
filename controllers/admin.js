@@ -212,6 +212,27 @@ exports.getAdminOrders = (req, res, next) => {
     });
 };
 
+exports.patchOrderStatus = (req, res, next) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found.' });
+      }
+      if (!order.canTransitionTo(status)) {
+        return res.status(422).json({ message: `Cannot transition from ${order.status} to ${status}.` });
+      }
+      return order.transitionTo(status).then(() => {
+        res.json({ status: order.status });
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: 'Failed to update order status.' });
+    });
+};
+
 exports.deleteProduct = (req, res, next) => {
   const prodId = req.params.prodId;
   Product.findById(prodId)

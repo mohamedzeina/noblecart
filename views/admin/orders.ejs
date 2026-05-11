@@ -13,6 +13,23 @@
                 </div>
             </div>
 
+            <%
+                const VALID_TRANSITIONS = {
+                    pending:          ['confirmed', 'canceled'],
+                    confirmed:        ['shipped', 'canceled'],
+                    shipped:          ['out_for_delivery'],
+                    out_for_delivery: ['delivered'],
+                    delivered:        [],
+                    canceled:         [],
+                };
+                const STATUS_LABELS = {
+                    confirmed:        'Confirmed',
+                    shipped:          'Shipped',
+                    out_for_delivery: 'Out for delivery',
+                    delivered:        'Delivered',
+                    canceled:         'Canceled',
+                };
+            %>
             <% if (orders.length > 0) { %>
                 <div class="admin-order-list">
                     <% orders.forEach(order => { %>
@@ -20,6 +37,7 @@
                             const total = order.products.reduce((sum, p) => sum + p.quantity * p.productData.price, 0);
                             const shortId = '#' + order._id.toString().slice(-8).toUpperCase();
                             const itemCount = order.products.reduce((sum, p) => sum + p.quantity, 0);
+                            const nextStatuses = VALID_TRANSITIONS[order.status] || [];
                         %>
                         <article class="admin-order-item">
                             <div class="admin-order-item__info">
@@ -30,7 +48,17 @@
                                 <span class="admin-order-item__items"><%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %></span>
                                 <span class="admin-order-item__total">$<%= total.toFixed(2) %></span>
                             </div>
-                            <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
+                            <div class="admin-order-item__status">
+                                <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
+                                <% if (nextStatuses.length > 0) { %>
+                                <select class="order-status-select" data-order-id="<%= order._id %>" data-csrf="<%= csrfToken %>">
+                                    <option value="">Move to…</option>
+                                    <% nextStatuses.forEach(s => { %>
+                                    <option value="<%= s %>"><%= STATUS_LABELS[s] %></option>
+                                    <% }) %>
+                                </select>
+                                <% } %>
+                            </div>
                         </article>
                     <% }) %>
                 </div>
