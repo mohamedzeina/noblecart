@@ -9,7 +9,7 @@ const EMAIL = process.env.ADMIN_EMAIL;
 const PASSWORD = process.env.ADMIN_PASSWORD;
 
 if (!EMAIL || !PASSWORD) {
-  console.error('Missing ADMIN_EMAIL or ADMIN_PASSWORD in .env');
+  console.error('Missing ADMIN_EMAIL or ADMIN_PASSWORD in nodemon.json');
   process.exit(1);
 }
 

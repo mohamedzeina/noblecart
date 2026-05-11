@@ -18,17 +18,9 @@ const paginationHelper = (
     .countDocuments()
     .then((numProds) => {
       totalItems = numProds;
-      return Product.find()
-        .skip((page - 1) * ITEMS_PER_PAGE) // Skips amount of products
-        .limit(ITEMS_PER_PAGE); // Limits the amount of data you get
-    });
-  Product.find(filter)
-    .countDocuments()
-    .then((numProds) => {
-      totalItems = numProds;
       return Product.find(filter)
-        .skip((page - 1) * ITEMS_PER_PAGE) // Skips amount of products
-        .limit(ITEMS_PER_PAGE); // Limits the amount of data you get
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
     })
     .then((products) => {
       res.render(pageToRender, {

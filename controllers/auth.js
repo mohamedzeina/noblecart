@@ -15,16 +15,11 @@ exports.getLogin = (req, res, next) => {
   if (req.admin !== undefined) {
     return res.redirect('/admin/orders');
   }
-  let message = req.flash('loginError');
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
+  const message = req.flash('loginError');
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
-    errorMessage: message,
+    errorMessage: message.length > 0 ? message[0] : null,
     oldInput: {
       email: '',
       password: '',
@@ -38,7 +33,6 @@ exports.postLogin = (req, res, next) => {
   const password = req.body.password;
 
   const errors = validationResult(req);
-  console.log(errors);
   if (!errors.isEmpty()) {
     return res.status(422).render('auth/login', {
       path: '/login',
@@ -112,16 +106,11 @@ exports.getSignup = (req, res, next) => {
   if (req.admin !== undefined) {
     return res.redirect('/admin/orders');
   }
-  let message = req.flash('signUpError');
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
+  const message = req.flash('signUpError');
   res.render('auth/signup', {
     path: '/signup',
     pageTitle: 'Signup',
-    errorMessage: message,
+    errorMessage: message.length > 0 ? message[0] : null,
     oldInput: { email: '', password: '', confirmPassword: '' },
     validationErrors: [],
   });
@@ -171,9 +160,9 @@ exports.postSignup = (req, res, next) => {
 
 exports.postLogout = (req, res, next) => {
   req.session.destroy((err) => {
-    console.log(err);
+    if (err) console.log(err);
     res.redirect('/');
-  }); // Deleting the session from the db
+  });
 };
 
 exports.getReset = (req, res, next) => {
