@@ -66,6 +66,7 @@
                                 <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
                                 <% if (nextStatuses.length > 0) { %>
                                 <div class="order-status-actions">
+                                    <span class="order-status-actions__label">Move to:</span>
                                     <% nextStatuses.forEach(s => { %>
                                     <button class="order-status-btn<%= s === 'canceled' ? ' order-status-btn--danger' : '' %>"
                                             type="button"
