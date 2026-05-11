@@ -207,10 +207,9 @@
                     <% } %>
                     <% } %>
 
-                    <% if (reviews.length > 0) { %>
-                    <ul class="review-list">
-                        <% reviews.forEach(review => { %>
-                        <% if (!userReview || review._id.toString() !== userReview._id.toString()) { %>
+                    <% if (reviewsListTotal > 0) { %>
+                    <ul class="review-list" id="review-list">
+                        <% displayedReviews.forEach(review => { %>
                         <li class="review-item">
                             <div class="review-item__header">
                                 <div class="review-item__avatar"><%= review.userName.charAt(0).toUpperCase() %></div>
@@ -227,9 +226,18 @@
                             </div>
                             <p class="review-item__comment">"<%= review.comment %>"</p>
                         </li>
-                        <% } %>
                         <% }) %>
                     </ul>
+                    <% if (reviewsListTotal > 5) { %>
+                    <div class="reviews-load-more">
+                        <button class="btn reviews-load-more__btn"
+                                data-product-id="<%= product._id %>"
+                                data-skip="<%= displayedReviews.length %>">
+                            Load more reviews
+                        </button>
+                        <span class="reviews-load-more__count"><%= displayedReviews.length %> of <%= reviewsListTotal %></span>
+                    </div>
+                    <% } %>
                     <% } else if (!isAuthenticated) { %>
                     <div class="reviews-section__signin-cta">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="28" height="28" aria-hidden="true">

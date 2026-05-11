@@ -12,6 +12,7 @@ const Review = require('../models/review');
 const { sendOrderConfirmation } = require('../util/email');
 const pg = require('../util/paginationHelper');
 
+const REVIEWS_PER_PAGE = 5;
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
@@ -30,12 +31,17 @@ exports.getProduct = (req, res, next) => {
         star,
         count: reviews.filter((r) => r.rating === star).length,
       }));
+      const otherReviews = reviews.filter(
+        (r) => !userReview || r._id.toString() !== userReview._id.toString()
+      );
       const reviewError = req.flash('reviewError');
       res.render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
         product,
         reviews,
+        displayedReviews: otherReviews.slice(0, REVIEWS_PER_PAGE),
+        reviewsListTotal: otherReviews.length,
         avgRating,
         userReview,
         ratingBreakdown,
@@ -47,6 +53,32 @@ exports.getProduct = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
+};
+
+exports.getProductReviews = (req, res, next) => {
+  const { productId } = req.params;
+  const skip = parseInt(req.query.skip, 10) || 0;
+  const filter = { productId };
+  if (req.user) filter.userId = { $ne: req.user._id };
+
+  Review.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(REVIEWS_PER_PAGE)
+    .then((reviews) => {
+      res.json({
+        reviews: reviews.map((r) => ({
+          _id: r._id,
+          userName: r.userName,
+          rating: r.rating,
+          comment: r.comment,
+          verifiedPurchase: r.verifiedPurchase,
+          createdAt: r.createdAt,
+        })),
+        hasMore: reviews.length === REVIEWS_PER_PAGE,
+      });
+    })
+    .catch(() => res.status(500).json({ error: 'Failed to load reviews' }));
 };
 
 exports.getIndex = (req, res, next) => {

@@ -400,6 +400,22 @@
   margin: 0;
 }
 
+.reviews-load-more {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.reviews-load-more__btn {
+  flex-shrink: 0;
+}
+
+.reviews-load-more__count {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
 .reviews-section__no-reviews {
   display: flex;
   flex-direction: column;

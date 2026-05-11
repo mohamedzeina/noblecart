@@ -40,6 +40,7 @@ router.get('/wishlist', isAuth, shopController.getWishlist);
 
 router.get('/orders/:orderId', isAuth, shopController.getInvoice);
 
+router.get('/products/:productId/reviews', shopController.getProductReviews);
 router.post('/products/:productId/review', isAuth, shopController.postReview);
 router.post('/products/:productId/review/update', isAuth, shopController.putReview);
 router.post('/products/:productId/review/delete', isAuth, shopController.deleteReview);

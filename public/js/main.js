@@ -96,6 +96,74 @@ if (deleteReviewBtn) {
   });
 }
 
+// Load more reviews
+const loadMoreBtn = document.querySelector('.reviews-load-more__btn');
+if (loadMoreBtn) {
+  const loadMoreWrap = loadMoreBtn.closest('.reviews-load-more');
+  const countEl = loadMoreWrap.querySelector('.reviews-load-more__count');
+  const list = document.getElementById('review-list');
+
+  function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function buildStars(rating) {
+    let s = '';
+    for (let i = 1; i <= 5; i++) {
+      s += `<svg class="star${i <= rating ? ' star--filled' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+    }
+    return s;
+  }
+
+  loadMoreBtn.addEventListener('click', () => {
+    const productId = loadMoreBtn.dataset.productId;
+    let skip = parseInt(loadMoreBtn.dataset.skip, 10);
+
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.innerHTML = SPINNER + ' Loading…';
+
+    fetch(`/products/${productId}/reviews?skip=${skip}`)
+      .then((r) => r.json())
+      .then(({ reviews, hasMore }) => {
+        reviews.forEach((review) => {
+          const date = new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const verified = review.verifiedPurchase ? '<span class="review-item__verified">Verified Purchase</span>' : '';
+          const li = document.createElement('li');
+          li.className = 'review-item';
+          li.innerHTML = `
+            <div class="review-item__header">
+              <div class="review-item__avatar">${escHtml(review.userName.charAt(0).toUpperCase())}</div>
+              <div class="review-item__meta">
+                <div class="stars-display">${buildStars(review.rating)}</div>
+                <div class="review-item__author-row">
+                  <span class="review-item__author">${escHtml(review.userName)}</span>
+                  ${verified}
+                </div>
+              </div>
+              <span class="review-item__date">${date}</span>
+            </div>
+            <p class="review-item__comment">"${escHtml(review.comment)}"</p>`;
+          list.appendChild(li);
+        });
+
+        skip += reviews.length;
+        loadMoreBtn.dataset.skip = skip;
+        if (countEl) countEl.textContent = `${skip} of ${parseInt(countEl.textContent.split('of')[1], 10)}`;
+
+        if (!hasMore) {
+          loadMoreWrap.remove();
+        } else {
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = 'Load more reviews';
+        }
+      })
+      .catch(() => {
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = 'Load more reviews';
+      });
+  });
+}
+
 // Edit review toggle
 const reviewCard = document.querySelector('.review-form--existing');
 if (reviewCard) {
