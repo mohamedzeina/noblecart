@@ -33,9 +33,9 @@ const productSchema = new Schema({
     required: true,
     enum: ['electronics', 'fashion', 'home', 'accessories'],
   },
-  userId: {
+  adminId: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // References User model to add a relation
+    ref: 'Admin',
     required: true,
   },
 });
