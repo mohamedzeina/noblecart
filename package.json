@@ -8,7 +8,8 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "build:viewer": "esbuild public/js/product-detail-src.js --bundle --format=esm --outfile=public/js/product-detail.js",
-    "seed": "node scripts/seed-glb-products.js"
+    "seed": "node scripts/seed-glb-products.js",
+    "seed:admin": "node scripts/seed-admin.js"
   },
   "author": "Mohamed Zeina",
   "license": "ISC",
