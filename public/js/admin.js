@@ -59,6 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
           prodElement.remove();
           showToast('Product deleted');
 
+          const subtitle = document.querySelector('.admin-page-header__subtitle');
+          if (subtitle) {
+            const remaining = document.querySelectorAll('.admin-product-item').length;
+            subtitle.textContent = `${remaining} product${remaining !== 1 ? 's' : ''} listed`;
+          }
+
           const ITEMS_PER_PAGE = 6;
           const params = new URLSearchParams(window.location.search);
           const currentPage = parseInt(params.get('page')) || 1;

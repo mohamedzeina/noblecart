@@ -8,14 +8,14 @@
 ---
 
 ## 2. Admin login
-- [ ] Visit `/admin/login` — see the Admin Portal page with no nav bar
-- [ ] Submit wrong credentials — see error message, stay on page
-- [ ] Submit correct credentials (`test@admin.com` / `admin123`) — redirect to `/admin/orders`
+- [x] Visit `/admin/login` — see the Admin Portal page with no nav bar
+- [x] Submit wrong credentials — see error message, stay on page
+- [x] Submit correct credentials (`test@admin.com` / `admin123`) — redirect to `/admin/orders`
 
 ## 3. Admin navigation
-- [ ] After login: nav shows account icon with dropdown only (no cart, no wishlist, no category links)
-- [ ] Dropdown shows Manage Products, Manage Orders, Logout
-- [ ] Category links (Electronics, Fashion...) are hidden
+- [x] After login: nav shows account icon with dropdown only (no cart, no wishlist, no category links)
+- [x] Dropdown shows Manage Products, Manage Orders, Logout
+- [x] Category links (Electronics, Fashion...) are hidden
 
 ## 4. Admin route protection
 - [ ] While logged in as admin, visit `/admin/products` — loads correctly
