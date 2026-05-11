@@ -35,9 +35,26 @@
   background: #fff;
 }
 
+.order-stepper__circle--active {
+  background: #1e293b;
+  box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.35);
+  animation: stepper-pulse 2s ease-in-out infinite;
+}
+
 .order-stepper__circle--canceled {
   background: #ef4444;
   color: #fff;
+}
+
+@keyframes stepper-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.35); }
+  50%       { box-shadow: 0 0 0 8px rgba(30, 41, 59, 0.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-stepper__circle--active {
+    animation: none;
+  }
 }
 
 .order-stepper__line {
