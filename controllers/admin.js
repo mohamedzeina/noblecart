@@ -5,6 +5,7 @@ const Order = require('../models/order');
 const User = require('../models/user');
 const fileHelper = require('../util/file');
 const pg = require('../util/paginationHelper');
+const { sendStatusUpdate } = require('../util/email');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -225,6 +226,7 @@ exports.patchOrderStatus = (req, res, next) => {
         return res.status(422).json({ message: `Cannot transition from ${order.status} to ${status}.` });
       }
       return order.transitionTo(status).then(() => {
+        sendStatusUpdate(order, order.user.email).catch(() => {});
         res.json({ status: order.status });
       });
     })
