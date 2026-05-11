@@ -1,12 +1,12 @@
 const crypto = require('crypto');
 
 const bcrypt = require('bcryptjs');
-const { Resend } = require('resend');
+const { sendWelcome, sendPasswordReset } = require('../util/email');
 const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 exports.getLogin = (req, res, next) => {
   if (req.user !== undefined) {
@@ -149,12 +149,7 @@ exports.postSignup = (req, res, next) => {
     .then(() => {
       res.redirect('/login');
 
-      return resend.emails.send({
-        from: process.env.FROM_EMAIL,
-        to: email,
-        subject: 'Signup succeeded!',
-        html: '<h1>You successfully signed up!</h1>',
-      }).catch((err) => console.log('Email error:', err.message));
+      sendWelcome(email).catch(() => {});
     });
 };
 
@@ -196,13 +191,7 @@ exports.postReset = (req, res, next) => {
       .then(() => {
         req.flash('resetSuccess', 'Check your inbox — a reset link is on its way.');
         res.redirect('/reset');
-        resend.emails.send({
-          from: process.env.FROM_EMAIL,
-          to: req.body.email,
-          subject: 'Password reset',
-          html: `<p>You requested a password reset</p>
-          <p>Click this <a href="${req.protocol}://${req.get('host')}/reset/${token}">link</a> to set a new password.</p>`,
-        }).catch((err) => console.log('Email error:', err.message));
+        sendPasswordReset(req.body.email, token, req.protocol, req.get('host')).catch(() => {});
       })
       .catch((err) => {
         const error = new Error(err);

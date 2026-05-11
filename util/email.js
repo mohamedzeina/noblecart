@@ -112,3 +112,48 @@ exports.sendStatusUpdate = (order, email) => {
     html,
   });
 };
+
+exports.sendWelcome = (email) => {
+  const html = baseTemplate({
+    title: 'Welcome to Noblecart',
+    preheader: 'Your account has been created successfully.',
+    body: `
+      <p style="margin:0 0 24px;font-size:15px;color:#475569;">Your account is ready. Start browsing and add items to your cart whenever you're ready.</p>
+      <a href="${process.env.APP_URL || 'http://localhost:3000'}"
+         style="display:inline-block;background:#111111;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none;">
+        Start Shopping
+      </a>
+    `,
+  });
+
+  return resend.emails.send({
+    from: process.env.FROM_EMAIL,
+    to: email,
+    subject: 'Welcome to Noblecart',
+    html,
+  });
+};
+
+exports.sendPasswordReset = (email, token, protocol, host) => {
+  const resetUrl = `${protocol}://${host}/reset/${token}`;
+
+  const html = baseTemplate({
+    title: 'Reset Your Password',
+    preheader: 'A password reset was requested for your Noblecart account.',
+    body: `
+      <p style="margin:0 0 24px;font-size:15px;color:#475569;">We received a request to reset your password. Click the button below to choose a new one. This link expires in <strong>1 hour</strong>.</p>
+      <a href="${resetUrl}"
+         style="display:inline-block;background:#111111;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none;">
+        Reset Password
+      </a>
+      <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;">If you didn't request this, you can safely ignore this email. Your password won't change.</p>
+    `,
+  });
+
+  return resend.emails.send({
+    from: process.env.FROM_EMAIL,
+    to: email,
+    subject: 'Reset your Noblecart password',
+    html,
+  });
+};
