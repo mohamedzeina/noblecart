@@ -66,7 +66,7 @@ app.set('views', 'views');
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, 'access.log'),
   { flags: 'a' }
-); // Creating a write stream to log requests
+);
 
 app.use(
   helmet({
@@ -84,10 +84,10 @@ app.use(
     },
   })
 );
-app.use(compression()); // Compression middleware for performance
-app.use(morgan('combined', {stream: accessLogStream})); // Morgan middleware for logging
+app.use(compression());
+app.use(morgan('combined', { stream: accessLogStream }));
 
-app.use(bodyParser.urlencoded({ extended: false })); // Parses body like we used to do manually in previous http version of this project
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
   multer({ storage: fileStorage, fileFilter }).fields([
     { name: 'image', maxCount: 1 },
@@ -95,7 +95,7 @@ app.use(
   ])
 );
 
-app.use(express.static(path.join(__dirname, 'public'))); // Grant read access to the public folder statically
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(
   session({
@@ -104,9 +104,10 @@ app.use(
     saveUninitialized: false,
     store: store,
   })
-); // Session middleware initialized
+);
 
-app.use(csrfProtection); // CSRF middleware
+app.use(csrfProtection);
+
 app.use(flash());
 
 app.use((req, res, next) => {
