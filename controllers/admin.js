@@ -105,7 +105,7 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  Product.findById(prodId)
+  return Product.findById(prodId)
     .then((product) => {
       if (!product) {
         return res.redirect('/');
@@ -372,7 +372,7 @@ exports.patchOrderStatus = (req, res, next) => {
   const { orderId } = req.params;
   const { status } = req.body;
 
-  Order.findById(orderId)
+  return Order.findById(orderId)
     .then((order) => {
       if (!order) {
         return res.status(404).json({ message: 'Order not found.' });
@@ -448,7 +448,7 @@ exports.postUpdateStock = async (req, res, next) => {
 
 exports.deleteProduct = (req, res, next) => {
   const prodId = req.params.prodId;
-  Product.findById(prodId)
+  return Product.findById(prodId)
     .then((product) => {
       if (!product) {
         return res.status(404).json({ message: 'Product not found.' });

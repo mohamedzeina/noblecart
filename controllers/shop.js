@@ -108,7 +108,7 @@ exports.getProductReviews = (req, res, next) => {
   const filter = { productId };
   if (req.user) filter.userId = { $ne: req.user._id };
 
-  Review.find(filter)
+  return Review.find(filter)
     .sort(REVIEW_SORT_OPTS[activeReviewSort])
     .skip(skip)
     .limit(REVIEWS_PER_PAGE)
@@ -181,7 +181,7 @@ exports.getSearchSuggest = (req, res, next) => {
   if (query.length < 2) return res.json({ results: [], query, wishlistedIds: [] });
 
   const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-  Product.find({ $or: [{ title: regex }, { category: regex }] })
+  return Product.find({ $or: [{ title: regex }, { category: regex }] })
     .select('title price imageUrl category _id')
     .limit(6)
     .then((products) => {
@@ -210,7 +210,7 @@ exports.getSearchSuggest = (req, res, next) => {
 };
 
 exports.getCartData = (req, res, next) => {
-  req.user
+  return req.user
     .populate('cart.items.productId')
     .then((user) => {
       const items = user.cart.items.map((i) => ({
@@ -229,7 +229,7 @@ exports.getCartData = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findById(prodId)
+  return Product.findById(prodId)
     .then((product) => {
       return req.user.addToCart(product);
     })
@@ -251,7 +251,7 @@ exports.postCartUpdate = (req, res, next) => {
   const { productId, action } = req.body;
   let productPrice;
 
-  Product.findById(productId)
+  return Product.findById(productId)
     .then((product) => {
       if (!product) throw new Error('Product not found');
       productPrice = product.price;
@@ -277,7 +277,7 @@ exports.postCartUpdate = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.user
+  return req.user
     .removeFromCart(prodId)
     .then(() => {
       const cartCount = req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0);
@@ -426,7 +426,7 @@ exports.getCheckoutSession = async (req, res, next) => {
 };
 
 exports.getCheckoutSuccess = (req, res, next) => {
-  req.user
+  return req.user
     .populate('cart.items.productId')
     .then((user) => {
       const cartItems = user.cart.items;
@@ -470,7 +470,7 @@ exports.getCheckoutSuccess = (req, res, next) => {
 
 exports.postWishlistToggle = (req, res, next) => {
   const prodId = req.body.productId;
-  req.user
+  return req.user
     .toggleWishlist(prodId)
     .then(() => {
       const inWishlist = req.user.wishlist.some(
@@ -482,7 +482,7 @@ exports.postWishlistToggle = (req, res, next) => {
 };
 
 exports.getWishlist = (req, res, next) => {
-  req.user
+  return req.user
     .populate('wishlist.productId')
     .then((user) => {
       const products = user.wishlist
@@ -652,7 +652,7 @@ exports.postReview = (req, res, next) => {
     return res.redirect('/products/' + productId);
   }
 
-  Order.findOne({ 'user.userId': req.user._id, 'products.productData._id': productId })
+  return Order.findOne({ 'user.userId': req.user._id, 'products.productData._id': productId })
     .then((order) => new Review({
       productId,
       userId: req.user._id,
@@ -678,7 +678,7 @@ exports.putReview = (req, res, next) => {
     return res.redirect('/products/' + productId);
   }
 
-  Review.findOneAndUpdate(
+  return Review.findOneAndUpdate(
     { productId, userId: req.user._id },
     { rating: ratingNum, comment },
     { new: true }
@@ -690,7 +690,7 @@ exports.putReview = (req, res, next) => {
 exports.deleteReview = (req, res, next) => {
   const { productId } = req.params;
 
-  Review.findOneAndDelete({ productId, userId: req.user._id })
+  return Review.findOneAndDelete({ productId, userId: req.user._id })
     .then(() => res.redirect('/products/' + productId))
     .catch((err) => next(new Error(err)));
 };
