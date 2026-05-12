@@ -1,3 +1,18 @@
+function animateValue(el, from, to, duration) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = '$' + to.toFixed(2);
+    return;
+  }
+  const start = performance.now();
+  const tick = (now) => {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = '$' + (from + (to - from) * eased).toFixed(2);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.cart__qty-btn');
   if (!btn) return;
@@ -33,13 +48,19 @@ document.addEventListener('click', (e) => {
         const row = document.querySelector(`.cart__item[data-product-id="${productId}"]`);
         if (row) {
           row.querySelector('.cart__qty-value').textContent = itemQuantity;
-          row.querySelector('.cart__item-total').textContent = '$' + itemTotal;
+          const itemTotalEl = row.querySelector('.cart__item-total');
+          const prevItem = parseFloat(itemTotalEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+          animateValue(itemTotalEl, prevItem, parseFloat(itemTotal), 350);
         }
         // Update summary item
         const summaryItem = document.querySelector(`.cart-summary__item[data-product-id="${productId}"]`);
         if (summaryItem) {
           summaryItem.querySelector('.summary-item__qty').textContent = itemQuantity;
-          summaryItem.querySelector('.summary-item__total').textContent = '$' + itemTotal;
+          const stEl = summaryItem.querySelector('.summary-item__total');
+          if (stEl) {
+            const prevSt = parseFloat(stEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+            animateValue(stEl, prevSt, parseFloat(itemTotal), 350);
+          }
         }
       }
 
@@ -51,7 +72,10 @@ document.addEventListener('click', (e) => {
         total += price * qty;
       });
       const grandTotal = document.getElementById('cart-grand-total');
-      if (grandTotal) grandTotal.textContent = '$' + total.toFixed(2);
+      if (grandTotal) {
+        const prevGrand = parseFloat(grandTotal.textContent.replace(/[^0-9.]/g, '')) || 0;
+        animateValue(grandTotal, prevGrand, total, 400);
+      }
     })
     .catch((err) => console.error(err))
     .finally(() => allBtns.forEach(b => b.disabled = false));

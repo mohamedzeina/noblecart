@@ -30,6 +30,21 @@
     }
   }
 
+  function animateValue(el, from, to, duration) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = '$' + to.toFixed(2);
+      return;
+    }
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = '$' + (from + (to - from) * eased).toFixed(2);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
   function recalcTotal() {
     let total = 0;
     let count = 0;
@@ -38,7 +53,8 @@
       total += parseFloat(item.dataset.price) * qty;
       count += qty;
     });
-    grandTotal.textContent = '$' + total.toFixed(2);
+    const prev = parseFloat(grandTotal.textContent.replace(/[^0-9.]/g, '')) || 0;
+    animateValue(grandTotal, prev, total, 400);
     if (countEl) countEl.textContent = count > 0 ? `(${count})` : '';
   }
 
@@ -186,10 +202,10 @@
         item.classList.add('drawer-item--removing');
       } else {
         // Optimistic update
-        qtyEl.textContent   = newQty;
+        qtyEl.textContent = newQty;
         flash(qtyEl);
-        totalEl.textContent = '$' + (price * newQty).toFixed(2);
-        flash(totalEl);
+        const prevTotal = parseFloat(totalEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+        animateValue(totalEl, prevTotal, price * newQty, 350);
         recalcTotal();
       }
 
