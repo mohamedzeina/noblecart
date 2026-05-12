@@ -291,28 +291,50 @@ exports.postCartDeleteProduct = (req, res, next) => {
     });
 };
 
-exports.getOrders = (req, res, next) => {
-  const statusFilter = req.query.status || 'all';
-  const query = { 'user.userId': req.user._id };
-  if (statusFilter === 'active') {
-    query.status = { $in: ['pending', 'confirmed', 'shipped', 'out_for_delivery'] };
-  } else if (statusFilter === 'delivered' || statusFilter === 'canceled') {
-    query.status = statusFilter;
-  }
-  Order.find(query).sort({ _id: -1 })
-    .then((orders) => {
-      res.render('shop/orders', {
-        path: '/orders',
-        pageTitle: 'Your Orders',
-        orders,
-        statusFilter,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+exports.getOrders = async (req, res, next) => {
+  try {
+    const statusFilter = req.query.status || 'all';
+    const query = { 'user.userId': req.user._id };
+    if (statusFilter === 'active') {
+      query.status = { $in: ['pending', 'confirmed', 'shipped', 'out_for_delivery'] };
+    } else if (statusFilter === 'delivered' || statusFilter === 'canceled') {
+      query.status = statusFilter;
+    }
+
+    const [orders, [rawCounts]] = await Promise.all([
+      Order.find(query).sort({ _id: -1 }),
+      Order.aggregate([
+        { $match: { 'user.userId': req.user._id } },
+        {
+          $facet: {
+            all:       [{ $count: 'n' }],
+            active:    [{ $match: { status: { $in: ['pending', 'confirmed', 'shipped', 'out_for_delivery'] } } }, { $count: 'n' }],
+            delivered: [{ $match: { status: 'delivered' } }, { $count: 'n' }],
+            canceled:  [{ $match: { status: 'canceled' } },  { $count: 'n' }],
+          },
+        },
+      ]),
+    ]);
+
+    const orderCounts = {
+      all:       rawCounts?.all?.[0]?.n       || 0,
+      active:    rawCounts?.active?.[0]?.n    || 0,
+      delivered: rawCounts?.delivered?.[0]?.n || 0,
+      canceled:  rawCounts?.canceled?.[0]?.n  || 0,
+    };
+
+    res.render('shop/orders', {
+      path: '/orders',
+      pageTitle: 'Your Orders',
+      orders,
+      statusFilter,
+      orderCounts,
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.postReorder = async (req, res, next) => {

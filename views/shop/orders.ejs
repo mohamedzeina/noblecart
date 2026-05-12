@@ -19,20 +19,42 @@
             <% } else { %>
                 <div class="orders-header">
                     <h1 class="orders-header__title">Your Orders</h1>
-                    <div class="orders-filter">
-                        <a href="/orders?status=all"       class="orders-filter__btn<%= statusFilter === 'all'       ? ' orders-filter__btn--active' : '' %>">All</a>
-                        <a href="/orders?status=active"    class="orders-filter__btn<%= statusFilter === 'active'    ? ' orders-filter__btn--active' : '' %>">Active</a>
-                        <a href="/orders?status=delivered" class="orders-filter__btn<%= statusFilter === 'delivered' ? ' orders-filter__btn--active' : '' %>">Delivered</a>
-                        <a href="/orders?status=canceled"  class="orders-filter__btn<%= statusFilter === 'canceled'  ? ' orders-filter__btn--active' : '' %>">Canceled</a>
-                    </div>
+                    <nav class="orders-filter" aria-label="Filter orders by status">
+                        <a href="/orders?status=all"
+                           class="orders-filter__btn<%= statusFilter === 'all' ? ' orders-filter__btn--active' : '' %>"
+                           aria-current="<%= statusFilter === 'all' ? 'page' : 'false' %>">
+                            All<% if (orderCounts.all > 0) { %><span class="orders-filter__count"><%= orderCounts.all %></span><% } %>
+                        </a>
+                        <a href="/orders?status=active"
+                           class="orders-filter__btn<%= statusFilter === 'active' ? ' orders-filter__btn--active' : '' %>"
+                           aria-current="<%= statusFilter === 'active' ? 'page' : 'false' %>">
+                            Active<% if (orderCounts.active > 0) { %><span class="orders-filter__count"><%= orderCounts.active %></span><% } %>
+                        </a>
+                        <a href="/orders?status=delivered"
+                           class="orders-filter__btn<%= statusFilter === 'delivered' ? ' orders-filter__btn--active' : '' %>"
+                           aria-current="<%= statusFilter === 'delivered' ? 'page' : 'false' %>">
+                            Delivered<% if (orderCounts.delivered > 0) { %><span class="orders-filter__count"><%= orderCounts.delivered %></span><% } %>
+                        </a>
+                        <a href="/orders?status=canceled"
+                           class="orders-filter__btn<%= statusFilter === 'canceled' ? ' orders-filter__btn--active' : '' %>"
+                           aria-current="<%= statusFilter === 'canceled' ? 'page' : 'false' %>">
+                            Canceled<% if (orderCounts.canceled > 0) { %><span class="orders-filter__count"><%= orderCounts.canceled %></span><% } %>
+                        </a>
+                    </nav>
                 </div>
 
                 <% if (orders.length === 0) { %>
                     <div class="orders-empty-filter">
-                        <p class="orders-empty-filter__text">No orders in this category.</p>
+                        <div class="orders-empty-filter__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="36" height="36">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                            </svg>
+                        </div>
+                        <p class="orders-empty-filter__text">No <%= statusFilter === 'all' ? '' : statusFilter %> orders found.</p>
+                        <a href="/orders" class="orders-empty-filter__link">View all orders</a>
                     </div>
                 <% } else { %>
-                <ul class="orders">
+                <ul class="orders" role="list">
                     <% orders.forEach(order => {
                         const orderDate = order._id.getTimestamp();
                         const formattedDate = orderDate.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -40,30 +62,33 @@
                         const orderTotal = order.products.reduce((s, p) => s + p.quantity * p.productData.price, 0);
                         const thumbs = order.products.slice(0, 3);
                         const extraCount = order.products.length - 3;
+                        const shortId = order._id.toString().slice(-8).toUpperCase();
                     %>
                         <li class="order-card">
-                            <a href="/orders/<%= order._id %>" class="order-card__link">
-                                <div class="order-card__thumbs">
+                            <a href="/orders/<%= order._id %>"
+                               class="order-card__link"
+                               aria-label="View details for Order #<%= shortId %>, <%= order.status.replace(/_/g, ' ') %>, placed <%= formattedDate %>">
+                                <div class="order-card__thumbs" aria-hidden="true">
                                     <% thumbs.forEach(p => { %>
                                         <div class="order-card__thumb">
-                                            <img src="<%= p.productData.imageUrl %>" alt="<%= p.productData.title %>">
+                                            <img src="<%= p.productData.imageUrl %>" alt="" loading="lazy">
                                         </div>
                                     <% }) %>
                                     <% if (extraCount > 0) { %>
-                                        <div class="order-card__thumb order-card__thumb--overflow">+<%= extraCount %></div>
+                                        <div class="order-card__thumb order-card__thumb--overflow" aria-hidden="true">+<%= extraCount %></div>
                                     <% } %>
                                 </div>
                                 <div class="order-card__info">
                                     <div class="order-card__info-top">
-                                        <span class="order-card__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></span>
+                                        <span class="order-card__id">Order #<%= shortId %></span>
                                         <span class="order-card__date"><%= formattedDate %></span>
                                     </div>
                                     <div class="order-card__info-bottom">
                                         <span class="order-card__summary"><%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %> &middot; $<%= orderTotal.toFixed(2) %></span>
-                                        <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
+                                        <span class="order-status-badge order-status-badge--<%= order.status %>" aria-label="Status: <%= order.status.replace(/_/g, ' ') %>"><%= order.status.replace(/_/g, ' ') %></span>
                                     </div>
                                 </div>
-                                <div class="order-card__chevron">
+                                <div class="order-card__chevron" aria-hidden="true">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                     </svg>
