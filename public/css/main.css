@@ -1139,3 +1139,9 @@ a.breadcrumb__item:hover {
   background: #fee2e2;
   color: #991b1b;
 }
+
+/* Utilities */
+.hidden { display: none; }
+.svg-defs { position: absolute; overflow: hidden; }
+#view-3d { display: none; }
+.review-form__delete-form { display: inline; }

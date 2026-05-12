@@ -77,10 +77,10 @@ if (reviewForm) {
     if (!reviewForm.querySelector('input[name="rating"]:checked')) {
       e.preventDefault();
       errorEl.textContent = 'Please select a star rating before submitting.';
-      errorEl.style.display = '';
+      errorEl.classList.remove('hidden');
       return;
     }
-    errorEl.style.display = 'none';
+    errorEl.classList.add('hidden');
     const btn = reviewForm.querySelector('.review-form__submit');
     btn.disabled = true;
     btn.innerHTML = SPINNER + ' Submitting…';

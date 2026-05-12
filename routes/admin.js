@@ -6,6 +6,8 @@ const { body } = require('express-validator');
 
 const router = express.Router();
 
+router.get('/dashboard', isAdmin, adminController.getAdminDashboard);
+
 // /admin/add-product => GET
 router.get('/add-product', isAdmin, adminController.getAddProduct);
 

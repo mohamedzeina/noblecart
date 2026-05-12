@@ -5,7 +5,7 @@ const Admin = require('../models/admin');
 
 exports.getLogin = (req, res, next) => {
   if (req.admin !== undefined) {
-    return res.redirect('/admin/products');
+    return res.redirect('/admin/dashboard');
   }
   if (req.user !== undefined) {
     return res.redirect('/');
@@ -64,7 +64,7 @@ exports.postLogin = (req, res, next) => {
           req.session.adminId = admin._id;
           req.session.save((saveErr) => {
             if (saveErr) console.log(saveErr);
-            res.redirect('/admin/products');
+            res.redirect('/admin/dashboard');
           });
         });
       });

@@ -25,7 +25,7 @@
                         <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
                     </div>
                     <% if (product.modelUrl) { %>
-                        <div id="view-3d" style="display:none" data-model-url="<%= product.modelUrl %>"></div>
+                        <div id="view-3d" data-model-url="<%= product.modelUrl %>"></div>
                     <% } %>
                 </div>
                 <div class="product-detail__info">
@@ -91,7 +91,7 @@
                     </div>
                 </div>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="svg-defs" aria-hidden="true">
                 <defs>
                     <linearGradient id="hsg" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="50%" stop-color="#f59e0b"/>
@@ -206,7 +206,7 @@
                             <% } %>
                         </div>
                         <textarea class="review-form__textarea" name="comment" rows="3" maxlength="1000" placeholder="Share your thoughts on this product…" required></textarea>
-                        <p class="review-form__error" id="review-error-msg"<%= reviewError ? '' : ' style="display:none"' %>><%= reviewError || '' %></p>
+                        <p class="review-form__error<%= reviewError ? '' : ' hidden' %>" id="review-error-msg"><%= reviewError || '' %></p>
                         <button class="btn btn--solid review-form__submit" type="submit">Submit Review</button>
                     </form>
                     <% } else { %>
@@ -227,7 +227,7 @@
                             <p class="review-item__comment">"<%= userReview.comment %>"</p>
                             <div class="review-form__actions">
                                 <button class="btn btn--solid review-form__edit-btn" type="button">Edit</button>
-                                <form action="/products/<%= product._id %>/review/delete" method="POST" style="display:inline">
+                                <form action="/products/<%= product._id %>/review/delete" method="POST" class="review-form__delete-form">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <button class="btn review-form__delete-btn" type="submit">Delete</button>
                                 </form>

@@ -44,7 +44,7 @@
                             </div>
                         <% } %>
                     </div>
-                    <div id="model-viewer-container" style="margin-top:0.5rem;border-radius:8px;overflow:hidden;position:relative;background:#1a1a1a;display:none;height:420px;"></div>
+                    <div id="model-viewer-container"></div>
                 </div>
                 <div class="form-control">
                     <label>Product Image <span class="form-control__hint" id="image-label-hint">(auto-filled from 3D model, or upload manually)</span></label>
@@ -54,7 +54,7 @@
                             <img src="<%= product.imageUrl %>" alt="Current image" class="file-upload__preview" id="image-preview">
                             <p class="file-upload__hint">Click or drag to replace</p>
                         <% } else { %>
-                            <img src="" alt="" class="file-upload__preview" id="image-preview" style="display:none">
+                            <img src="" alt="" class="file-upload__preview hidden" id="image-preview">
                             <div class="file-upload__placeholder" id="upload-placeholder">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />

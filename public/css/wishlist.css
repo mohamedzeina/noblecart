@@ -134,6 +134,7 @@
   padding: 0 3px;
   pointer-events: none;
 }
+.wishlist-badge.hidden { display: none; }
 
 /* ── Wishlist page ── */
 .wishlist-header {

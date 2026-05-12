@@ -192,6 +192,73 @@ exports.postEditProduct = async (req, res, next) => {
   }
 };
 
+exports.getAdminDashboard = async (req, res, next) => {
+  try {
+    const [
+      revenueResult,
+      paidOrders,
+      topProducts,
+      statusBreakdown,
+      recentOrders,
+      productCount,
+    ] = await Promise.all([
+      Order.aggregate([
+        { $match: { status: { $ne: 'canceled' } } },
+        { $unwind: '$products' },
+        { $group: {
+          _id: null,
+          revenue: { $sum: { $multiply: ['$products.productData.price', '$products.quantity'] } },
+        }},
+      ]),
+      Order.countDocuments({ status: { $ne: 'canceled' } }),
+      Order.aggregate([
+        { $match: { status: { $ne: 'canceled' } } },
+        { $unwind: '$products' },
+        { $group: {
+          _id: '$products.productData.title',
+          revenue: { $sum: { $multiply: ['$products.productData.price', '$products.quantity'] } },
+          unitsSold: { $sum: '$products.quantity' },
+        }},
+        { $sort: { revenue: -1 } },
+        { $limit: 5 },
+      ]),
+      Order.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      Order.find().sort({ _id: -1 }).limit(5),
+      Product.countDocuments(),
+    ]);
+
+    const totalRevenue = revenueResult[0]?.revenue || 0;
+    const avgOrderValue = paidOrders > 0 ? totalRevenue / paidOrders : 0;
+
+    const recentOrdersMapped = recentOrders.map((o) => ({
+      id: o._id.toString().slice(-6).toUpperCase(),
+      email: o.user.email,
+      date: o._id.getTimestamp(),
+      status: o.status,
+      total: o.products.reduce((sum, p) => sum + p.productData.price * p.quantity, 0),
+    }));
+
+    res.render('admin/dashboard', {
+      pageTitle: 'Dashboard',
+      path: '/admin/dashboard',
+      totalRevenue,
+      paidOrders,
+      avgOrderValue,
+      productCount,
+      topProducts,
+      statusBreakdown,
+      recentOrders: recentOrdersMapped,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
+};
+
 exports.getProducts = (req, res, next) => {
   const activeCategory = req.query.category || '';
 
