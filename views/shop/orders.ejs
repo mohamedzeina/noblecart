@@ -5,7 +5,7 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-            <% if (orders.length <= 0) { %>
+            <% if (orders.length <= 0 && statusFilter === 'all') { %>
                 <div class="empty-state">
                     <div class="empty-state__icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
@@ -19,99 +19,60 @@
             <% } else { %>
                 <div class="orders-header">
                     <h1 class="orders-header__title">Your Orders</h1>
+                    <div class="orders-filter">
+                        <a href="/orders?status=all"       class="orders-filter__btn<%= statusFilter === 'all'       ? ' orders-filter__btn--active' : '' %>">All</a>
+                        <a href="/orders?status=active"    class="orders-filter__btn<%= statusFilter === 'active'    ? ' orders-filter__btn--active' : '' %>">Active</a>
+                        <a href="/orders?status=delivered" class="orders-filter__btn<%= statusFilter === 'delivered' ? ' orders-filter__btn--active' : '' %>">Delivered</a>
+                        <a href="/orders?status=canceled"  class="orders-filter__btn<%= statusFilter === 'canceled'  ? ' orders-filter__btn--active' : '' %>">Canceled</a>
+                    </div>
                 </div>
+
+                <% if (orders.length === 0) { %>
+                    <div class="orders-empty-filter">
+                        <p class="orders-empty-filter__text">No orders in this category.</p>
+                    </div>
+                <% } else { %>
                 <ul class="orders">
-                    <% orders.forEach(order => { %>
+                    <% orders.forEach(order => {
+                        const orderDate = order._id.getTimestamp();
+                        const formattedDate = orderDate.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        const itemCount = order.products.reduce((s, p) => s + p.quantity, 0);
+                        const orderTotal = order.products.reduce((s, p) => s + p.quantity * p.productData.price, 0);
+                        const thumbs = order.products.slice(0, 3);
+                        const extraCount = order.products.length - 3;
+                    %>
                         <li class="order-card">
-                            <div class="order-card__header">
-                                <div class="order-card__header-left">
-                                    <p class="order-card__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></p>
-                                    <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
-                                </div>
-                                <a href="/orders/<%= order._id %>" class="order-card__invoice-btn" target="_blank" rel="noopener noreferrer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                    </svg>
-                                    Invoice
-                                </a>
-                            </div>
-                            <%
-                                const STEPS = ['pending', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'];
-                                const STEP_LABELS = {
-                                    pending: 'Order Placed',
-                                    confirmed: 'Order Confirmed',
-                                    shipped: 'Shipped',
-                                    out_for_delivery: 'Out for Delivery',
-                                    delivered: 'Delivered',
-                                };
-                                const isCanceled = order.status === 'canceled';
-                                const cancelEntry = order.statusHistory.find(h => h.status === 'canceled');
-                                const displaySteps = isCanceled
-                                    ? [...STEPS.filter(s => order.statusHistory.some(h => h.status === s)), 'canceled']
-                                    : STEPS;
-                                const displayLabels = { ...STEP_LABELS, canceled: 'Canceled' };
-                            %>
-                            <div class="order-stepper">
-                                <% displaySteps.forEach((step, i) => {
-                                    const isActive  = order.status === step && step !== 'delivered';
-                                    const isDone    = !isActive && order.statusHistory.some(h => h.status === step);
-                                    const isLast    = i === displaySteps.length - 1;
-                                    const histEntry = order.statusHistory.find(h => h.status === step);
-                                    const nextIsDone = !isLast && order.statusHistory.some(h => h.status === displaySteps[i + 1]);
-                                    const timestamp = histEntry
-                                        ? new Date(histEntry.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                                        : null;
-                                    let circleClass = 'order-stepper__circle--upcoming';
-                                    if (step === 'canceled') circleClass = 'order-stepper__circle--canceled';
-                                    else if (isDone)         circleClass = 'order-stepper__circle--done';
-                                    else if (isActive)       circleClass = 'order-stepper__circle--active';
-                                %>
-                                <div class="order-stepper__step">
-                                    <div class="order-stepper__track">
-                                        <div class="order-stepper__circle <%= circleClass %>">
-                                            <% if (isDone) { %>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M20 6 9 17l-5-5"/>
-                                            </svg>
-                                            <% } else if (step === 'canceled') { %>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M18 6 6 18M6 6l12 12"/>
-                                            </svg>
-                                            <% } %>
-                                        </div>
-                                        <% if (!isLast) { %>
-                                        <div class="order-stepper__line <%= step === 'canceled' ? 'order-stepper__line--canceled' : nextIsDone ? 'order-stepper__line--done' : '' %>"></div>
-                                        <% } %>
-                                    </div>
-                                    <div class="order-stepper__content">
-                                        <p class="order-stepper__label <%= (!isDone && !isActive && step !== 'canceled') ? 'order-stepper__label--upcoming' : '' %>"><%= displayLabels[step] %></p>
-                                        <% if (timestamp) { %>
-                                        <p class="order-stepper__timestamp"><%= timestamp %></p>
-                                        <% } %>
-                                    </div>
-                                </div>
-                                <% }) %>
-                            </div>
-                            <ul class="order-card__products">
-                                <% order.products.forEach(p => { %>
-                                    <li class="order-card__product">
-                                        <div class="order-card__product-image">
+                            <a href="/orders/<%= order._id %>" class="order-card__link">
+                                <div class="order-card__thumbs">
+                                    <% thumbs.forEach(p => { %>
+                                        <div class="order-card__thumb">
                                             <img src="<%= p.productData.imageUrl %>" alt="<%= p.productData.title %>">
                                         </div>
-                                        <div class="order-card__product-info">
-                                            <span class="order-card__product-title"><%= p.productData.title %></span>
-                                            <span class="order-card__product-price">$<%= p.productData.price.toFixed(2) %> &times; <%= p.quantity %></span>
-                                        </div>
-                                        <span class="order-card__product-total">$<%= (p.productData.price * p.quantity).toFixed(2) %></span>
-                                    </li>
-                                <% }) %>
-                            </ul>
-                            <div class="order-card__footer">
-                                <span class="order-card__total">Total: $<%= order.products.reduce((sum, p) => sum + p.quantity * p.productData.price, 0).toFixed(2) %></span>
-                            </div>
+                                    <% }) %>
+                                    <% if (extraCount > 0) { %>
+                                        <div class="order-card__thumb order-card__thumb--overflow">+<%= extraCount %></div>
+                                    <% } %>
+                                </div>
+                                <div class="order-card__info">
+                                    <div class="order-card__info-top">
+                                        <span class="order-card__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></span>
+                                        <span class="order-card__date"><%= formattedDate %></span>
+                                    </div>
+                                    <div class="order-card__info-bottom">
+                                        <span class="order-card__summary"><%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %> &middot; $<%= orderTotal.toFixed(2) %></span>
+                                        <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
+                                    </div>
+                                </div>
+                                <div class="order-card__chevron">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                    </svg>
+                                </div>
+                            </a>
                         </li>
                     <% }) %>
                 </ul>
+                <% } %>
             <% } %>
         </main>
         <%- include('../includes/end.ejs') %>

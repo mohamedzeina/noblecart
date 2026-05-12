@@ -292,12 +292,20 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  Order.find({ 'user.userId': req.user._id }).sort({ _id: -1 })
+  const statusFilter = req.query.status || 'all';
+  const query = { 'user.userId': req.user._id };
+  if (statusFilter === 'active') {
+    query.status = { $in: ['pending', 'confirmed', 'shipped', 'out_for_delivery'] };
+  } else if (statusFilter === 'delivered' || statusFilter === 'canceled') {
+    query.status = statusFilter;
+  }
+  Order.find(query).sort({ _id: -1 })
     .then((orders) => {
       res.render('shop/orders', {
         path: '/orders',
         pageTitle: 'Your Orders',
-        orders: orders,
+        orders,
+        statusFilter,
       });
     })
     .catch((err) => {
@@ -305,6 +313,21 @@ exports.getOrders = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
+};
+
+exports.postReorder = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.orderId, 'user.userId': req.user._id });
+    if (!order) return res.redirect('/orders');
+    const productIds = order.products.map((p) => p.productData._id);
+    const products = await Product.find({ _id: { $in: productIds }, stock: { $gt: 0 } });
+    for (const product of products) {
+      await req.user.addToCart(product);
+    }
+    res.redirect('/checkout');
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.getCheckout = async (req, res, next) => {
@@ -480,6 +503,20 @@ exports.getWishlist = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
+};
+
+exports.getOrderDetail = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.orderId, 'user.userId': req.user._id });
+    if (!order) return next(new Error('No order found.'));
+    res.render('shop/order-detail', {
+      path: '/orders',
+      pageTitle: 'Order Details',
+      order,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.getInvoice = async (req, res, next) => {

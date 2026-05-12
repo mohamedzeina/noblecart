@@ -1,0 +1,173 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/orders.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main>
+            <%
+                const orderDate = order._id.getTimestamp();
+                const formattedDate = orderDate.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const orderTotal = order.products.reduce((s, p) => s + p.quantity * p.productData.price, 0);
+                const itemCount = order.products.reduce((s, p) => s + p.quantity, 0);
+
+                const STATUS_BANNER = {
+                    pending:          { label: 'Order Received',     subtitle: 'We\'ve received your order and will confirm it shortly.' },
+                    confirmed:        { label: 'Order Confirmed',     subtitle: 'Your order has been confirmed and is being prepared.' },
+                    shipped:          { label: 'Order Shipped',       subtitle: 'Your order is on its way.' },
+                    out_for_delivery: { label: 'Out for Delivery',    subtitle: 'Your order will arrive today.' },
+                    delivered:        { label: 'Order Delivered',     subtitle: 'Your order has been delivered. Enjoy!' },
+                    canceled:         { label: 'Order Canceled',      subtitle: 'This order has been canceled.' },
+                };
+                const banner = STATUS_BANNER[order.status] || STATUS_BANNER.pending;
+
+                const STEPS = ['pending', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'];
+                const STEP_LABELS = {
+                    pending:          'Order Placed',
+                    confirmed:        'Confirmed',
+                    shipped:          'Shipped',
+                    out_for_delivery: 'Out for Delivery',
+                    delivered:        'Delivered',
+                };
+                const isCanceled = order.status === 'canceled';
+                const displaySteps = isCanceled
+                    ? [...STEPS.filter(s => order.statusHistory.some(h => h.status === s)), 'canceled']
+                    : STEPS;
+                const displayLabels = { ...STEP_LABELS, canceled: 'Canceled' };
+            %>
+
+            <div class="order-detail">
+                <a href="/orders" class="order-detail__back">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
+                    Your Orders
+                </a>
+
+                <div class="order-detail__card">
+
+                    <!-- Status banner -->
+                    <div class="order-detail__banner order-detail__banner--<%= order.status %>">
+                        <div class="order-detail__banner-icon">
+                            <% if (order.status === 'pending') { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <% } else if (order.status === 'confirmed') { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <% } else if (order.status === 'shipped') { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                            </svg>
+                            <% } else if (order.status === 'out_for_delivery') { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                            </svg>
+                            <% } else if (order.status === 'delivered') { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                            </svg>
+                            <% } else { %>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <% } %>
+                        </div>
+                        <div class="order-detail__banner-text">
+                            <p class="order-detail__banner-label"><%= banner.label %></p>
+                            <p class="order-detail__banner-subtitle"><%= banner.subtitle %></p>
+                        </div>
+                    </div>
+
+                    <!-- Order meta -->
+                    <div class="order-detail__meta">
+                        <div class="order-detail__meta-left">
+                            <h1 class="order-detail__id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></h1>
+                            <span class="order-detail__date"><%= formattedDate %></span>
+                        </div>
+                        <a href="/orders/<%= order._id %>/invoice" class="order-detail__invoice-btn" target="_blank" rel="noopener noreferrer">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            Invoice
+                        </a>
+                    </div>
+
+                    <!-- Horizontal stepper -->
+                    <div class="order-hstepper">
+                        <% displaySteps.forEach((step, i) => {
+                            const isActive  = order.status === step && step !== 'delivered';
+                            const isDone    = !isActive && order.statusHistory.some(h => h.status === step);
+                            const histEntry = order.statusHistory.find(h => h.status === step);
+                            const timestamp = histEntry
+                                ? new Date(histEntry.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                : null;
+                            let stepClass = 'order-hstepper__step--upcoming';
+                            if (step === 'canceled')  stepClass = 'order-hstepper__step--canceled';
+                            else if (isDone)           stepClass = 'order-hstepper__step--done';
+                            else if (isActive)         stepClass = 'order-hstepper__step--active';
+                        %>
+                        <div class="order-hstepper__step <%= stepClass %>">
+                            <div class="order-hstepper__circle">
+                                <% if (isDone) { %>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+                                <% } else if (step === 'canceled') { %>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6 6 18M6 6l12 12"/>
+                                </svg>
+                                <% } %>
+                            </div>
+                            <p class="order-hstepper__label"><%= displayLabels[step] %></p>
+                            <% if (timestamp) { %>
+                            <p class="order-hstepper__timestamp"><%= timestamp %></p>
+                            <% } %>
+                        </div>
+                        <% }) %>
+                    </div>
+
+                    <!-- Products -->
+                    <div class="order-detail__section-label">Items</div>
+                    <ul class="order-detail__products">
+                        <% order.products.forEach(p => { %>
+                        <li class="order-detail__product">
+                            <a href="/products/<%= p.productData._id %>" class="order-detail__product-img-link">
+                                <img src="<%= p.productData.imageUrl %>" alt="<%= p.productData.title %>" class="order-detail__product-img">
+                            </a>
+                            <div class="order-detail__product-info">
+                                <a href="/products/<%= p.productData._id %>" class="order-detail__product-title"><%= p.productData.title %></a>
+                                <span class="order-detail__product-qty">Qty: <%= p.quantity %></span>
+                            </div>
+                            <span class="order-detail__product-total">$<%= (p.productData.price * p.quantity).toFixed(2) %></span>
+                        </li>
+                        <% }) %>
+                    </ul>
+
+                    <!-- Footer: total + actions -->
+                    <div class="order-detail__footer">
+                        <div class="order-detail__totals">
+                            <div class="order-detail__totals-row">
+                                <span><%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %></span>
+                                <span>$<%= orderTotal.toFixed(2) %></span>
+                            </div>
+                        </div>
+                        <% if (order.status !== 'canceled') { %>
+                        <form action="/orders/<%= order._id %>/reorder" method="POST" class="order-detail__reorder-form">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="order-detail__reorder-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                Buy Again
+                            </button>
+                        </form>
+                        <% } %>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+        <%- include('../includes/end.ejs') %>
