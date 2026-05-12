@@ -110,7 +110,8 @@
                         { value: 'top-rated',  label: 'Top Rated' },
                     ].forEach(chip => { %>
                     <a href="?sort=<%= chip.value %><%= _priceSuffix %>"
-                       class="sort-chip<%= activeSort === chip.value ? ' sort-chip--active' : '' %>">
+                       class="sort-chip<%= activeSort === chip.value ? ' sort-chip--active' : '' %>"
+                       aria-current="<%= activeSort === chip.value ? 'page' : 'false' %>">
                         <%= chip.label %>
                     </a>
                     <% }) %>
@@ -120,7 +121,8 @@
                 <span class="sort-bar__label">Price</span>
                 <div class="sort-bar__chips">
                     <a href="?<%= _sortSuffix ? _sortSuffix.slice(1) : '' %>"
-                       class="sort-chip<%= activePrice === 'all' ? ' sort-chip--active' : '' %>">All</a>
+                       class="sort-chip<%= activePrice === 'all' ? ' sort-chip--active' : '' %>"
+                       aria-current="<%= activePrice === 'all' ? 'page' : 'false' %>">All</a>
                     <% [
                         { value: '0-50',    label: 'Under $50' },
                         { value: '50-200',  label: '$50 – $200' },
@@ -128,7 +130,8 @@
                         { value: '500up',   label: '$500+' },
                     ].forEach(chip => { %>
                     <a href="?price=<%= chip.value %><%= _sortSuffix %>"
-                       class="sort-chip<%= activePrice === chip.value ? ' sort-chip--active' : '' %>">
+                       class="sort-chip<%= activePrice === chip.value ? ' sort-chip--active' : '' %>"
+                       aria-current="<%= activePrice === chip.value ? 'page' : 'false' %>">
                         <%= chip.label %>
                     </a>
                     <% }) %>
@@ -138,7 +141,7 @@
         <% if (prods.length > 0) { %>
             <div class="grid">
                 <% for (let product of prods) { %>
-                    <article class="card product-item">
+                    <article class="card product-item" aria-label="<%= product.title %>">
                         <div class="card__image">
                             <img src="<%= product.imageUrl %>" alt="<%= product.title %>" loading="lazy">
                             <%- include('../includes/wishlist-btn.ejs', { product: product }) %>

@@ -74,6 +74,12 @@
   color: #0c0a09;
 }
 
+.cart-drawer__close:focus-visible {
+  outline: 2px solid #1e293b;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .cart-drawer__body {
   flex: 1;
   overflow-y: auto;
@@ -224,6 +230,11 @@
   color: #0c0a09;
 }
 
+.drawer-qty-btn:focus-visible {
+  outline: 2px solid #1e293b;
+  outline-offset: 2px;
+}
+
 .drawer-qty-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -271,6 +282,12 @@
   color: #ef4444;
 }
 
+.drawer-item__remove:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .cart-drawer__footer {
   padding: 1.25rem 1.5rem;
   border-top: 1px solid #e2e8f0;
@@ -313,6 +330,12 @@
 
 .cart-drawer__continue:hover {
   color: #0c0a09;
+}
+
+.cart-drawer__continue:focus-visible {
+  outline: 2px solid #1e293b;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Shared qty-update animations (also used by checkout page) */

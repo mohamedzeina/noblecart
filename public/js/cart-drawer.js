@@ -117,6 +117,7 @@
         </div>
       </div>`;
     body.innerHTML = row + row + row;
+    footer.style.display = 'none';
     fetch('/cart/data')
       .then((res) => res.json())
       .then((data) => renderItems(data.items))
@@ -125,17 +126,22 @@
       });
   }
 
+  let _openerEl = null;
+
   function openDrawer() {
+    _openerEl = document.activeElement;
     drawer.classList.add('open');
     drawer.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     loadCart();
+    requestAnimationFrame(() => closeBtn && closeBtn.focus());
   }
 
   function closeDrawer() {
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (_openerEl) { _openerEl.focus(); _openerEl = null; }
   }
 
   // Open on cart icon click

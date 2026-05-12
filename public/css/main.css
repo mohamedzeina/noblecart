@@ -647,6 +647,62 @@ form {
   vertical-align: middle;
 }
 
+/* ---- Touch device: always show card reveal so actions are accessible ---- */
+@media (hover: none) {
+  .card__reveal {
+    transform: translateY(0);
+    background: linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.88) 32%);
+  }
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .card:hover .card__image img {
+    transform: none;
+  }
+  .card:active {
+    transform: scale(0.985);
+    transition: transform 0.1s;
+  }
+}
+
+/* ---- Card focus states for keyboard nav ---- */
+.card a:focus-visible,
+.card button:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.85);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- Category card focus ---- */
+.category-card:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.9);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(30,41,59,0.55);
+}
+
+/* ---- Product grid entrance animation ---- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes grid-card-enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .grid .card {
+    animation: grid-card-enter 0.35s ease-out both;
+  }
+
+  .grid .card:nth-child(1)  { animation-delay: 0ms; }
+  .grid .card:nth-child(2)  { animation-delay: 50ms; }
+  .grid .card:nth-child(3)  { animation-delay: 100ms; }
+  .grid .card:nth-child(4)  { animation-delay: 150ms; }
+  .grid .card:nth-child(5)  { animation-delay: 200ms; }
+  .grid .card:nth-child(6)  { animation-delay: 250ms; }
+  .grid .card:nth-child(7)  { animation-delay: 300ms; }
+  .grid .card:nth-child(8)  { animation-delay: 300ms; }
+  .grid .card:nth-child(n+9){ animation-delay: 300ms; }
+}
+
 .delete-confirm__label {
   display: block;
   font-size: 0.8rem;
