@@ -23,7 +23,7 @@
         <a class="nav-cat <%= path === '/category/home' ? 'active' : '' %>" href="/category/home">Home & Living</a>
       </li>
       <li class="main-header__item">
-        <a class="nav-cat <%= path === '/category/accessories' ? 'active' : '' %>" href="/category/accessories">Accessories</a>
+        <a class="nav-cat <%= path === '/category/wearables' ? 'active' : '' %>" href="/category/wearables">Wearables & Gadgets</a>
       </li>
       <% } %>
     </ul>
@@ -65,6 +65,7 @@
           <span class="wishlist-badge" id="wishlist-badge"<% if (wishlistCount === 0) { %> style="display:none"<% } %>><%= wishlistCount %></span>
         </a>
       </li>
+      <% if (path !== '/checkout') { %>
       <li class="main-header__item">
         <a id="cart-drawer-toggle" class="nav-icon <%= path === '/cart' ? 'active' : '' %>" href="/cart" title="Cart">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="22" height="22">
@@ -75,6 +76,7 @@
           <% } %>
         </a>
       </li>
+      <% } %>
       <li class="main-header__item account-menu">
         <button class="nav-icon account-toggle" aria-label="Account" aria-expanded="false" aria-haspopup="true">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="22" height="22">
@@ -174,7 +176,7 @@
       <a class="<%= path === '/category/home' ? 'active' : '' %>" href="/category/home">Home & Living</a>
     </li>
     <li class="mobile-nav__item">
-      <a class="<%= path === '/category/accessories' ? 'active' : '' %>" href="/category/accessories">Accessories</a>
+      <a class="<%= path === '/category/wearables' ? 'active' : '' %>" href="/category/wearables">Wearables & Gadgets</a>
     </li>
     <li class="mobile-nav__sep"></li>
     <% if (isAuthenticated) { %>

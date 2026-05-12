@@ -31,12 +31,17 @@ const productSchema = new Schema({
   category: {
     type: String,
     required: true,
-    enum: ['electronics', 'fashion', 'home', 'accessories'],
+    enum: ['electronics', 'fashion', 'home', 'wearables'],
   },
   adminId: {
     type: Schema.Types.ObjectId,
     ref: 'Admin',
     required: true,
+  },
+  stock: {
+    type: Number,
+    default: 0,
+    min: 0,
   },
 });
 

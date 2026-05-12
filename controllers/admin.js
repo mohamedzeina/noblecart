@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -5,8 +6,29 @@ const Product = require('../models/product');
 const Order = require('../models/order');
 const User = require('../models/user');
 const fileHelper = require('../util/file');
+const cloudinary = require('../util/cloudinary');
 const pg = require('../util/paginationHelper');
 const { sendStatusUpdate } = require('../util/email');
+
+function uploadImage(file) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(file.path, { folder: 'noblecart' }, (error, result) => {
+      fs.unlink(file.path, () => {});
+      if (error) return reject(error);
+      resolve(result);
+    });
+  });
+}
+
+function uploadModel(file) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(file.path, { folder: 'noblecart-models', resource_type: 'raw', format: 'glb' }, (error, result) => {
+      fs.unlink(file.path, () => {});
+      if (error) return reject(error);
+      resolve(result);
+    });
+  });
+}
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -19,21 +41,23 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-exports.postAddProduct = (req, res, next) => {
+exports.postAddProduct = async (req, res, next) => {
   const title = req.body.title;
-  const image = req.files && req.files.image ? req.files.image[0] : null;
-  const model = req.files && req.files.model ? req.files.model[0] : null;
+  const imageFile = req.files && req.files.image ? req.files.image[0] : null;
+  const modelFile = req.files && req.files.model ? req.files.model[0] : null;
   const description = req.body.description;
   const price = req.body.price;
   const category = req.body.category;
+  const stock = parseInt(req.body.stock, 10) || 0;
 
-  if (!image) {
+  if (!imageFile) {
+    if (modelFile) fs.unlink(modelFile.path, () => {});
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
       editing: false,
       hasError: true,
-      product: { title, price, description, category },
+      product: { title, price, description, category, stock },
       errorMessage: 'Please provide a product image.',
       validationErrors: [],
     });
@@ -42,40 +66,42 @@ exports.postAddProduct = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    fileHelper.deleteFile(image.filename);
-    if (model) fileHelper.deleteModel(model.filename);
+    fs.unlink(imageFile.path, () => {});
+    if (modelFile) fs.unlink(modelFile.path, () => {});
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
       editing: false,
       hasError: true,
-      product: { title, price, description, category },
+      product: { title, price, description, category, stock },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
     });
   }
 
-  const product = new Product({
-    title,
-    price,
-    imageUrl: image.path,
-    imagePublicId: image.filename,
-    modelUrl: model ? model.path : undefined,
-    modelPublicId: model ? model.filename : undefined,
-    description,
-    category,
-    adminId: req.admin._id,
-  });
-  product
-    .save()
-    .then(() => {
-      res.redirect('/admin/products');
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const imageResult = await uploadImage(imageFile);
+    const modelResult = modelFile ? await uploadModel(modelFile) : null;
+
+    const product = new Product({
+      title,
+      price,
+      imageUrl: imageResult.secure_url,
+      imagePublicId: imageResult.public_id,
+      modelUrl: modelResult ? modelResult.secure_url : undefined,
+      modelPublicId: modelResult ? modelResult.public_id : undefined,
+      description,
+      category,
+      stock,
+      adminId: req.admin._id,
     });
+    await product.save();
+    res.redirect('/admin/products');
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -106,20 +132,21 @@ exports.getEditProduct = (req, res, next) => {
     });
 };
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
-  const image = req.files && req.files.image ? req.files.image[0] : null;
-  const model = req.files && req.files.model ? req.files.model[0] : null;
+  const imageFile = req.files && req.files.image ? req.files.image[0] : null;
+  const modelFile = req.files && req.files.model ? req.files.model[0] : null;
   const updatedPrice = req.body.price;
   const updatedDesc = req.body.description;
   const updatedCategory = req.body.category;
+  const updatedStock = parseInt(req.body.stock, 10) || 0;
 
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    if (image) fileHelper.deleteFile(image.filename);
-    if (model) fileHelper.deleteModel(model.filename);
+    if (imageFile) fs.unlink(imageFile.path, () => {});
+    if (modelFile) fs.unlink(modelFile.path, () => {});
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Edit Product',
       path: '/admin/edit-product',
@@ -130,6 +157,7 @@ exports.postEditProduct = (req, res, next) => {
         price: updatedPrice,
         description: updatedDesc,
         category: updatedCategory,
+        stock: updatedStock,
         _id: prodId,
       },
       errorMessage: errors.array()[0].msg,
@@ -137,35 +165,41 @@ exports.postEditProduct = (req, res, next) => {
     });
   }
 
-  Product.findById(prodId)
-    .then((product) => {
-      if (product.adminId.toString() !== req.admin._id.toString()) {
-        return res.redirect('/');
-      }
-      product.title = updatedTitle;
-      product.price = updatedPrice;
-      if (image) {
-        fileHelper.deleteFile(product.imagePublicId);
-        product.imageUrl = image.path;
-        product.imagePublicId = image.filename;
-      }
-      if (model) {
-        fileHelper.deleteModel(product.modelPublicId);
-        product.modelUrl = model.path;
-        product.modelPublicId = model.filename;
-      }
-      product.description = updatedDesc;
-      product.category = updatedCategory;
+  try {
+    const product = await Product.findById(prodId);
+    if (product.adminId.toString() !== req.admin._id.toString()) {
+      if (imageFile) fs.unlink(imageFile.path, () => {});
+      if (modelFile) fs.unlink(modelFile.path, () => {});
+      return res.redirect('/');
+    }
 
-      return product.save().then(() => {
-        res.redirect('/admin/products');
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    });
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.stock = updatedStock;
+
+    if (imageFile) {
+      const imageResult = await uploadImage(imageFile);
+      fileHelper.deleteFile(product.imagePublicId);
+      product.imageUrl = imageResult.secure_url;
+      product.imagePublicId = imageResult.public_id;
+    }
+    if (modelFile) {
+      const modelResult = await uploadModel(modelFile);
+      fileHelper.deleteModel(product.modelPublicId);
+      product.modelUrl = modelResult.secure_url;
+      product.modelPublicId = modelResult.public_id;
+    }
+
+    product.description = updatedDesc;
+    product.category = updatedCategory;
+
+    await product.save();
+    res.redirect('/admin/products');
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.getProducts = (req, res, next) => {
@@ -262,6 +296,64 @@ exports.patchOrderStatus = (req, res, next) => {
     .catch((err) => {
       res.status(500).json({ message: 'Failed to update order status.' });
     });
+};
+
+exports.getAdminProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    if (!product || product.adminId.toString() !== req.admin._id.toString()) {
+      return res.redirect('/admin/products');
+    }
+
+    const Review = require('../models/review');
+
+    const [reviews, ratingAgg, soldAgg] = await Promise.all([
+      Review.find({ productId: product._id }).sort({ createdAt: -1 }).lean(),
+      Review.aggregate([
+        { $match: { productId: product._id } },
+        { $group: { _id: null, avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+      ]),
+      Order.aggregate([
+        { $unwind: '$products' },
+        { $match: { 'products.productData._id': product._id } },
+        { $group: { _id: null, total: { $sum: '$products.quantity' } } },
+      ]),
+    ]);
+
+    const rating = ratingAgg[0] || { avg: 0, count: 0 };
+    const unitsSold = soldAgg[0]?.total || 0;
+
+    res.render('admin/product-detail', {
+      pageTitle: product.title,
+      path: '/admin/products',
+      product,
+      reviews,
+      rating,
+      unitsSold,
+      csrfToken: req.csrfToken(),
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
+};
+
+exports.postUpdateStock = async (req, res, next) => {
+  try {
+    const { productId, stock } = req.body;
+    const product = await Product.findById(productId);
+    if (!product || product.adminId.toString() !== req.admin._id.toString()) {
+      return res.redirect('/admin/products');
+    }
+    product.stock = Math.max(0, parseInt(stock, 10) || 0);
+    await product.save();
+    res.redirect('/admin/product/' + productId);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.deleteProduct = (req, res, next) => {

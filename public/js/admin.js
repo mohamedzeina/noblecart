@@ -159,6 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
       })
         .then(result => result.json())
         .then(({ totalItems }) => {
+          if (!prodElement) {
+            window.location.href = '/admin/products';
+            return;
+          }
+
           prodElement.remove();
           showToast('Product deleted');
 

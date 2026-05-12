@@ -30,9 +30,11 @@ router.get('/orders', isAuth, shopController.getOrders);
 
 router.get('/checkout', isAuth, shopController.getCheckout);
 
+router.get('/checkout/session', isAuth, shopController.getCheckoutSession);
+
 router.get('/checkout/success', isAuth, shopController.getCheckoutSuccess);
 
-router.get('/checkout/cancel', isAuth, shopController.getCheckout);
+router.get('/checkout/cancel', isAuth, (req, res) => res.redirect('/checkout'));
 
 router.post('/wishlist-toggle', isAuth, shopController.postWishlistToggle);
 

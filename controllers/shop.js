@@ -307,61 +307,103 @@ exports.getOrders = (req, res, next) => {
     });
 };
 
-exports.getCheckout = (req, res, next) => {
-  let cartProducts;
-  let total = 0;
-  req.user
-    .populate('cart.items.productId')
-    .then((user) => {
-      cartProducts = user.cart.items;
-      cartProducts.forEach((p) => {
-        total += p.quantity * p.productId.price;
-      });
+exports.getCheckout = async (req, res, next) => {
+  try {
+    const user = await req.user.populate('cart.items.productId');
+    const cartProducts = user.cart.items;
+    if (cartProducts.length === 0) return res.redirect('/');
 
-      return stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: cartProducts.map((p) => {
-          return {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: p.productId.title,
-                description: p.productId.description,
-              },
-              unit_amount: p.productId.price * 100,
-            },
-            quantity: p.quantity,
-          };
-        }),
-        mode: 'payment',
-        success_url:
-          req.protocol + '://' + req.get('host') + '/checkout/success',
-        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
-      });
-    })
-    .then((session) => {
-      res.render('shop/checkout', {
+    let total = 0;
+    cartProducts.forEach((p) => { total += p.quantity * p.productId.price; });
+
+    const outOfStock = cartProducts.filter((p) => p.productId.stock < p.quantity);
+    if (outOfStock.length > 0) {
+      const names = outOfStock.map((p) => p.productId.title).join(', ');
+      return res.render('shop/checkout', {
         path: '/checkout',
         pageTitle: 'Checkout',
         products: cartProducts,
         totalSum: total,
-        sessionId: session.id,
+        sessionId: null,
         stripePublicKey: process.env.STRIPE_PUB_KEY,
+        stockError: `${names} ${outOfStock.length === 1 ? 'is' : 'are'} out of stock or have insufficient quantity. Please update your cart.`,
+        csrfToken: req.csrfToken(),
       });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: cartProducts.map((p) => ({
+        price_data: {
+          currency: 'usd',
+          product_data: { name: p.productId.title, description: p.productId.description },
+          unit_amount: p.productId.price * 100,
+        },
+        quantity: p.quantity,
+      })),
+      mode: 'payment',
+      success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+      cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
     });
+
+    res.render('shop/checkout', {
+      path: '/checkout',
+      pageTitle: 'Checkout',
+      products: cartProducts,
+      totalSum: total,
+      sessionId: session.id,
+      stripePublicKey: process.env.STRIPE_PUB_KEY,
+      csrfToken: req.csrfToken(),
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
+};
+
+exports.getCheckoutSession = async (req, res, next) => {
+  try {
+    const user = await req.user.populate('cart.items.productId');
+    const cartProducts = user.cart.items;
+    if (cartProducts.length === 0) return res.json({ sessionId: null, stockError: null });
+
+    const overStock = cartProducts.filter((p) => p.productId.stock < p.quantity);
+    if (overStock.length > 0) {
+      const names = overStock.map((p) => p.productId.title).join(', ');
+      return res.json({
+        sessionId: null,
+        stockError: `${names} ${overStock.length === 1 ? 'is' : 'are'} out of stock or have insufficient quantity. Please update your cart.`,
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: cartProducts.map((p) => ({
+        price_data: {
+          currency: 'usd',
+          product_data: { name: p.productId.title, description: p.productId.description },
+          unit_amount: Math.round(p.productId.price * 100),
+        },
+        quantity: p.quantity,
+      })),
+      mode: 'payment',
+      success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+      cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
+    });
+    res.json({ sessionId: session.id, stockError: null });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create session' });
+  }
 };
 
 exports.getCheckoutSuccess = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
     .then((user) => {
-      const products = user.cart.items.map((i) => {
-        return { quantity: i.quantity, productData: { ...i.productId._doc } }; // _doc to pull out all the data inside the object
+      const cartItems = user.cart.items;
+      const products = cartItems.map((i) => {
+        return { quantity: i.quantity, productData: { ...i.productId._doc } };
       });
 
       const order = new Order({
@@ -373,7 +415,16 @@ exports.getCheckoutSuccess = (req, res, next) => {
         status: 'pending',
         statusHistory: [{ status: 'pending', timestamp: new Date() }],
       });
-      return order.save();
+      return order.save().then((savedOrder) => {
+        return Promise.all(
+          cartItems.map((item) =>
+            Product.updateOne(
+              { _id: item.productId._id },
+              { $inc: { stock: -item.quantity } }
+            )
+          )
+        ).then(() => savedOrder);
+      });
     })
     .then((order) => {
       sendOrderConfirmation(order, order.user.email).catch(() => {});

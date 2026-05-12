@@ -100,6 +100,14 @@
   background: #f8fafc;
 }
 
+.cart__qty-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+  background: white;
+  color: #475569;
+}
+
 .cart__qty-value {
   font-size: 0.95rem;
   font-weight: 600;

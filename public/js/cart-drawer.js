@@ -145,68 +145,95 @@
   if (continueBtn) continueBtn.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
+  function flash(el) {
+    el.classList.remove('qty-flash');
+    void el.offsetWidth;
+    el.classList.add('qty-flash');
+  }
+
+  function removeItem(item, cartCount) {
+    item.classList.add('drawer-item--removing');
+    updateBadge(cartCount);
+    setTimeout(() => {
+      item.remove();
+      if (!body.querySelector('.drawer-item')) {
+        body.innerHTML = '<p class="cart-drawer__empty">Your cart is empty.</p>';
+        footer.style.display = 'none';
+      }
+      recalcTotal();
+    }, 230);
+  }
+
   // Qty + remove delegation
   body.addEventListener('click', (e) => {
-    const qtyBtn = e.target.closest('.drawer-qty-btn');
+    const qtyBtn    = e.target.closest('.drawer-qty-btn');
     const removeBtn = e.target.closest('.drawer-item__remove');
 
     if (qtyBtn) {
       const productId = qtyBtn.dataset.productId;
-      const action = qtyBtn.dataset.action;
-      const item = body.querySelector(`.drawer-item[data-product-id="${productId}"]`);
-      const btns = item.querySelectorAll('.drawer-qty-btn');
+      const action    = qtyBtn.dataset.action;
+      const item      = body.querySelector(`.drawer-item[data-product-id="${productId}"]`);
+      const qtyEl     = item.querySelector('.drawer-qty-value');
+      const totalEl   = item.querySelector('.drawer-item__total');
+      const price     = parseFloat(item.dataset.price);
+      const prevQty   = parseInt(qtyEl.textContent, 10);
+      const newQty    = action === 'increase' ? prevQty + 1 : Math.max(0, prevQty - 1);
+      const btns      = item.querySelectorAll('.drawer-qty-btn');
+
       btns.forEach((b) => (b.disabled = true));
+
+      if (newQty === 0) {
+        item.classList.add('drawer-item--removing');
+      } else {
+        // Optimistic update
+        qtyEl.textContent   = newQty;
+        flash(qtyEl);
+        totalEl.textContent = '$' + (price * newQty).toFixed(2);
+        flash(totalEl);
+        recalcTotal();
+      }
 
       fetch('/cart-update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-requested-with': 'fetch' },
         body: new URLSearchParams({ productId, action, _csrf: getCsrf() }),
       })
         .then((res) => res.json())
         .then(({ cartCount, itemQuantity, removed }) => {
-          updateBadge(cartCount);
           if (removed) {
-            item.remove();
-            if (!body.querySelector('.drawer-item')) {
-              body.innerHTML = '<p class="cart-drawer__empty">Your cart is empty.</p>';
-              footer.style.display = 'none';
-            }
+            removeItem(item, cartCount);
           } else {
-            item.querySelector('.drawer-qty-value').textContent = itemQuantity;
-            const price = parseFloat(item.dataset.price);
-            item.querySelector('.drawer-item__total').textContent = '$' + (price * itemQuantity).toFixed(2);
+            updateBadge(cartCount);
+            btns.forEach((b) => (b.disabled = false));
           }
-          recalcTotal();
         })
-        .finally(() => btns.forEach((b) => (b.disabled = false)));
+        .catch(() => {
+          // Revert on error
+          qtyEl.textContent   = prevQty;
+          totalEl.textContent = '$' + (price * prevQty).toFixed(2);
+          item.classList.remove('drawer-item--removing');
+          recalcTotal();
+          btns.forEach((b) => (b.disabled = false));
+        });
     }
 
     if (removeBtn) {
       const productId = removeBtn.dataset.productId;
-      const item = body.querySelector(`.drawer-item[data-product-id="${productId}"]`);
+      const item      = body.querySelector(`.drawer-item[data-product-id="${productId}"]`);
 
       removeBtn.disabled = true;
-      removeBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-      `;
+      item.classList.add('drawer-item--removing');
 
       fetch('/cart-delete-item', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-requested-with': 'fetch',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-requested-with': 'fetch' },
         body: new URLSearchParams({ productId, _csrf: getCsrf() }),
       })
         .then((res) => res.json())
-        .then(({ cartCount }) => {
-          updateBadge(cartCount);
-          item.remove();
-          if (!body.querySelector('.drawer-item')) {
-            body.innerHTML = '<p class="cart-drawer__empty">Your cart is empty.</p>';
-            footer.style.display = 'none';
-          }
-          recalcTotal();
+        .then(({ cartCount }) => removeItem(item, cartCount))
+        .catch(() => {
+          item.classList.remove('drawer-item--removing');
+          removeBtn.disabled = false;
         });
     }
   });

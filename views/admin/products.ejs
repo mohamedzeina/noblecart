@@ -20,13 +20,13 @@
             </div>
 
             <%
-                const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home', accessories: 'Accessories' };
+                const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home & Living', wearables: 'Wearables & Gadgets' };
                 const categoryChips = [
                     { value: '', label: 'All' },
                     { value: 'electronics', label: 'Electronics' },
                     { value: 'fashion', label: 'Fashion' },
-                    { value: 'home', label: 'Home' },
-                    { value: 'accessories', label: 'Accessories' },
+                    { value: 'home', label: 'Home & Living' },
+                    { value: 'wearables', label: 'Wearables & Gadgets' },
                 ];
             %>
             <div class="admin-filters">
@@ -51,7 +51,7 @@
                                 <img src="<%= product.imageUrl %>" alt="<%= product.title %>" loading="lazy">
                             </div>
                             <div class="admin-product-item__info">
-                                <h2 class="admin-product-item__title"><%= product.title %></h2>
+                                <h2 class="admin-product-item__title"><a href="/admin/product/<%= product._id %>"><%= product.title %></a></h2>
                                 <div class="admin-product-item__meta">
                                     <span class="admin-product-item__price">$<%= product.price.toFixed(2) %></span>
                                     <% if (product.category) { %>

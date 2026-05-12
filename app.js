@@ -25,16 +25,13 @@ const User = require('./models/user');
 const Admin = require('./models/admin');
 
 
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('./util/cloudinary');
+const os = require('os');
 
-const fileStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    if (file.fieldname === 'model') {
-      return { folder: 'noblecart-models', resource_type: 'raw', format: 'glb' };
-    }
-    return { folder: 'noblecart', allowed_formats: ['png', 'jpg', 'jpeg'] };
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, os.tmpdir()),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
   },
 });
 

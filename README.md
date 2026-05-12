@@ -175,10 +175,11 @@ This project follows the **Model-View-Controller (MVC)** pattern:
 ├── scripts/
 │   ├── seed.js               # Full DB reset and seed (Cloudinary + orders + reviews)
 │   └── products/             # Product data folders (gitignored)
-│       └── <slug>/
-│           ├── meta.txt      # title, price, category, description
-│           ├── model.glb     # 3D model (optional)
-│           └── image.png     # Optional — auto-captured via Puppeteer if missing
+│       └── <genre>/          # Category subfolder (electronics, fashion, home, accessories)
+│           └── <slug>/
+│               ├── meta.txt  # title, price, category, stock, description
+│               ├── model.glb # 3D model (optional)
+│               └── image.png # Optional — auto-captured via Puppeteer if missing
 └── invoices/               # Generated PDF invoices (gitignored)
 ```
 

@@ -324,6 +324,28 @@
 
 /* ── Reviews ─────────────────────────────────────── */
 
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  margin-top: -0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.stock-badge--out {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.stock-badge--low {
+  background: #fef3c7;
+  color: #d97706;
+}
+
 .related-products {
   max-width: 1200px;
   margin: 0 auto;

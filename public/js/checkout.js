@@ -1,6 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('order-btn');
+  if (!btn) return;
   const stripe = Stripe(btn.dataset.stripeKey);
+
+  const IDLE_HTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+    </svg>
+    Pay with Stripe
+  `;
+
+  function resetBtn() {
+    btn.disabled = false;
+    btn.innerHTML = IDLE_HTML;
+  }
 
   btn.addEventListener('click', () => {
     btn.disabled = true;
@@ -9,16 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
       Redirecting to Stripe…
     `;
     stripe.redirectToCheckout({ sessionId: btn.dataset.sessionId })
-      .then((result) => {
-        if (result.error) {
-          btn.disabled = false;
-          btn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-            </svg>
-            Pay with Stripe
-          `;
-        }
-      });
+      .then((result) => { if (result.error) resetBtn(); });
   });
+
+  // Restore button when user navigates back from Stripe (bfcache restore)
+  window.addEventListener('pageshow', (e) => { if (e.persisted) resetBtn(); });
 });

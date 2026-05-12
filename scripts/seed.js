@@ -32,6 +32,19 @@ const Review = require('../models/review');
 const PRODUCTS_DIR = path.join(__dirname, 'products');
 const CUSTOMER_PASSWORD = '123456';
 
+// Stock levels per product — covers all UI states: out of stock (0), low (1–5), normal (6+)
+const STOCK_MAP = {
+  'macbook-pro-m3-16-2024':  0,   // out of stock
+  'sony-ps5':                3,   // low stock
+  'ikea-kallax-147x147':     15,
+  'ikea-vittsjo':            2,   // low stock
+  'ikea-nockeby':            0,   // out of stock
+  'air-zoom-citizen-1999':   12,
+  'mercurial-vapor-iv':      4,   // low stock
+  'tiempo-legend-2014':      8,
+  'mercurial-ic-2014':       1,   // low stock
+};
+
 // ── Product upload helpers (shared with seed-glb-products.js) ────────────────
 
 function parseMeta(filePath) {
@@ -51,6 +64,7 @@ function parseMeta(filePath) {
     price: parseFloat(meta.price),
     category: meta.category.toLowerCase(),
     description: meta.description,
+    stock: meta.stock ? parseInt(meta.stock, 10) : 10,
   };
 }
 
@@ -62,14 +76,19 @@ async function uploadImage(filePath) {
   return { url: result.secure_url, publicId: result.public_id };
 }
 
-async function uploadModel(filePath) {
-  const result = await cloudinary.uploader.upload(filePath, {
-    folder: 'noblecart-models',
-    resource_type: 'raw',
-    use_filename: true,
-    unique_filename: true,
+function uploadModel(filePath) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(filePath, {
+      folder: 'noblecart-models',
+      resource_type: 'raw',
+      format: 'glb',
+      use_filename: true,
+      unique_filename: true,
+    }, (error, result) => {
+      if (error) return reject(error);
+      resolve({ url: result.secure_url, publicId: result.public_id });
+    });
   });
-  return { url: result.secure_url, publicId: result.public_id };
 }
 
 function findFile(dir, names) {
@@ -99,7 +118,7 @@ async function captureGlbThumbnail(glbPath) {
   await page.goto(`http://127.0.0.1:${port}/`);
   await page.waitForFunction(
     () => document.querySelector('model-viewer')?.loaded === true,
-    { timeout: 30000 }
+    { timeout: 60000 }
   );
   await new Promise(resolve => setTimeout(resolve, 2000));
   const screenshot = await page.screenshot({ type: 'png' });
@@ -175,17 +194,23 @@ async function run() {
 
   // Step 4: Seed products
   console.log('\n── Seeding products…');
-  const slugs = fs.readdirSync(PRODUCTS_DIR)
-    .filter(name => fs.statSync(path.join(PRODUCTS_DIR, name)).isDirectory())
-    .sort();
+  const productEntries = [];
+  for (const genre of fs.readdirSync(PRODUCTS_DIR).sort()) {
+    const genrePath = path.join(PRODUCTS_DIR, genre);
+    if (!fs.statSync(genrePath).isDirectory()) continue;
+    for (const slug of fs.readdirSync(genrePath).sort()) {
+      const slugPath = path.join(genrePath, slug);
+      if (fs.statSync(slugPath).isDirectory()) productEntries.push({ slug, dir: slugPath });
+    }
+  }
 
   const productMap = {};
-  for (const slug of slugs) {
-    const dir = path.join(PRODUCTS_DIR, slug);
+  for (const { slug, dir } of productEntries) {
     const metaPath = path.join(dir, 'meta.txt');
     if (!fs.existsSync(metaPath)) { console.warn(`  Skipping ${slug} — no meta.txt`); continue; }
 
     const meta = parseMeta(metaPath);
+    if (slug in STOCK_MAP) meta.stock = STOCK_MAP[slug];
     const doc = { ...meta, adminId: admin._id, imageUrl: '', imagePublicId: '' };
 
     const modelPath = findFile(dir, ['model.glb']);
@@ -201,8 +226,12 @@ async function run() {
     let tmpThumb = null;
     if (!imagePath && modelPath) {
       process.stdout.write(`  [${slug}] Capturing GLB thumbnail… `);
-      tmpThumb = await captureGlbThumbnail(modelPath);
-      imagePath = tmpThumb;
+      try {
+        tmpThumb = await captureGlbThumbnail(modelPath);
+        imagePath = tmpThumb;
+      } catch (e) {
+        console.warn(`\n  ⚠ Thumbnail capture failed for ${slug} — add an image.png manually`);
+      }
       console.log('done');
     }
     if (!imagePath) { console.warn(`  Skipping ${slug} — no image or GLB`); continue; }
@@ -440,6 +469,54 @@ async function run() {
       comment: "Beautiful heritage boot and the touch is exceptional. My issue is the weight — modern alternatives like the Predator give similar control at a fraction of the mass." },
     { slug: 'tiempo-legend-2014', user: u6, rating: 4, verifiedPurchase: false,
       comment: "Classic leather craftsmanship that feels like it was made by someone who actually played the game. Heavy, yes, but for a number 10 the close control is worth it." },
+
+    // ── AirPods Pro (2nd Generation) ─────────────────────────────────────────
+    { slug: 'airpods-pro', user: u2, rating: 5, verifiedPurchase: true,
+      comment: "The ANC is genuinely class-leading. I use these on daily commutes and they make the Underground feel silent. Transparency mode is so good you forget you're wearing them. Worth every penny." },
+    { slug: 'airpods-pro', user: u4, rating: 4, verifiedPurchase: true,
+      comment: "Huge upgrade over the first gen. Adaptive Audio is a feature I didn't know I needed — it blends noise cancellation and transparency seamlessly based on your environment. Battery life is much improved too." },
+    { slug: 'airpods-pro', user: u6, rating: 5, verifiedPurchase: false,
+      comment: "Borrowed a pair for a flight — the ANC blocked out engine noise better than my over-ears. Spatial Audio in movies is legitimately immersive. Buying my own pair as soon as possible." },
+    { slug: 'airpods-pro', user: u9, rating: 3, verifiedPurchase: false,
+      comment: "Great earbuds but the fit doesn't work for my ear shape — they pop out during runs regardless of which tip size I use. ANC and sound quality are excellent when they stay in though." },
+    { slug: 'airpods-pro', user: u11, rating: 5, verifiedPurchase: true,
+      comment: "The Conversation Awareness feature alone makes these worth it. Media pauses and volume drops the moment I start talking — it sounds like a small thing until you've used it for a week." },
+
+    // ── AirPods Max ───────────────────────────────────────────────────────────
+    { slug: 'airpods-max', user: u3, rating: 5, verifiedPurchase: true,
+      comment: "The best headphones I've ever owned. The ANC is otherworldly and the sound quality is rich and detailed across every genre. The aluminium build feels like wearing a precision instrument on your head." },
+    { slug: 'airpods-max', user: u7, rating: 4, verifiedPurchase: false,
+      comment: "Tried these for a week and the sound quality is genuinely stunning. My only hesitation is the case — it looks like a bra and offers almost no protection. For the price that's embarrassing." },
+    { slug: 'airpods-max', user: u10, rating: 5, verifiedPurchase: true,
+      comment: "Spatial Audio with head tracking is not a gimmick — watching films on a plane with these is a cinema experience. The knitted mesh headband is the most comfortable I've worn over long sessions." },
+    { slug: 'airpods-max', user: u12, rating: 3, verifiedPurchase: false,
+      comment: "Exceptional sound but the weight becomes noticeable after two hours. Sony's XM5s are lighter, cheaper, and have a better case. These are the status play if you're already in the Apple ecosystem." },
+    { slug: 'airpods-max', user: u5, rating: 4, verifiedPurchase: true,
+      comment: "Sound quality is reference-grade and ANC handles airplane cabin noise better than anything else I've tried. The Digital Crown for volume is a thoughtful detail. Case is still awful though." },
+
+    // ── Apple Watch Ultra ─────────────────────────────────────────────────────
+    { slug: 'apple-watch-ultra', user: u4, rating: 5, verifiedPurchase: true,
+      comment: "The original Ultra set the bar for what a smartwatch could be. Titanium case, 40m water resistance, precise GPS — and the Action Button is still one of the smartest hardware additions Apple has made." },
+    { slug: 'apple-watch-ultra', user: u6, rating: 4, verifiedPurchase: false,
+      comment: "Still an excellent watch even with the Ultra 2 out. The 2000 nit display handles direct sunlight well and the battery life is miles ahead of the standard Apple Watch. Great value at the current price." },
+    { slug: 'apple-watch-ultra', user: u8, rating: 5, verifiedPurchase: true,
+      comment: "Used this for a full Ironman — GPS held perfect throughout the swim, bike, and run. The crash detection and emergency SOS gave real peace of mind in remote sections of the course." },
+    { slug: 'apple-watch-ultra', user: u2, rating: 3, verifiedPurchase: false,
+      comment: "Great watch but if you're choosing between this and the Ultra 2 the S9 chip and 3000 nit display are meaningful upgrades. This one is only worth it if the price difference is significant." },
+    { slug: 'apple-watch-ultra', user: u11, rating: 4, verifiedPurchase: true,
+      comment: "Chunky but purposeful. The ocean band is genuinely comfortable for watersports and the 40m dive rating actually gets used. Build quality is exceptional — no scratches after six months of hard use." },
+
+    // ── Rolex Datejust 41 ─────────────────────────────────────────────────────
+    { slug: 'rolex-datejust', user: u1, rating: 5, verifiedPurchase: true,
+      comment: "Flawless craftsmanship. The Calibre 3235 movement is buttery smooth and the jubilee bracelet wears beautifully. This is a watch you buy once and pass down. Every detail is considered and perfect." },
+    { slug: 'rolex-datejust', user: u5, rating: 5, verifiedPurchase: false,
+      comment: "Tried one at a boutique — the fit, weight, and finish are in a different universe from anything else I've worn. The Cyclops lens is more useful than it looks. A timeless object in every sense." },
+    { slug: 'rolex-datejust', user: u9, rating: 4, verifiedPurchase: true,
+      comment: "Incredible watch. The 70-hour power reserve is reassuring and the self-winding movement is hypnotic to watch through the caseback. Only giving four stars because the waiting list experience was frustrating." },
+    { slug: 'rolex-datejust', user: u3, rating: 5, verifiedPurchase: false,
+      comment: "The Datejust is the definitive dress watch. Clean, legible, and appropriate for every occasion. The fluted bezel catches light beautifully. Nothing else in this category comes close to the overall package." },
+    { slug: 'rolex-datejust', user: u7, rating: 4, verifiedPurchase: true,
+      comment: "Superb quality and a watch that only improves with age. The bracelet has zero play after months of daily wear. Would give five stars but the date font feels slightly dated against modern competitors." },
   ];
 
   for (const { slug, user, rating, verifiedPurchase, comment } of reviews) {

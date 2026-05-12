@@ -15,3 +15,43 @@
   margin-top: 0.65rem;
   margin-bottom: 0;
 }
+
+.checkout__stock-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.checkout__stock-error svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Stock error / pay button visibility — uses ID selector to beat any class display rule */
+.cart-summary:not(.cart-summary--stock-error) #checkout-stock-error { display: none; }
+.cart-summary--stock-error #order-btn { display: none; }
+
+.cart__qty-value,
+.js-item-total,
+.js-grand-total {
+  display: inline-block;
+}
+
+.cart__item--removing {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+}
+
+.cart-summary__item--removing {
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}

@@ -22,7 +22,7 @@ router.post(
       .trim(),
     body('price', 'Please enter a valid price.').isFloat(),
     body('description').isLength({ min: 5, max: 400 }).trim(),
-    body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'accessories']),
+    body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'wearables']),
   ],
   isAdmin,
   adminController.postAddProduct
@@ -53,11 +53,15 @@ router.post(
     )
       .isLength({ min: 5, max: 400 })
       .trim(),
-    body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'accessories']),
+    body('category', 'Please select a valid category.').isIn(['electronics', 'fashion', 'home', 'wearables']),
   ],
   isAdmin,
   adminController.postEditProduct
 );
+
+router.get('/product/:productId', isAdmin, adminController.getAdminProduct);
+
+router.post('/update-stock', isAdmin, adminController.postUpdateStock);
 
 router.delete('/product/:prodId', isAdmin, adminController.deleteProduct);
 

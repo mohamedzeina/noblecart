@@ -56,6 +56,15 @@
   text-overflow: ellipsis;
 }
 
+.admin-product-item__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.admin-product-item__title a:hover {
+  color: #475569;
+}
+
 .admin-product-item__meta {
   display: flex;
   align-items: center;
@@ -478,4 +487,352 @@
 
 .order-cancel-confirm__no:hover {
   background: #e2e8f0;
+}
+
+/* ── Admin Product Detail (apd) ── */
+.apd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.apd-back:hover {
+  color: #1e293b;
+}
+
+.apd-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.apd-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  align-items: start;
+}
+
+/* Left column */
+.apd-image {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apd-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.apd-image .admin-product-item__badge--3d {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.apd-meta {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.apd-meta__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.apd-meta__row:last-child {
+  border-bottom: none;
+}
+
+.apd-meta__row--desc {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.apd-meta__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.apd-meta__value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+}
+
+.apd-meta__value--desc {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #475569;
+  line-height: 1.55;
+  text-align: left;
+}
+
+/* Right column */
+.apd-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* KPI cards */
+.apd-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.apd-kpi {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.apd-kpi__value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.apd-kpi__value--danger {
+  color: #dc2626;
+}
+
+.apd-kpi__value--warn {
+  color: #d97706;
+}
+
+.apd-kpi__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Stock card */
+.apd-stock-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.apd-stock-card__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem;
+}
+
+.apd-stock-form__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.apd-stock-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.apd-stock-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.apd-stock-input {
+  width: 80px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.apd-stock-input:focus {
+  border-color: #94a3b8;
+}
+
+.apd-stock-save {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: 8px;
+}
+
+/* Reviews */
+.apd-reviews {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.apd-reviews__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.apd-reviews__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.apd-reviews__empty {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.apd-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.apd-review {
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.apd-review:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.apd-review__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.apd-review__stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.apd-review__stars .star path {
+  fill: #e2e8f0;
+}
+
+.apd-review__stars .star--filled path {
+  fill: #f59e0b;
+}
+
+.apd-review__user {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.apd-review__verified {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  padding: 0.05rem 0.35rem;
+}
+
+.apd-review__date {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+.apd-review__comment {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .apd-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .apd-image {
+    max-width: 340px;
+  }
+
+  .apd-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .apd-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .apd-header-actions {
+    gap: 0.4rem;
+  }
 }

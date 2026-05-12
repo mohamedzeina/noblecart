@@ -5,7 +5,7 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-            <% const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home & Living', accessories: 'Accessories' }; %>
+            <% const catLabels = { electronics: 'Electronics', fashion: 'Fashion', home: 'Home & Living', wearables: 'Wearables & Gadgets' }; %>
             <nav class="breadcrumb product-detail__breadcrumb" aria-label="Breadcrumb">
                 <a href="/" class="breadcrumb__item">All Products</a>
                 <span class="breadcrumb__sep">/</span>
@@ -39,6 +39,11 @@
                     </a>
                     <% } %>
                     <p class="product-detail__price">$<%= product.price.toFixed(2) %></p>
+                    <% if (product.stock === 0) { %>
+                        <p class="stock-badge stock-badge--out">Out of Stock</p>
+                    <% } else if (product.stock <= 5) { %>
+                        <p class="stock-badge stock-badge--low">Only <%= product.stock %> left in stock</p>
+                    <% } %>
                     <p class="product-detail__description"><%= product.description %></p>
 
                     <% if (isAuthenticated) { %>
