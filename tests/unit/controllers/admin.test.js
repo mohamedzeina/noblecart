@@ -5,6 +5,9 @@ jest.mock('../../../models/review');
 jest.mock('../../../util/email', () => ({ sendStatusUpdate: jest.fn().mockResolvedValue() }));
 jest.mock('../../../util/cloudinary');
 jest.mock('../../../util/file', () => ({ deleteFile: jest.fn(), deleteModel: jest.fn() }));
+jest.mock('express-validator', () => ({
+  validationResult: jest.fn().mockReturnValue({ isEmpty: () => true, array: () => [] }),
+}));
 
 const mongoose = require('mongoose');
 const Order = require('../../../models/order');
@@ -12,6 +15,8 @@ const Product = require('../../../models/product');
 const User = require('../../../models/user');
 const Review = require('../../../models/review');
 const { sendStatusUpdate } = require('../../../util/email');
+const { validationResult } = require('express-validator');
+const cloudinary = require('../../../util/cloudinary');
 const adminController = require('../../../controllers/admin');
 
 function id() {
@@ -195,5 +200,210 @@ describe('deleteProduct', () => {
     await adminController.deleteProduct(makeReq({ params: { prodId }, admin: { _id: id() } }), res, jest.fn());
 
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ totalItems: 4 }));
+  });
+});
+
+// ─── postUpdateStock ──────────────────────────────────────────────────────────
+
+describe('postUpdateStock', () => {
+  it('redirects to /admin/products when product not found', async () => {
+    Product.findById = jest.fn().mockResolvedValue(null);
+    const res = makeRes();
+    await adminController.postUpdateStock(
+      makeReq({ body: { productId: id().toString(), stock: '5' } }),
+      res, jest.fn(),
+    );
+    expect(res.redirect).toHaveBeenCalledWith('/admin/products');
+  });
+
+  it('redirects when admin does not own the product', async () => {
+    const product = { _id: id(), adminId: id() };
+    Product.findById = jest.fn().mockResolvedValue(product);
+    const res = makeRes();
+    await adminController.postUpdateStock(
+      makeReq({ body: { productId: product._id.toString(), stock: '5' }, admin: { _id: id() } }),
+      res, jest.fn(),
+    );
+    expect(res.redirect).toHaveBeenCalledWith('/admin/products');
+  });
+
+  it('updates stock and redirects to product page', async () => {
+    const adminId = id();
+    const productId = id();
+    const product = { _id: productId, adminId, stock: 3, save: jest.fn().mockResolvedValue({}) };
+    Product.findById = jest.fn().mockResolvedValue(product);
+
+    const res = makeRes();
+    await adminController.postUpdateStock(
+      makeReq({ body: { productId: productId.toString(), stock: '10' }, admin: { _id: adminId } }),
+      res, jest.fn(),
+    );
+
+    expect(product.stock).toBe(10);
+    expect(product.save).toHaveBeenCalledTimes(1);
+    expect(res.redirect).toHaveBeenCalledWith('/admin/product/' + productId.toString());
+  });
+});
+
+// ─── getAdminProduct ──────────────────────────────────────────────────────────
+
+describe('getAdminProduct', () => {
+  it('redirects when product not found', async () => {
+    Product.findById = jest.fn().mockResolvedValue(null);
+    const res = makeRes();
+    await adminController.getAdminProduct(
+      makeReq({ params: { productId: id().toString() } }), res, jest.fn(),
+    );
+    expect(res.redirect).toHaveBeenCalledWith('/admin/products');
+  });
+
+  it('redirects when admin does not own the product', async () => {
+    const product = { _id: id(), adminId: id() };
+    Product.findById = jest.fn().mockResolvedValue(product);
+    const res = makeRes();
+    await adminController.getAdminProduct(
+      makeReq({ params: { productId: product._id.toString() }, admin: { _id: id() } }),
+      res, jest.fn(),
+    );
+    expect(res.redirect).toHaveBeenCalledWith('/admin/products');
+  });
+
+  it('renders product-detail with reviews and stats', async () => {
+    const adminId = id();
+    const product = { _id: id(), adminId };
+    Product.findById = jest.fn().mockResolvedValue(product);
+    Review.find = jest.fn().mockReturnValue({
+      sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
+    });
+    Review.aggregate = jest.fn().mockResolvedValue([{ avg: 4.5, count: 10 }]);
+    Order.aggregate = jest.fn().mockResolvedValue([{ total: 25 }]);
+
+    const res = makeRes();
+    await adminController.getAdminProduct(
+      makeReq({ params: { productId: product._id.toString() }, admin: { _id: adminId } }),
+      res, jest.fn(),
+    );
+
+    expect(res.render).toHaveBeenCalledWith('admin/product-detail', expect.objectContaining({
+      product,
+      unitsSold: 25,
+    }));
+  });
+});
+
+// ─── postAddProduct ───────────────────────────────────────────────────────────
+
+describe('postAddProduct', () => {
+  beforeEach(() => {
+    cloudinary.uploader = {
+      upload_stream: jest.fn((opts, cb) => {
+        cb(null, { secure_url: 'https://res.cloudinary.com/img.jpg', public_id: 'noblecart/abc' });
+        return { end: jest.fn() };
+      }),
+    };
+  });
+
+  it('returns 422 when no image is provided', async () => {
+    const res = makeRes();
+    await adminController.postAddProduct(
+      makeReq({ body: { title: 'Watch', price: '50', description: 'Nice', category: 'watches', stock: '5' }, files: {} }),
+      res, jest.fn(),
+    );
+    expect(res.status).toHaveBeenCalledWith(422);
+    expect(res.render).toHaveBeenCalledWith('admin/edit-product', expect.objectContaining({ hasError: true }));
+  });
+
+  it('returns 422 when validation errors exist', async () => {
+    validationResult.mockReturnValueOnce({ isEmpty: () => false, array: () => [{ msg: 'Title is required' }] });
+
+    const res = makeRes();
+    await adminController.postAddProduct(
+      makeReq({
+        body: { title: '', price: '50', description: 'Nice', category: 'watches', stock: '5' },
+        files: { image: [{ buffer: Buffer.from('img') }] },
+      }),
+      res, jest.fn(),
+    );
+    expect(res.status).toHaveBeenCalledWith(422);
+  });
+
+  it('uploads image and creates product on valid input', async () => {
+    Product.mockImplementation(() => ({ save: jest.fn().mockResolvedValue({}) }));
+
+    const res = makeRes();
+    await adminController.postAddProduct(
+      makeReq({
+        body: { title: 'Watch', price: '50', description: 'Nice', category: 'watches', stock: '5' },
+        files: { image: [{ buffer: Buffer.from('img') }] },
+      }),
+      res, jest.fn(),
+    );
+
+    expect(res.redirect).toHaveBeenCalledWith('/admin/products');
+  });
+});
+
+// ─── postEditProduct ──────────────────────────────────────────────────────────
+
+describe('postEditProduct', () => {
+  it('returns 422 when validation errors exist', async () => {
+    validationResult.mockReturnValueOnce({ isEmpty: () => false, array: () => [{ msg: 'Price invalid' }] });
+
+    const res = makeRes();
+    await adminController.postEditProduct(
+      makeReq({
+        body: { productId: id().toString(), title: 'Watch', price: 'abc', description: 'Nice', category: 'watches', stock: '5' },
+        files: {},
+      }),
+      res, jest.fn(),
+    );
+    expect(res.status).toHaveBeenCalledWith(422);
+    expect(res.render).toHaveBeenCalledWith('admin/edit-product', expect.objectContaining({ hasError: true }));
+  });
+
+  it('redirects to / when admin does not own the product', async () => {
+    const product = { adminId: id() };
+    Product.findById = jest.fn().mockResolvedValue(product);
+
+    const res = makeRes();
+    await adminController.postEditProduct(
+      makeReq({
+        body: { productId: id().toString(), title: 'Watch', price: '50', description: 'Nice', category: 'watches', stock: '5' },
+        files: {},
+        admin: { _id: id() },
+      }),
+      res, jest.fn(),
+    );
+    expect(res.redirect).toHaveBeenCalledWith('/');
+  });
+
+  it('saves updated fields and redirects when no new files are uploaded', async () => {
+    const adminId = id();
+    const productId = id();
+    const product = {
+      _id: productId,
+      adminId,
+      title: 'Old',
+      price: '30',
+      stock: 2,
+      description: 'Old desc',
+      category: 'old',
+      save: jest.fn().mockResolvedValue({}),
+    };
+    Product.findById = jest.fn().mockResolvedValue(product);
+
+    const res = makeRes();
+    await adminController.postEditProduct(
+      makeReq({
+        body: { productId: productId.toString(), title: 'New Watch', price: '60', description: 'Updated', category: 'watches', stock: '8' },
+        files: {},
+        admin: { _id: adminId },
+      }),
+      res, jest.fn(),
+    );
+
+    expect(product.title).toBe('New Watch');
+    expect(product.save).toHaveBeenCalledTimes(1);
+    expect(res.redirect).toHaveBeenCalledWith('/admin/products');
   });
 });

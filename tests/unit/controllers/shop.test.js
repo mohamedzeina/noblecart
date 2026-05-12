@@ -10,7 +10,9 @@ jest.mock('stripe', () => jest.fn(() => ({
 const mongoose = require('mongoose');
 const Order = require('../../../models/order');
 const Product = require('../../../models/product');
+const Review = require('../../../models/review');
 const { buildRatingsMap } = require('../../../util/reviewHelpers');
+const { sendOrderConfirmation } = require('../../../util/email');
 const shopController = require('../../../controllers/shop');
 
 function id() {
@@ -40,6 +42,7 @@ function makeReq(overrides = {}) {
     get: jest.fn().mockReturnValue('localhost:3000'),
     user: {
       _id: id(),
+      email: 'test@test.com',
       cart: { items: [] },
       wishlist: [],
       save: jest.fn().mockResolvedValue({}),
@@ -307,5 +310,258 @@ describe('getOrderDetail', () => {
     const next = jest.fn();
     await shopController.getOrderDetail(makeReq({ params: { orderId: id().toString() } }), makeRes(), next);
     expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+});
+
+// ─── postCartUpdate ───────────────────────────────────────────────────────────
+
+describe('postCartUpdate', () => {
+  it('calls addToCart for increase and returns JSON', async () => {
+    const productId = id();
+    const product = { _id: productId, price: 25 };
+    Product.findById = jest.fn().mockResolvedValue(product);
+
+    const req = makeReq({ body: { productId: productId.toString(), action: 'increase' } });
+    req.user.cart.items = [{ productId, quantity: 2 }];
+    const res = makeRes();
+    await shopController.postCartUpdate(req, res, jest.fn());
+
+    expect(req.user.addToCart).toHaveBeenCalledWith(product);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ cartCount: 2, removed: false }));
+  });
+
+  it('calls decrementFromCart for decrease', async () => {
+    const productId = id();
+    Product.findById = jest.fn().mockResolvedValue({ _id: productId, price: 25 });
+
+    const req = makeReq({ body: { productId: productId.toString(), action: 'decrease' } });
+    req.user.cart.items = [{ productId, quantity: 1 }];
+    await shopController.postCartUpdate(req, makeRes(), jest.fn());
+
+    expect(req.user.decrementFromCart).toHaveBeenCalledWith(productId.toString());
+  });
+
+  it('returns removed: true when item quantity drops to 0', async () => {
+    const productId = id();
+    Product.findById = jest.fn().mockResolvedValue({ _id: productId, price: 25 });
+
+    const req = makeReq({ body: { productId: productId.toString(), action: 'decrease' } });
+    req.user.cart.items = [];
+    const res = makeRes();
+    await shopController.postCartUpdate(req, res, jest.fn());
+
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ removed: true, itemQuantity: 0 }));
+  });
+
+  it('calls next with 500 when product not found', async () => {
+    Product.findById = jest.fn().mockResolvedValue(null);
+    const next = jest.fn();
+    await shopController.postCartUpdate(
+      makeReq({ body: { productId: id().toString(), action: 'increase' } }),
+      makeRes(), next,
+    );
+    expect(next).toHaveBeenCalled();
+    expect(next.mock.calls[0][0].httpStatusCode).toBe(500);
+  });
+});
+
+// ─── postWishlistToggle ───────────────────────────────────────────────────────
+
+describe('postWishlistToggle', () => {
+  it('returns inWishlist: true when product is in wishlist after toggle', async () => {
+    const productId = id();
+    const req = makeReq({ body: { productId: productId.toString() } });
+    req.user.toggleWishlist = jest.fn().mockResolvedValue({});
+    req.user.wishlist = [{ productId }];
+
+    const res = makeRes();
+    await shopController.postWishlistToggle(req, res, jest.fn());
+
+    expect(req.user.toggleWishlist).toHaveBeenCalledWith(productId.toString());
+    expect(res.json).toHaveBeenCalledWith({ success: true, inWishlist: true, wishlistCount: 1 });
+  });
+
+  it('returns inWishlist: false when product is removed from wishlist', async () => {
+    const productId = id();
+    const req = makeReq({ body: { productId: productId.toString() } });
+    req.user.toggleWishlist = jest.fn().mockResolvedValue({});
+    req.user.wishlist = [];
+
+    const res = makeRes();
+    await shopController.postWishlistToggle(req, res, jest.fn());
+
+    expect(res.json).toHaveBeenCalledWith({ success: true, inWishlist: false, wishlistCount: 0 });
+  });
+});
+
+// ─── getCheckoutSuccess ───────────────────────────────────────────────────────
+
+describe('getCheckoutSuccess', () => {
+  function makeCartItem(qty = 2) {
+    const productId = id();
+    return {
+      quantity: qty,
+      productId: { _id: productId, _doc: { _id: productId, title: 'Watch', price: 100 } },
+    };
+  }
+
+  it('creates an Order with the current user data', async () => {
+    const item = makeCartItem();
+    const req = makeReq();
+    req.user.email = 'buyer@test.com';
+    req.user.populate = jest.fn().mockResolvedValue({ cart: { items: [item] } });
+
+    const savedOrder = { _id: id(), user: { email: 'buyer@test.com' } };
+    Order.mockImplementation(() => ({ save: jest.fn().mockResolvedValue(savedOrder) }));
+    Product.updateOne = jest.fn().mockResolvedValue({});
+
+    await shopController.getCheckoutSuccess(req, makeRes(), jest.fn());
+
+    expect(Order).toHaveBeenCalledWith(expect.objectContaining({
+      user: expect.objectContaining({ email: 'buyer@test.com' }),
+      status: 'pending',
+    }));
+  });
+
+  it('decrements stock for each cart item', async () => {
+    const item = makeCartItem(3);
+    const req = makeReq();
+    req.user.populate = jest.fn().mockResolvedValue({ cart: { items: [item] } });
+
+    const savedOrder = { _id: id(), user: { email: 'buyer@test.com' } };
+    Order.mockImplementation(() => ({ save: jest.fn().mockResolvedValue(savedOrder) }));
+    Product.updateOne = jest.fn().mockResolvedValue({});
+
+    await shopController.getCheckoutSuccess(req, makeRes(), jest.fn());
+
+    expect(Product.updateOne).toHaveBeenCalledWith(
+      { _id: item.productId._id },
+      { $inc: { stock: -3 } },
+    );
+  });
+
+  it('clears the cart and redirects to /orders on success', async () => {
+    const req = makeReq();
+    req.user.populate = jest.fn().mockResolvedValue({ cart: { items: [] } });
+
+    const savedOrder = { _id: id(), user: { email: 'buyer@test.com' } };
+    Order.mockImplementation(() => ({ save: jest.fn().mockResolvedValue(savedOrder) }));
+
+    const res = makeRes();
+    await shopController.getCheckoutSuccess(req, res, jest.fn());
+
+    expect(req.user.clearCart).toHaveBeenCalledTimes(1);
+    expect(res.redirect).toHaveBeenCalledWith('/orders');
+  });
+});
+
+// ─── postReview ───────────────────────────────────────────────────────────────
+
+describe('postReview', () => {
+  it('flashes error and redirects when rating is 0', async () => {
+    const productId = id().toString();
+    const req = makeReq({ params: { productId }, body: { rating: '0', comment: 'Good' } });
+    const res = makeRes();
+    await shopController.postReview(req, res, jest.fn());
+    expect(req.flash).toHaveBeenCalledWith('reviewError', expect.any(String));
+    expect(res.redirect).toHaveBeenCalledWith('/products/' + productId);
+  });
+
+  it('flashes error when comment is blank', async () => {
+    const productId = id().toString();
+    const req = makeReq({ params: { productId }, body: { rating: '4', comment: '   ' } });
+    await shopController.postReview(req, makeRes(), jest.fn());
+    expect(req.flash).toHaveBeenCalledWith('reviewError', expect.any(String));
+  });
+
+  it('sets verifiedPurchase: true when user has ordered the product', async () => {
+    const productId = id().toString();
+    Order.findOne = jest.fn().mockResolvedValue({ _id: id() });
+    Review.mockImplementation(() => ({ save: jest.fn().mockResolvedValue({}) }));
+
+    const req = makeReq({ params: { productId }, body: { rating: '5', comment: 'Excellent!' } });
+    await shopController.postReview(req, makeRes(), jest.fn());
+
+    expect(Review).toHaveBeenCalledWith(expect.objectContaining({ verifiedPurchase: true }));
+  });
+
+  it('sets verifiedPurchase: false when no matching order exists', async () => {
+    const productId = id().toString();
+    Order.findOne = jest.fn().mockResolvedValue(null);
+    Review.mockImplementation(() => ({ save: jest.fn().mockResolvedValue({}) }));
+
+    const req = makeReq({ params: { productId }, body: { rating: '3', comment: 'OK' } });
+    await shopController.postReview(req, makeRes(), jest.fn());
+
+    expect(Review).toHaveBeenCalledWith(expect.objectContaining({ verifiedPurchase: false }));
+  });
+
+  it('redirects without calling next on duplicate review (code 11000)', async () => {
+    const productId = id().toString();
+    Order.findOne = jest.fn().mockResolvedValue(null);
+    Review.mockImplementation(() => ({ save: jest.fn().mockRejectedValue({ code: 11000 }) }));
+
+    const next = jest.fn();
+    const res = makeRes();
+    const req = makeReq({ params: { productId }, body: { rating: '4', comment: 'Nice!' } });
+    await shopController.postReview(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith('/products/' + productId);
+  });
+});
+
+// ─── putReview ────────────────────────────────────────────────────────────────
+
+describe('putReview', () => {
+  it('flashes error and redirects when rating is out of range', async () => {
+    const productId = id().toString();
+    const req = makeReq({ params: { productId }, body: { rating: '6', comment: 'Good' } });
+    const res = makeRes();
+    await shopController.putReview(req, res, jest.fn());
+    expect(req.flash).toHaveBeenCalledWith('reviewError', expect.any(String));
+    expect(res.redirect).toHaveBeenCalledWith('/products/' + productId);
+  });
+
+  it('calls findOneAndUpdate with correct fields', async () => {
+    const productId = id().toString();
+    Review.findOneAndUpdate = jest.fn().mockResolvedValue({});
+    const req = makeReq({ params: { productId }, body: { rating: '4', comment: 'Updated' } });
+    await shopController.putReview(req, makeRes(), jest.fn());
+    expect(Review.findOneAndUpdate).toHaveBeenCalledWith(
+      { productId, userId: req.user._id },
+      { rating: 4, comment: 'Updated' },
+      { new: true },
+    );
+  });
+
+  it('redirects to product on success', async () => {
+    const productId = id().toString();
+    Review.findOneAndUpdate = jest.fn().mockResolvedValue({});
+    const req = makeReq({ params: { productId }, body: { rating: '3', comment: 'Good' } });
+    const res = makeRes();
+    await shopController.putReview(req, res, jest.fn());
+    expect(res.redirect).toHaveBeenCalledWith('/products/' + productId);
+  });
+});
+
+// ─── deleteReview ─────────────────────────────────────────────────────────────
+
+describe('deleteReview', () => {
+  it('calls findOneAndDelete with correct ids', async () => {
+    const productId = id().toString();
+    Review.findOneAndDelete = jest.fn().mockResolvedValue({});
+    const req = makeReq({ params: { productId } });
+    await shopController.deleteReview(req, makeRes(), jest.fn());
+    expect(Review.findOneAndDelete).toHaveBeenCalledWith({ productId, userId: req.user._id });
+  });
+
+  it('redirects to product on success', async () => {
+    const productId = id().toString();
+    Review.findOneAndDelete = jest.fn().mockResolvedValue({});
+    const req = makeReq({ params: { productId } });
+    const res = makeRes();
+    await shopController.deleteReview(req, res, jest.fn());
+    expect(res.redirect).toHaveBeenCalledWith('/products/' + productId);
   });
 });

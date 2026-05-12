@@ -19,6 +19,9 @@ server.cert
 # Seed assets — GLB files and images are large, stored in Cloudinary
 /scripts/products/
 
+# Test coverage
+coverage/
+
 # Logs
 access.log
 *.log
