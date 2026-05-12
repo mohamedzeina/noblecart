@@ -19,6 +19,7 @@ const adminRoutes = require('./routes/admin');
 const adminAuthRoutes = require('./routes/admin-auth');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
+const apiRoutes = require('./routes/api');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -132,6 +133,7 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminAuthRoutes);
 app.use('/admin', adminRoutes);
+app.use('/api', apiRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 

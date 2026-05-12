@@ -96,7 +96,7 @@
 
                     <div class="profile-form__row">
                         <div class="form-control">
-                            <label for="name">Full Name</label>
+                            <label for="name">Full Name <span class="form-required">*</span></label>
                             <input type="text" name="name" id="name" value="<%= user.name %>" placeholder="Your name" autocomplete="name" maxlength="100" required />
                         </div>
                         <div class="form-control">
@@ -106,6 +106,7 @@
                     </div>
 
                     <div class="profile-form__actions">
+                        <p class="profile-form__required-note"><span class="form-required">*</span> Required</p>
                         <button type="submit" class="profile-btn">Save Changes</button>
                     </div>
                 </form>
@@ -143,14 +144,25 @@
 
                 <% if (hasAddress && !showAddressForm) { %>
                 <!-- Saved address display -->
-                <div id="address-display" class="profile-address-display">
-                    <div class="profile-address-display__lines">
-                        <% if (user.address.street) { %><p><%= user.address.street %></p><% } %>
-                        <% const cityLine = [user.address.city, user.address.state, user.address.zip].filter(Boolean).join(', '); %>
-                        <% if (cityLine) { %><p><%= cityLine %></p><% } %>
-                        <% if (user.address.country) { %><p><%= user.address.country %></p><% } %>
+                <div id="address-display" class="profile-address-card-wrap">
+                    <div class="profile-address-card">
+                        <div class="profile-address-card__header">
+                            <div class="profile-address-card__label-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                                <span class="profile-address-card__label"><%= user.address.label %></span>
+                            </div>
+                            <button type="button" id="address-show-form" class="profile-address-card__edit-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+                                Edit
+                            </button>
+                        </div>
+                        <div class="profile-address-card__lines">
+                            <% if (user.address.street) { %><span><%= user.address.street %></span><% } %>
+                            <% const cityLine = [user.address.city, user.address.state, user.address.zip].filter(Boolean).join(', '); %>
+                            <% if (cityLine) { %><span><%= cityLine %></span><% } %>
+                            <% if (user.address.country) { %><span><%= user.address.country %></span><% } %>
+                        </div>
                     </div>
-                    <button type="button" id="address-show-form" class="profile-btn-outline">Edit Address</button>
                 </div>
                 <% } %>
 
@@ -160,40 +172,63 @@
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
                     <div class="form-control">
-                        <label for="street">Street Address</label>
+                        <label for="addressLabel">Address Label <span class="form-required">*</span></label>
+                        <input type="text" name="label" id="addressLabel"
+                               value="<%= user.address ? user.address.label : '' %>"
+                               placeholder="e.g. Home, Work, Office" maxlength="50" autocomplete="off" required />
+                    </div>
+
+                    <div class="profile-form__row">
+                        <div class="form-control">
+                            <label for="country">Country <span class="form-required">*</span></label>
+                            <select name="country" id="country" required>
+                                <option value="">Select country</option>
+                                <% countries.forEach(c => { %>
+                                <option value="<%= c.name %>" data-code="<%= c.isoCode %>"
+                                    <%= (user.address && user.address.country === c.name) ? 'selected' : '' %>>
+                                    <%= c.name %>
+                                </option>
+                                <% }) %>
+                            </select>
+                            <input type="hidden" name="countryCode" id="countryCode"
+                                   value="<%= user.address ? user.address.countryCode : '' %>" />
+                        </div>
+                        <div class="form-control profile-form--hidden" id="state-field">
+                            <label for="state" id="state-label">State / Province</label>
+                            <select name="state" id="state">
+                                <option value="">Select</option>
+                            </select>
+                            <input type="hidden" name="stateCode" id="stateCode"
+                                   value="<%= user.address ? user.address.stateCode : '' %>" />
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label for="street">Street Address <span class="form-required">*</span></label>
                         <input type="text" name="street" id="street"
                                value="<%= user.address ? user.address.street : '' %>"
-                               placeholder="123 Main St" autocomplete="street-address" />
+                               placeholder="123 Main St" autocomplete="street-address" required />
                     </div>
+
                     <div class="profile-form__row">
                         <div class="form-control">
-                            <label for="city">City</label>
-                            <input type="text" name="city" id="city"
-                                   value="<%= user.address ? user.address.city : '' %>"
-                                   placeholder="New York" autocomplete="address-level2" />
+                            <label for="city" id="city-label">City <span class="form-required">*</span></label>
+                            <select name="city" id="city" required>
+                                <option value="">Select</option>
+                                <% if (user.address && user.address.city) { %>
+                                <option value="<%= user.address.city %>" selected><%= user.address.city %></option>
+                                <% } %>
+                            </select>
                         </div>
-                        <div class="form-control">
-                            <label for="state">State / Province</label>
-                            <input type="text" name="state" id="state"
-                                   value="<%= user.address ? user.address.state : '' %>"
-                                   placeholder="NY" autocomplete="address-level1" />
-                        </div>
-                    </div>
-                    <div class="profile-form__row">
                         <div class="form-control">
                             <label for="zip">ZIP / Postal Code</label>
                             <input type="text" name="zip" id="zip"
                                    value="<%= user.address ? user.address.zip : '' %>"
                                    placeholder="10001" autocomplete="postal-code" />
                         </div>
-                        <div class="form-control">
-                            <label for="country">Country</label>
-                            <input type="text" name="country" id="country"
-                                   value="<%= user.address ? user.address.country : '' %>"
-                                   placeholder="United States" autocomplete="country-name" />
-                        </div>
                     </div>
                     <div class="profile-form__actions">
+                        <p class="profile-form__required-note"><span class="form-required">*</span> Required</p>
                         <% if (hasAddress) { %>
                         <button type="button" id="address-cancel" class="profile-btn-ghost">Cancel</button>
                         <% } %>
@@ -222,7 +257,7 @@
                     <form action="/profile/password" method="POST" class="profile-form profile-form--security">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                         <div class="form-control">
-                            <label for="currentPassword">Current Password</label>
+                            <label for="currentPassword">Current Password <span class="form-required">*</span></label>
                             <div class="input-wrapper">
                                 <input type="password" name="currentPassword" id="currentPassword" placeholder="Enter current password" autocomplete="current-password" />
                                 <button type="button" class="input-toggle" aria-label="Show password">
@@ -232,7 +267,7 @@
                             </div>
                         </div>
                         <div class="form-control">
-                            <label for="newPassword">New Password</label>
+                            <label for="newPassword">New Password <span class="form-required">*</span></label>
                             <div class="input-wrapper">
                                 <input type="password" name="newPassword" id="newPassword" placeholder="At least 6 characters" autocomplete="new-password" />
                                 <button type="button" class="input-toggle" aria-label="Show password">
@@ -242,7 +277,7 @@
                             </div>
                         </div>
                         <div class="form-control">
-                            <label for="confirmPassword">Confirm New Password</label>
+                            <label for="confirmPassword">Confirm New Password <span class="form-required">*</span></label>
                             <div class="input-wrapper">
                                 <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Repeat new password" autocomplete="new-password" />
                                 <button type="button" class="input-toggle" aria-label="Show password">
@@ -252,6 +287,7 @@
                             </div>
                         </div>
                         <div class="profile-form__actions">
+                            <p class="profile-form__required-note"><span class="form-required">*</span> Required</p>
                             <button type="submit" class="profile-btn">Update Password</button>
                         </div>
                     </form>
