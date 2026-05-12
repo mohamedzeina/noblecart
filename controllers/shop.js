@@ -657,6 +657,7 @@ exports.postReview = (req, res, next) => {
       productId,
       userId: req.user._id,
       userName: req.user.name || req.user.email.split('@')[0],
+      userAvatar: req.user.avatar || '',
       rating: ratingNum,
       comment,
       verifiedPurchase: !!order,

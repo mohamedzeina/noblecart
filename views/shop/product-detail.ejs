@@ -213,7 +213,9 @@
                     <div class="review-form review-form--existing">
                         <div class="review-form__view">
                             <div class="review-item__header">
-                                <div class="review-item__avatar"><%= userReview.userName.charAt(0).toUpperCase() %></div>
+                                <div class="review-item__avatar">
+                                    <% if (userReview.userAvatar) { %><img src="<%= userReview.userAvatar %>" alt="" class="review-item__avatar-img" /><% } else { %><%= userReview.userName.charAt(0).toUpperCase() %><% } %>
+                                </div>
                                 <div class="review-item__meta">
                                     <div class="stars-display"><%- stars(userReview.rating) %></div>
                                     <div class="review-item__author-row">
@@ -271,7 +273,9 @@
                         <% displayedReviews.forEach(review => { %>
                         <li class="review-item">
                             <div class="review-item__header">
-                                <div class="review-item__avatar"><%= review.userName.charAt(0).toUpperCase() %></div>
+                                <div class="review-item__avatar">
+                                    <% if (review.userAvatar) { %><img src="<%= review.userAvatar %>" alt="" class="review-item__avatar-img" /><% } else { %><%= review.userName.charAt(0).toUpperCase() %><% } %>
+                                </div>
                                 <div class="review-item__meta">
                                     <div class="stars-display"><%- stars(review.rating) %></div>
                                     <div class="review-item__author-row">

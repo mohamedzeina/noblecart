@@ -15,6 +15,10 @@ const reviewSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  userAvatar: {
+    type: String,
+    default: '',
+  },
   rating: {
     type: Number,
     required: true,

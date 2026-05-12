@@ -560,7 +560,7 @@ async function run() {
   for (const { slug, user, rating, verifiedPurchase, comment } of reviews) {
     const product = productMap[slug];
     if (!product) { console.warn(`  Skipping review — product "${slug}" not found`); continue; }
-    const userName = user.email.split('@')[0];
+    const userName = user.name;
     await Review.create({ productId: product._id, userId: user._id, userName, rating, comment, verifiedPurchase });
     const label = verifiedPurchase ? '✓ verified' : '  unverified';
     console.log(`  ${label}  ${userName} → "${product.title.slice(0, 28)}…" ${rating}★`);
