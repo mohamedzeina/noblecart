@@ -250,22 +250,51 @@ async function run() {
   // Step 5: Create customers
   console.log('\n── Creating customers…');
   const customerHash = await bcrypt.hash(CUSTOMER_PASSWORD, 12);
+  const USERS = [
+    {
+      email: 'test@test.com', name: 'Alice Johnson',
+      address: { label: 'Home', street: '350 Fifth Avenue', city: 'New York City', state: 'New York', stateCode: 'NY', zip: '10118', country: 'United States', countryCode: 'US' },
+    },
+    {
+      email: 'test2@test.com', name: 'Bob Smith',
+      address: { label: 'Home', street: '10 Downing Street', city: 'London', state: 'England', stateCode: 'ENG', zip: 'SW1A 2AA', country: 'United Kingdom', countryCode: 'GB' },
+    },
+    {
+      email: 'test3@test.com', name: 'Carol White',
+      address: { label: 'Home', street: '221B Baker Street', city: 'London', state: 'England', stateCode: 'ENG', zip: 'NW1 6XE', country: 'United Kingdom', countryCode: 'GB' },
+    },
+    {
+      email: 'test4@test.com', name: 'David Lee',
+      address: { label: 'Home', street: 'Bağdat Caddesi 100', city: 'Kadıköy', state: 'Istanbul', stateCode: '34', zip: '34710', country: 'Turkey', countryCode: 'TR' },
+    },
+    {
+      email: 'test5@test.com', name: 'Eva Martinez',
+      address: { label: 'Work', street: '1 Infinite Loop', city: 'Los Angeles', state: 'California', stateCode: 'CA', zip: '90001', country: 'United States', countryCode: 'US' },
+    },
+    {
+      email: 'test6@test.com', name: 'Frank Brown',
+      address: { label: 'Home', street: '55 Water Street', city: 'New York City', state: 'New York', stateCode: 'NY', zip: '10041', country: 'United States', countryCode: 'US' },
+    },
+    {
+      email: 'test7@test.com', name: 'Grace Kim',
+      address: { label: 'Home', street: '100 Queen Street West', city: 'Toronto', state: 'Ontario', stateCode: 'ON', zip: 'M5H 2N2', country: 'Canada', countryCode: 'CA' },
+    },
+    { email: 'test8@test.com',  name: 'Henry Davis'    },
+    {
+      email: 'test9@test.com', name: 'Isla Wilson',
+      address: { label: 'Home', street: '1 Macquarie Street', city: 'Sydney', state: 'New South Wales', stateCode: 'NSW', zip: '2000', country: 'Australia', countryCode: 'AU' },
+    },
+    { email: 'test10@test.com', name: 'Jack Taylor'    },
+    {
+      email: 'test11@test.com', name: 'Karen Anderson',
+      address: { label: 'Home', street: '233 S Wacker Drive', city: 'Chicago', state: 'Illinois', stateCode: 'IL', zip: '60606', country: 'United States', countryCode: 'US' },
+    },
+    { email: 'test12@test.com', name: 'Liam Thomas'    },
+  ];
+
   const [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12] = await Promise.all(
-    [
-      { email: 'test@test.com',   name: 'Alice Johnson'  },
-      { email: 'test2@test.com',  name: 'Bob Smith'      },
-      { email: 'test3@test.com',  name: 'Carol White'    },
-      { email: 'test4@test.com',  name: 'David Lee'      },
-      { email: 'test5@test.com',  name: 'Eva Martinez'   },
-      { email: 'test6@test.com',  name: 'Frank Brown'    },
-      { email: 'test7@test.com',  name: 'Grace Kim'      },
-      { email: 'test8@test.com',  name: 'Henry Davis'    },
-      { email: 'test9@test.com',  name: 'Isla Wilson'    },
-      { email: 'test10@test.com', name: 'Jack Taylor'    },
-      { email: 'test11@test.com', name: 'Karen Anderson' },
-      { email: 'test12@test.com', name: 'Liam Thomas'    },
-    ].map(({ email, name }) =>
-      User.create({ email, name, password: customerHash, cart: { items: [] }, wishlist: [] })
+    USERS.map(({ email, name, address }) =>
+      User.create({ email, name, password: customerHash, cart: { items: [] }, wishlist: [], ...(address ? { address } : {}) })
     )
   );
   [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12].forEach(u => console.log(`  ✓ ${u.email}  (password: ${CUSTOMER_PASSWORD})`));

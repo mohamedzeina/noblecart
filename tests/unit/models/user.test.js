@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../../../models/user');
 
 function makeUser(cartItems = [], wishlist = []) {
-  const user = new User({ email: 'test@test.com', password: 'hashed' });
+  const user = new User({ email: 'test@test.com', name: 'Test User', password: 'hashed' });
   user.cart = { items: cartItems };
   user.wishlist = wishlist;
   user.save = jest.fn().mockResolvedValue(user);
