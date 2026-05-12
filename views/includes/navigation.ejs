@@ -2,7 +2,7 @@
 <div class="backdrop"></div>
 <header class="main-header">
   <button id="side-menu-toggle">Menu</button>
-  <a class="main-header__brand" href="/">Noblecart_</a>
+  <a class="main-header__brand" href="<%= isAdmin ? '/admin/dashboard' : '/' %>">Noblecart_</a>
   <nav class="main-header__nav">
     <ul class="main-header__item-list">
       <% if (isAdmin) { %>

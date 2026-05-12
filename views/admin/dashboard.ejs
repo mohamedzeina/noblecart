@@ -11,6 +11,11 @@
                     <h1 class="admin-page-header__title">Dashboard</h1>
                     <p class="admin-page-header__subtitle">Overview of your store performance</p>
                 </div>
+                <div class="dash-period-filter">
+                    <a href="/admin/dashboard?period=7d"  class="dash-period-btn<%= period === '7d'  ? ' dash-period-btn--active' : '' %>">7D</a>
+                    <a href="/admin/dashboard?period=30d" class="dash-period-btn<%= period === '30d' ? ' dash-period-btn--active' : '' %>">30D</a>
+                    <a href="/admin/dashboard?period=all" class="dash-period-btn<%= period === 'all' ? ' dash-period-btn--active' : '' %>">All</a>
+                </div>
             </div>
 
             <!-- KPI row -->
@@ -50,6 +55,20 @@
                         <span class="dash-kpi__label">Products Listed</span>
                         <span class="dash-kpi__value" data-target="<%= productCount %>" data-prefix="" data-decimals="0">0</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Revenue trend chart -->
+            <div class="dash-card dash-card--full dash-chart-card">
+                <h2 class="dash-card__title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="15" height="15"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" /></svg>
+                    Revenue Trend
+                </h2>
+                <div class="dash-chart-wrap">
+                    <canvas id="revenue-chart"
+                        data-labels="<%= dailyRevenue.map(d => d.date).join(',') %>"
+                        data-values="<%= dailyRevenue.map(d => d.revenue.toFixed(2)).join(',') %>">
+                    </canvas>
                 </div>
             </div>
 
@@ -116,7 +135,7 @@
                                         <span class="dash-status-row__label"><%= label %></span>
                                         <span class="dash-status-row__count"><%= row.count %></span>
                                     </div>
-                                    <div class="dash-status-row__bar-bg">
+                                    <div class="dash-status-row__bar-bg" data-tooltip="<%= pct %>%">
                                         <div class="dash-status-row__bar dash-status-row__bar--<%= row._id %>" data-pct="<%= pct %>"></div>
                                     </div>
                                 </div>
@@ -165,5 +184,6 @@
 
         </main>
         <script src="/js/admin.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <script src="/js/dashboard.js"></script>
         <%- include('../includes/end.ejs') %>

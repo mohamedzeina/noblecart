@@ -194,6 +194,21 @@ exports.postEditProduct = async (req, res, next) => {
 
 exports.getAdminDashboard = async (req, res, next) => {
   try {
+    const period = req.query.period || '30d';
+
+    let startDate = null;
+    if (period === '7d')  startDate = new Date(Date.now() - 7  * 24 * 60 * 60 * 1000);
+    if (period === '30d') startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const oidFromDate = (d) => mongoose.Types.ObjectId.createFromTime(Math.floor(d.getTime() / 1000));
+    const periodMatch = startDate ? { _id: { $gte: oidFromDate(startDate) } } : {};
+    const paidMatch   = { ...periodMatch, status: { $ne: 'canceled' } };
+
+    // Chart always shows the selected window (7d → 7 days, 30d/all → 30 days)
+    const chartDays  = period === '7d' ? 7 : 30;
+    const chartStart = new Date(Date.now() - chartDays * 24 * 60 * 60 * 1000);
+    const chartMatch = { _id: { $gte: oidFromDate(chartStart) }, status: { $ne: 'canceled' } };
+
     const [
       revenueResult,
       paidOrders,
@@ -201,18 +216,16 @@ exports.getAdminDashboard = async (req, res, next) => {
       statusBreakdown,
       recentOrders,
       productCount,
+      dailyRevenueRaw,
     ] = await Promise.all([
       Order.aggregate([
-        { $match: { status: { $ne: 'canceled' } } },
+        { $match: paidMatch },
         { $unwind: '$products' },
-        { $group: {
-          _id: null,
-          revenue: { $sum: { $multiply: ['$products.productData.price', '$products.quantity'] } },
-        }},
+        { $group: { _id: null, revenue: { $sum: { $multiply: ['$products.productData.price', '$products.quantity'] } } } },
       ]),
-      Order.countDocuments({ status: { $ne: 'canceled' } }),
+      Order.countDocuments(paidMatch),
       Order.aggregate([
-        { $match: { status: { $ne: 'canceled' } } },
+        { $match: paidMatch },
         { $unwind: '$products' },
         { $group: {
           _id: '$products.productData.title',
@@ -223,14 +236,34 @@ exports.getAdminDashboard = async (req, res, next) => {
         { $limit: 5 },
       ]),
       Order.aggregate([
+        { $match: periodMatch },
         { $group: { _id: '$status', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
-      Order.find().sort({ _id: -1 }).limit(5),
+      Order.find(periodMatch).sort({ _id: -1 }).limit(5),
       Product.countDocuments(),
+      Order.aggregate([
+        { $match: chartMatch },
+        { $unwind: '$products' },
+        { $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: { $toDate: '$_id' } } },
+          revenue: { $sum: { $multiply: ['$products.productData.price', '$products.quantity'] } },
+        }},
+        { $sort: { _id: 1 } },
+      ]),
     ]);
 
-    const totalRevenue = revenueResult[0]?.revenue || 0;
+    // Fill every day in range with 0 if no revenue
+    const revenueByDay = {};
+    dailyRevenueRaw.forEach(r => { revenueByDay[r._id] = r.revenue; });
+    const dailyRevenue = Array.from({ length: chartDays }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (chartDays - 1 - i));
+      const key = d.toISOString().slice(0, 10);
+      return { date: key, revenue: revenueByDay[key] || 0 };
+    });
+
+    const totalRevenue  = revenueResult[0]?.revenue || 0;
     const avgOrderValue = paidOrders > 0 ? totalRevenue / paidOrders : 0;
 
     const recentOrdersMapped = recentOrders.map((o) => ({
@@ -251,6 +284,8 @@ exports.getAdminDashboard = async (req, res, next) => {
       topProducts,
       statusBreakdown,
       recentOrders: recentOrdersMapped,
+      dailyRevenue,
+      period,
     });
   } catch (err) {
     const error = new Error(err);

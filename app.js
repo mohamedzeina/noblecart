@@ -64,7 +64,7 @@ app.use(
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         'img-src': ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
-        'script-src': ["'self'", 'https://js.stripe.com', 'https://ajax.googleapis.com', 'https://www.gstatic.com'],
+        'script-src': ["'self'", 'https://js.stripe.com', 'https://ajax.googleapis.com', 'https://www.gstatic.com', 'https://cdn.jsdelivr.net'],
         'frame-src': ["'self'", 'https://js.stripe.com'],
         'style-src': ["'self'", 'https://fonts.googleapis.com'],
         'font-src': ["'self'", 'https://fonts.gstatic.com'],
