@@ -1,6 +1,7 @@
 const express = require('express');
 
 const shopController = require('../controllers/shop');
+const profileController = require('../controllers/profile');
 const isAuth = require('../middleware/is-auth');
 const isNotAdmin = require('../middleware/is-not-admin');
 
@@ -48,5 +49,10 @@ router.get('/products/:productId/reviews', shopController.getProductReviews);
 router.post('/products/:productId/review', isAuth, shopController.postReview);
 router.post('/products/:productId/review/update', isAuth, shopController.putReview);
 router.post('/products/:productId/review/delete', isAuth, shopController.deleteReview);
+
+router.get('/profile', isAuth, profileController.getProfile);
+router.post('/profile', isAuth, profileController.postUpdateProfile);
+router.post('/profile/address', isAuth, profileController.postUpdateAddress);
+router.post('/profile/password', isAuth, profileController.postUpdatePassword);
 
 module.exports = router;

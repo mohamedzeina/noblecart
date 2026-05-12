@@ -3,8 +3,19 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { sendWelcome, sendPasswordReset } = require('../util/email');
 const { validationResult } = require('express-validator');
+const cloudinary = require('../util/cloudinary');
 
 const User = require('../models/user');
+
+function uploadAvatar(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'noblecart-avatars', transformation: [{ width: 200, height: 200, crop: 'fill', gravity: 'face' }] },
+      (err, result) => (err ? reject(err) : resolve(result))
+    );
+    stream.end(buffer);
+  });
+}
 
 
 
@@ -111,46 +122,50 @@ exports.getSignup = (req, res, next) => {
     path: '/signup',
     pageTitle: 'Signup',
     errorMessage: message.length > 0 ? message[0] : null,
-    oldInput: { email: '', password: '', confirmPassword: '' },
+    oldInput: { name: '', email: '', password: '', confirmPassword: '' },
     validationErrors: [],
   });
 };
 
-exports.postSignup = (req, res, next) => {
+exports.postSignup = async (req, res, next) => {
+  const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
-  const errors = validationResult(req);
+  const avatarFile = req.files && req.files.avatar ? req.files.avatar[0] : null;
 
+  const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).render('auth/signup', {
       path: '/signup',
       pageTitle: 'Signup',
       errorMessage: errors.array()[0].msg,
-      oldInput: {
-        email: email,
-        password: password,
-        confirmPassword: req.body.confirmPassword,
-      },
+      oldInput: { name, email, password, confirmPassword: req.body.confirmPassword },
       validationErrors: errors.array(),
     });
   }
 
-  bcrypt
-    .hash(password, 12)
-    .then((hashedPass) => {
-      const user = new User({
-        email: email,
-        password: hashedPass,
-        cart: { items: [] },
-      });
+  try {
+    const [hashedPass, avatarResult] = await Promise.all([
+      bcrypt.hash(password, 12),
+      avatarFile ? uploadAvatar(avatarFile.buffer) : Promise.resolve(null),
+    ]);
 
-      return user.save();
-    })
-    .then(() => {
-      res.redirect('/login');
-
-      sendWelcome(email).catch(() => {});
+    const user = new User({
+      name,
+      email,
+      password: hashedPass,
+      avatar: avatarResult ? avatarResult.secure_url : '',
+      avatarPublicId: avatarResult ? avatarResult.public_id : '',
+      cart: { items: [] },
     });
+    await user.save();
+    res.redirect('/login');
+    sendWelcome(email).catch(() => {});
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.postLogout = (req, res, next) => {

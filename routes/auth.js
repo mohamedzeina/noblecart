@@ -30,6 +30,12 @@ router.get('/signup', authController.getSignup);
 router.post(
   '/signup',
   [
+    body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('Please enter your name.')
+      .isLength({ max: 100 })
+      .withMessage('Name must be 100 characters or fewer.'),
     body('email')
       .isEmail()
       .withMessage('Please enter a valid email.')

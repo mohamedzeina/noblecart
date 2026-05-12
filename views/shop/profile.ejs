@@ -1,0 +1,279 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/profile.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    <main class="profile-page">
+
+        <!-- Sidebar -->
+        <aside class="profile-sidebar">
+            <div class="profile-sidebar__user">
+                <div class="profile-sidebar__avatar">
+                    <% if (user.avatar) { %>
+                    <img src="<%= user.avatar %>" alt="<%= user.name %>" class="profile-sidebar__avatar-img" />
+                    <% } else { %>
+                    <span class="profile-sidebar__avatar-initial">
+                        <%= user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase() %>
+                    </span>
+                    <% } %>
+                </div>
+                <div class="profile-sidebar__user-info">
+                    <p class="profile-sidebar__name"><%= user.name || user.email.split('@')[0] %></p>
+                    <p class="profile-sidebar__email"><%= user.email %></p>
+                    <p class="profile-sidebar__since">Member since <%= memberSince.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %></p>
+                </div>
+            </div>
+
+            <div class="profile-sidebar__stats">
+                <a href="/orders" class="profile-sidebar__stat">
+                    <span class="profile-sidebar__stat-value"><%= orderCount %></span>
+                    <span class="profile-sidebar__stat-label">Orders</span>
+                </a>
+                <div class="profile-sidebar__stat-sep"></div>
+                <a href="/wishlist" class="profile-sidebar__stat">
+                    <span class="profile-sidebar__stat-value"><%= wishlistCount %></span>
+                    <span class="profile-sidebar__stat-label">Wishlist</span>
+                </a>
+            </div>
+
+            <nav class="profile-sidebar__nav" aria-label="Profile sections">
+                <button class="profile-sidebar__nav-item profile-sidebar__nav-item--active" data-tab="info">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                    Personal Info
+                </button>
+                <button class="profile-sidebar__nav-item" data-tab="address">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                    Address
+                </button>
+                <button class="profile-sidebar__nav-item" data-tab="security">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                    Security
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main content -->
+        <div class="profile-content">
+
+            <!-- ── Personal Info ──────────────────────────────── -->
+            <section id="tab-info" class="profile-section" data-tab-panel="info">
+                <div class="profile-section__header">
+                    <h2 class="profile-section__title">Personal Information</h2>
+                    <p class="profile-section__desc">Update your name and profile photo.</p>
+                </div>
+
+                <% if (infoMsg.success || infoMsg.error) { %>
+                <div class="profile-section__alert profile-alert--<%= infoMsg.success ? 'success' : 'error' %>" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+                        <% if (infoMsg.success) { %><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /><% } else { %><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /><% } %>
+                    </svg>
+                    <%= infoMsg.success || infoMsg.error %>
+                </div>
+                <% } %>
+
+                <form action="/profile" method="POST" enctype="multipart/form-data" class="profile-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                    <div class="profile-avatar-field">
+                        <div class="profile-avatar-circle" id="profile-avatar-wrap">
+                            <% if (user.avatar) { %>
+                            <img id="profile-avatar-img" src="<%= user.avatar %>" alt="Avatar" class="profile-avatar-circle__img" />
+                            <% } else { %>
+                            <span id="profile-avatar-initial" class="profile-avatar-circle__initial">
+                                <%= user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase() %>
+                            </span>
+                            <img id="profile-avatar-img" src="" alt="Avatar" class="profile-avatar-circle__img hidden" />
+                            <% } %>
+                            <label for="profile-avatar-input" class="profile-avatar-circle__overlay" aria-label="Change photo">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" /></svg>
+                            </label>
+                        </div>
+                        <input type="file" name="avatar" id="profile-avatar-input" accept="image/*" class="profile-avatar-circle__input" />
+                        <p class="profile-avatar-field__hint">JPG or PNG · Max 5 MB</p>
+                    </div>
+
+                    <div class="profile-form__row">
+                        <div class="form-control">
+                            <label for="name">Full Name</label>
+                            <input type="text" name="name" id="name" value="<%= user.name %>" placeholder="Your name" autocomplete="name" maxlength="100" required />
+                        </div>
+                        <div class="form-control">
+                            <label for="email">Email <span class="form-control__hint">(read‑only)</span></label>
+                            <input type="email" id="email" value="<%= user.email %>" disabled />
+                        </div>
+                    </div>
+
+                    <div class="profile-form__actions">
+                        <button type="submit" class="profile-btn">Save Changes</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- ── Shipping Address ───────────────────────────── -->
+            <%
+              const hasAddress = user.address &&
+                (user.address.street || user.address.city || user.address.zip || user.address.country);
+              const showAddressForm = !!addressMsg.error;
+            %>
+            <section id="tab-address" class="profile-section profile-section--hidden" data-tab-panel="address">
+                <div class="profile-section__header">
+                    <h2 class="profile-section__title">Shipping Address</h2>
+                    <p class="profile-section__desc">Default address used during checkout.</p>
+                </div>
+
+                <% if (addressMsg.success || addressMsg.error) { %>
+                <div class="profile-section__alert profile-alert--<%= addressMsg.success ? 'success' : 'error' %>" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+                        <% if (addressMsg.success) { %><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /><% } else { %><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /><% } %>
+                    </svg>
+                    <%= addressMsg.success || addressMsg.error %>
+                </div>
+                <% } %>
+
+                <% if (!hasAddress && !showAddressForm) { %>
+                <!-- Empty state -->
+                <div id="address-empty" class="profile-address-empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="36" height="36"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                    <p class="profile-address-empty__text">No shipping address saved yet.</p>
+                    <button type="button" id="address-show-form" class="profile-btn">Add Address</button>
+                </div>
+                <% } %>
+
+                <% if (hasAddress && !showAddressForm) { %>
+                <!-- Saved address display -->
+                <div id="address-display" class="profile-address-display">
+                    <div class="profile-address-display__lines">
+                        <% if (user.address.street) { %><p><%= user.address.street %></p><% } %>
+                        <% const cityLine = [user.address.city, user.address.state, user.address.zip].filter(Boolean).join(', '); %>
+                        <% if (cityLine) { %><p><%= cityLine %></p><% } %>
+                        <% if (user.address.country) { %><p><%= user.address.country %></p><% } %>
+                    </div>
+                    <button type="button" id="address-show-form" class="profile-btn-outline">Edit Address</button>
+                </div>
+                <% } %>
+
+                <!-- Address form (shown when no address, or editing, or on error) -->
+                <form id="address-form" action="/profile/address" method="POST"
+                      class="profile-form<%= !showAddressForm ? ' profile-form--hidden' : '' %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                    <div class="form-control">
+                        <label for="street">Street Address</label>
+                        <input type="text" name="street" id="street"
+                               value="<%= user.address ? user.address.street : '' %>"
+                               placeholder="123 Main St" autocomplete="street-address" />
+                    </div>
+                    <div class="profile-form__row">
+                        <div class="form-control">
+                            <label for="city">City</label>
+                            <input type="text" name="city" id="city"
+                                   value="<%= user.address ? user.address.city : '' %>"
+                                   placeholder="New York" autocomplete="address-level2" />
+                        </div>
+                        <div class="form-control">
+                            <label for="state">State / Province</label>
+                            <input type="text" name="state" id="state"
+                                   value="<%= user.address ? user.address.state : '' %>"
+                                   placeholder="NY" autocomplete="address-level1" />
+                        </div>
+                    </div>
+                    <div class="profile-form__row">
+                        <div class="form-control">
+                            <label for="zip">ZIP / Postal Code</label>
+                            <input type="text" name="zip" id="zip"
+                                   value="<%= user.address ? user.address.zip : '' %>"
+                                   placeholder="10001" autocomplete="postal-code" />
+                        </div>
+                        <div class="form-control">
+                            <label for="country">Country</label>
+                            <input type="text" name="country" id="country"
+                                   value="<%= user.address ? user.address.country : '' %>"
+                                   placeholder="United States" autocomplete="country-name" />
+                        </div>
+                    </div>
+                    <div class="profile-form__actions">
+                        <% if (hasAddress) { %>
+                        <button type="button" id="address-cancel" class="profile-btn-ghost">Cancel</button>
+                        <% } %>
+                        <button type="submit" class="profile-btn">Save Address</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- ── Security ───────────────────────────────────── -->
+            <section id="tab-security" class="profile-section profile-section--hidden" data-tab-panel="security">
+                <div class="profile-section__header">
+                    <h2 class="profile-section__title">Security</h2>
+                    <p class="profile-section__desc">Change your password. You'll stay logged in after updating.</p>
+                </div>
+
+                <% if (securityMsg.success || securityMsg.error) { %>
+                <div class="profile-section__alert profile-alert--<%= securityMsg.success ? 'success' : 'error' %>" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+                        <% if (securityMsg.success) { %><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /><% } else { %><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /><% } %>
+                    </svg>
+                    <%= securityMsg.success || securityMsg.error %>
+                </div>
+                <% } %>
+
+                <div class="profile-security-layout">
+                    <form action="/profile/password" method="POST" class="profile-form profile-form--security">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <div class="form-control">
+                            <label for="currentPassword">Current Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" name="currentPassword" id="currentPassword" placeholder="Enter current password" autocomplete="current-password" />
+                                <button type="button" class="input-toggle" aria-label="Show password">
+                                    <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-control">
+                            <label for="newPassword">New Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" name="newPassword" id="newPassword" placeholder="At least 6 characters" autocomplete="new-password" />
+                                <button type="button" class="input-toggle" aria-label="Show password">
+                                    <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-control">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Repeat new password" autocomplete="new-password" />
+                                <button type="button" class="input-toggle" aria-label="Show password">
+                                    <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="profile-form__actions">
+                            <button type="submit" class="profile-btn">Update Password</button>
+                        </div>
+                    </form>
+
+                    <aside class="profile-security-tips">
+                        <div class="profile-security-tips__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" /></svg>
+                        </div>
+                        <h3 class="profile-security-tips__heading">Password tips</h3>
+                        <ul class="profile-security-tips__list">
+                            <li>Use at least 8 characters</li>
+                            <li>Mix uppercase letters, numbers &amp; symbols</li>
+                            <li>Avoid personal info like birthdays</li>
+                            <li>Use a unique password for this account</li>
+                        </ul>
+                        <p class="profile-security-tips__note">Member since <%= memberSince.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) %></p>
+                    </aside>
+                </div>
+            </section>
+
+        </div>
+    </main>
+<script src="/js/auth.js"></script>
+<script src="/js/profile.js"></script>
+<%- include('../includes/end.ejs') %>

@@ -1,0 +1,78 @@
+.signup-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.signup-avatar__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.signup-avatar__input {
+  display: none;
+}
+
+.signup-avatar__circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #252525;
+  border: 2px solid #3a3a3a;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.signup-avatar__label:hover .signup-avatar__circle {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.signup-avatar__initial {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.signup-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.signup-avatar__img.hidden {
+  display: none;
+}
+
+.signup-avatar__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.signup-avatar__label:hover .signup-avatar__overlay {
+  opacity: 1;
+}
+
+.signup-avatar__hint {
+  font-size: 0.8rem;
+  color: #64748b;
+}

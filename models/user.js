@@ -11,6 +11,27 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+    trim: true,
+    maxlength: 100,
+    required: true,
+  },
+  avatar: {
+    type: String,
+    default: '',
+  },
+  avatarPublicId: {
+    type: String,
+    default: '',
+  },
+  address: {
+    street:  { type: String, trim: true, default: '' },
+    city:    { type: String, trim: true, default: '' },
+    state:   { type: String, trim: true, default: '' },
+    zip:     { type: String, trim: true, default: '' },
+    country: { type: String, trim: true, default: '' },
+  },
   resetToken: String,
   resetTokenExpiration: Date,
   cart: {

@@ -252,11 +252,20 @@ async function run() {
   const customerHash = await bcrypt.hash(CUSTOMER_PASSWORD, 12);
   const [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12] = await Promise.all(
     [
-      'test@test.com',  'test2@test.com',  'test3@test.com',  'test4@test.com',
-      'test5@test.com', 'test6@test.com',  'test7@test.com',  'test8@test.com',
-      'test9@test.com', 'test10@test.com', 'test11@test.com', 'test12@test.com',
-    ].map(email =>
-      User.create({ email, password: customerHash, cart: { items: [] }, wishlist: [] })
+      { email: 'test@test.com',   name: 'Alice Johnson'  },
+      { email: 'test2@test.com',  name: 'Bob Smith'      },
+      { email: 'test3@test.com',  name: 'Carol White'    },
+      { email: 'test4@test.com',  name: 'David Lee'      },
+      { email: 'test5@test.com',  name: 'Eva Martinez'   },
+      { email: 'test6@test.com',  name: 'Frank Brown'    },
+      { email: 'test7@test.com',  name: 'Grace Kim'      },
+      { email: 'test8@test.com',  name: 'Henry Davis'    },
+      { email: 'test9@test.com',  name: 'Isla Wilson'    },
+      { email: 'test10@test.com', name: 'Jack Taylor'    },
+      { email: 'test11@test.com', name: 'Karen Anderson' },
+      { email: 'test12@test.com', name: 'Liam Thomas'    },
+    ].map(({ email, name }) =>
+      User.create({ email, name, password: customerHash, cart: { items: [] }, wishlist: [] })
     )
   );
   [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12].forEach(u => console.log(`  ✓ ${u.email}  (password: ${CUSTOMER_PASSWORD})`));

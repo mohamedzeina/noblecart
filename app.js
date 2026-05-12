@@ -83,6 +83,7 @@ app.use(
   multer({ storage: fileStorage, fileFilter }).fields([
     { name: 'image', maxCount: 1 },
     { name: 'model', maxCount: 1 },
+    { name: 'avatar', maxCount: 1 },
   ])
 );
 
