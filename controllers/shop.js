@@ -3,13 +3,13 @@ const path = require('path');
 
 const PDFDocument = require('pdfkit');
 
-
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const Product = require('../models/product');
 const Order = require('../models/order');
 const Review = require('../models/review');
 const { sendOrderConfirmation } = require('../util/email');
+const { buildRatingsMap } = require('../util/reviewHelpers');
 const pg = require('../util/paginationHelper');
 
 const REVIEWS_PER_PAGE = 5;
@@ -20,67 +20,85 @@ const REVIEW_SORT_OPTS = {
   lowest:  { rating: 1,  createdAt: -1 },
 };
 
-exports.getProduct = (req, res, next) => {
-  const prodId = req.params.productId;
-  const activeReviewSort = REVIEW_SORT_OPTS[req.query.reviewSort] ? req.query.reviewSort : 'newest';
-  Promise.all([
-    Product.findById(prodId),
-    Review.find({ productId: prodId }).sort(REVIEW_SORT_OPTS[activeReviewSort]),
-  ])
-    .then(([product, reviews]) => {
-      const avgRating = reviews.length
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : null;
-      const userReview = req.user
-        ? reviews.find((r) => r.userId.toString() === req.user._id.toString())
-        : null;
-      const ratingBreakdown = [5, 4, 3, 2, 1].map((star) => ({
-        star,
-        count: reviews.filter((r) => r.rating === star).length,
-      }));
-      const otherReviews = reviews.filter(
-        (r) => !userReview || r._id.toString() !== userReview._id.toString()
-      );
-      const reviewError = req.flash('reviewError');
+function buildStockError(items) {
+  const names = items.map((p) => p.productId.title).join(', ');
+  return `${names} ${items.length === 1 ? 'is' : 'are'} out of stock or have insufficient quantity. Please update your cart.`;
+}
 
-      return Product.aggregate([
-        { $match: { category: product.category, _id: { $ne: product._id } } },
-        { $lookup: { from: 'reviews', localField: '_id', foreignField: 'productId', as: '_r' } },
-        { $addFields: { _avg: { $ifNull: [{ $avg: '$_r.rating' }, 0] } } },
-        { $sort: { _avg: -1, _id: -1 } },
-        { $project: { _r: 0, _avg: 0 } },
-        { $limit: 4 },
-      ]).then((relatedProducts) => {
-        const relatedIds = relatedProducts.map((p) => p._id);
-        return Review.aggregate([
-          { $match: { productId: { $in: relatedIds } } },
-          { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
-        ]).then((agg) => {
-          const relatedRatingsMap = {};
-          agg.forEach((r) => { relatedRatingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
-          res.render('shop/product-detail', {
-            pageTitle: product.title,
-            path: '/products',
-            product,
-            reviews,
-            displayedReviews: otherReviews.slice(0, REVIEWS_PER_PAGE),
-            reviewsListTotal: otherReviews.length,
-            avgRating,
-            userReview,
-            ratingBreakdown,
-            activeReviewSort,
-            reviewError: reviewError.length > 0 ? reviewError[0] : null,
-            relatedProducts,
-            relatedRatingsMap,
-          });
-        });
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+function createStripeSession(cartProducts, req) {
+  const baseUrl = req.protocol + '://' + req.get('host');
+  return stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: cartProducts.map((p) => ({
+      price_data: {
+        currency: 'usd',
+        product_data: { name: p.productId.title, description: p.productId.description },
+        unit_amount: Math.round(p.productId.price * 100),
+      },
+      quantity: p.quantity,
+    })),
+    mode: 'payment',
+    success_url: baseUrl + '/checkout/success',
+    cancel_url: baseUrl + '/checkout/cancel',
+  });
+}
+
+exports.getProduct = async (req, res, next) => {
+  try {
+    const prodId = req.params.productId;
+    const activeReviewSort = REVIEW_SORT_OPTS[req.query.reviewSort] ? req.query.reviewSort : 'newest';
+
+    const [product, reviews] = await Promise.all([
+      Product.findById(prodId),
+      Review.find({ productId: prodId }).sort(REVIEW_SORT_OPTS[activeReviewSort]),
+    ]);
+
+    const avgRating = reviews.length
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : null;
+    const userReview = req.user
+      ? reviews.find((r) => r.userId.toString() === req.user._id.toString())
+      : null;
+    const ratingBreakdown = [5, 4, 3, 2, 1].map((star) => ({
+      star,
+      count: reviews.filter((r) => r.rating === star).length,
+    }));
+    const otherReviews = reviews.filter(
+      (r) => !userReview || r._id.toString() !== userReview._id.toString()
+    );
+    const reviewError = req.flash('reviewError');
+
+    const relatedProducts = await Product.aggregate([
+      { $match: { category: product.category, _id: { $ne: product._id } } },
+      { $lookup: { from: 'reviews', localField: '_id', foreignField: 'productId', as: '_r' } },
+      { $addFields: { _avg: { $ifNull: [{ $avg: '$_r.rating' }, 0] } } },
+      { $sort: { _avg: -1, _id: -1 } },
+      { $project: { _r: 0, _avg: 0 } },
+      { $limit: 4 },
+    ]);
+
+    const relatedRatingsMap = await buildRatingsMap(relatedProducts.map((p) => p._id));
+
+    res.render('shop/product-detail', {
+      pageTitle: product.title,
+      path: '/products',
+      product,
+      reviews,
+      displayedReviews: otherReviews.slice(0, REVIEWS_PER_PAGE),
+      reviewsListTotal: otherReviews.length,
+      avgRating,
+      userReview,
+      ratingBreakdown,
+      activeReviewSort,
+      reviewError: reviewError.length > 0 ? reviewError[0] : null,
+      relatedProducts,
+      relatedRatingsMap,
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.getProductReviews = (req, res, next) => {
@@ -122,16 +140,6 @@ exports.getCategory = (req, res, next) => {
 exports.getSearch = (req, res, next) => {
   const query = (req.query.q || '').trim();
   if (!query) return res.redirect('/');
-
-  const buildRatingsMap = (ids) =>
-    Review.aggregate([
-      { $match: { productId: { $in: ids } } },
-      { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
-    ]).then((agg) => {
-      const map = {};
-      agg.forEach((r) => { map[r._id.toString()] = { avg: r.avg, count: r.count }; });
-      return map;
-    });
 
   const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   Product.find({ $or: [{ title: regex }, { category: regex }, { description: regex }] })
@@ -178,13 +186,7 @@ exports.getSearchSuggest = (req, res, next) => {
     .limit(6)
     .then((products) => {
       const productIds = products.map((p) => p._id);
-      return Review.aggregate([
-        { $match: { productId: { $in: productIds } } },
-        { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
-      ]).then((agg) => {
-        const ratingsMap = {};
-        agg.forEach((r) => { ratingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
-
+      return buildRatingsMap(productIds).then((ratingsMap) => {
         const wishlistSet = req.user
           ? new Set(req.user.wishlist.map((i) => i.productId.toString()))
           : new Set();
@@ -341,11 +343,23 @@ exports.postReorder = async (req, res, next) => {
   try {
     const order = await Order.findOne({ _id: req.params.orderId, 'user.userId': req.user._id });
     if (!order) return res.redirect('/orders');
+
     const productIds = order.products.map((p) => p.productData._id);
-    const products = await Product.find({ _id: { $in: productIds }, stock: { $gt: 0 } });
-    for (const product of products) {
-      await req.user.addToCart(product);
+    const inStock = await Product.find({ _id: { $in: productIds }, stock: { $gt: 0 } });
+    const inStockIds = new Set(inStock.map((p) => p._id.toString()));
+
+    for (const { productData, quantity } of order.products) {
+      if (!inStockIds.has(productData._id.toString())) continue;
+      const idx = req.user.cart.items.findIndex(
+        (i) => i.productId.toString() === productData._id.toString()
+      );
+      if (idx >= 0) {
+        req.user.cart.items[idx].quantity += quantity;
+      } else {
+        req.user.cart.items.push({ productId: productData._id, quantity });
+      }
     }
+    await req.user.save();
     res.redirect('/checkout');
   } catch (err) {
     next(err);
@@ -363,7 +377,6 @@ exports.getCheckout = async (req, res, next) => {
 
     const outOfStock = cartProducts.filter((p) => p.productId.stock < p.quantity);
     if (outOfStock.length > 0) {
-      const names = outOfStock.map((p) => p.productId.title).join(', ');
       return res.render('shop/checkout', {
         path: '/checkout',
         pageTitle: 'Checkout',
@@ -371,25 +384,12 @@ exports.getCheckout = async (req, res, next) => {
         totalSum: total,
         sessionId: null,
         stripePublicKey: process.env.STRIPE_PUB_KEY,
-        stockError: `${names} ${outOfStock.length === 1 ? 'is' : 'are'} out of stock or have insufficient quantity. Please update your cart.`,
+        stockError: buildStockError(outOfStock),
         csrfToken: req.csrfToken(),
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: cartProducts.map((p) => ({
-        price_data: {
-          currency: 'usd',
-          product_data: { name: p.productId.title, description: p.productId.description },
-          unit_amount: p.productId.price * 100,
-        },
-        quantity: p.quantity,
-      })),
-      mode: 'payment',
-      success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
-      cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
-    });
+    const session = await createStripeSession(cartProducts, req);
 
     res.render('shop/checkout', {
       path: '/checkout',
@@ -415,27 +415,10 @@ exports.getCheckoutSession = async (req, res, next) => {
 
     const overStock = cartProducts.filter((p) => p.productId.stock < p.quantity);
     if (overStock.length > 0) {
-      const names = overStock.map((p) => p.productId.title).join(', ');
-      return res.json({
-        sessionId: null,
-        stockError: `${names} ${overStock.length === 1 ? 'is' : 'are'} out of stock or have insufficient quantity. Please update your cart.`,
-      });
+      return res.json({ sessionId: null, stockError: buildStockError(overStock) });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: cartProducts.map((p) => ({
-        price_data: {
-          currency: 'usd',
-          product_data: { name: p.productId.title, description: p.productId.description },
-          unit_amount: Math.round(p.productId.price * 100),
-        },
-        quantity: p.quantity,
-      })),
-      mode: 'payment',
-      success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
-      cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
-    });
+    const session = await createStripeSession(cartProducts, req);
     res.json({ sessionId: session.id, stockError: null });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create session' });
@@ -505,13 +488,7 @@ exports.getWishlist = (req, res, next) => {
       const products = user.wishlist
         .filter((i) => i.productId)
         .map((i) => i.productId);
-      const productIds = products.map((p) => p._id);
-      return Review.aggregate([
-        { $match: { productId: { $in: productIds } } },
-        { $group: { _id: '$productId', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
-      ]).then((agg) => {
-        const ratingsMap = {};
-        agg.forEach((r) => { ratingsMap[r._id.toString()] = { avg: r.avg, count: r.count }; });
+      return buildRatingsMap(products.map((p) => p._id)).then((ratingsMap) => {
         res.render('shop/wishlist', {
           path: '/wishlist',
           pageTitle: 'Wishlist',

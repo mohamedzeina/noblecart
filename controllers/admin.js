@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/product');
 const Order = require('../models/order');
 const User = require('../models/user');
+const Review = require('../models/review');
 const fileHelper = require('../util/file');
 const cloudinary = require('../util/cloudinary');
 const pg = require('../util/paginationHelper');
@@ -167,17 +168,21 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = updatedPrice;
     product.stock = updatedStock;
 
-    if (imageFile) {
-      const imageResult = await uploadImage(imageFile);
-      fileHelper.deleteFile(product.imagePublicId);
-      product.imageUrl = imageResult.secure_url;
-      product.imagePublicId = imageResult.public_id;
-    }
-    if (modelFile) {
-      const modelResult = await uploadModel(modelFile);
-      fileHelper.deleteModel(product.modelPublicId);
-      product.modelUrl = modelResult.secure_url;
-      product.modelPublicId = modelResult.public_id;
+    if (imageFile || modelFile) {
+      const [imageResult, modelResult] = await Promise.all([
+        imageFile ? uploadImage(imageFile) : Promise.resolve(null),
+        modelFile ? uploadModel(modelFile) : Promise.resolve(null),
+      ]);
+      if (imageResult) {
+        fileHelper.deleteFile(product.imagePublicId);
+        product.imageUrl = imageResult.secure_url;
+        product.imagePublicId = imageResult.public_id;
+      }
+      if (modelResult) {
+        fileHelper.deleteModel(product.modelPublicId);
+        product.modelUrl = modelResult.secure_url;
+        product.modelPublicId = modelResult.public_id;
+      }
     }
 
     product.description = updatedDesc;
@@ -316,56 +321,51 @@ exports.getProducts = (req, res, next) => {
 
 const ORDERS_PER_PAGE = 10;
 
-exports.getAdminOrders = (req, res, next) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const activeStatus = req.query.status || '';
-  const activeDate = req.query.date || '';
+exports.getAdminOrders = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const activeStatus = req.query.status || '';
+    const activeDate = req.query.date || '';
 
-  const filter = {};
-  if (activeStatus) filter.status = activeStatus;
+    const filter = {};
+    if (activeStatus) filter.status = activeStatus;
 
-  if (activeDate) {
-    const now = new Date();
-    const fromDate =
-      activeDate === 'today' ? new Date(now.getFullYear(), now.getMonth(), now.getDate()) :
-      activeDate === '7d'    ? new Date(now - 7  * 24 * 60 * 60 * 1000) :
-      activeDate === '30d'   ? new Date(now - 30 * 24 * 60 * 60 * 1000) :
-      null;
-    if (fromDate) {
-      const hex = Math.floor(fromDate.getTime() / 1000).toString(16).padStart(8, '0');
-      filter._id = { $gte: new mongoose.Types.ObjectId(hex + '0000000000000000') };
+    if (activeDate) {
+      const now = new Date();
+      const fromDate =
+        activeDate === 'today' ? new Date(now.getFullYear(), now.getMonth(), now.getDate()) :
+        activeDate === '7d'    ? new Date(now - 7  * 24 * 60 * 60 * 1000) :
+        activeDate === '30d'   ? new Date(now - 30 * 24 * 60 * 60 * 1000) :
+        null;
+      if (fromDate) {
+        const hex = Math.floor(fromDate.getTime() / 1000).toString(16).padStart(8, '0');
+        filter._id = { $gte: new mongoose.Types.ObjectId(hex + '0000000000000000') };
+      }
     }
-  }
 
-  let totalOrders;
-  Order.countDocuments(filter)
-    .then((count) => {
-      totalOrders = count;
-      return Order.find(filter)
-        .sort({ _id: -1 })
-        .skip((page - 1) * ORDERS_PER_PAGE)
-        .limit(ORDERS_PER_PAGE);
-    })
-    .then((orders) => {
-      res.render('admin/orders', {
-        pageTitle: 'All Orders',
-        path: '/admin/orders',
-        orders,
-        activeStatus,
-        activeDate,
-        currentPage: page,
-        hasNextPage: ORDERS_PER_PAGE * page < totalOrders,
-        hasPrevPage: page > 1,
-        nextPage: page + 1,
-        prevPage: page - 1,
-        lastPage: Math.ceil(totalOrders / ORDERS_PER_PAGE),
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+    const [totalOrders, orders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter).sort({ _id: -1 }).skip((page - 1) * ORDERS_PER_PAGE).limit(ORDERS_PER_PAGE),
+    ]);
+
+    res.render('admin/orders', {
+      pageTitle: 'All Orders',
+      path: '/admin/orders',
+      orders,
+      activeStatus,
+      activeDate,
+      currentPage: page,
+      hasNextPage: ORDERS_PER_PAGE * page < totalOrders,
+      hasPrevPage: page > 1,
+      nextPage: page + 1,
+      prevPage: page - 1,
+      lastPage: Math.ceil(totalOrders / ORDERS_PER_PAGE),
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+  }
 };
 
 exports.patchOrderStatus = (req, res, next) => {
@@ -396,8 +396,6 @@ exports.getAdminProduct = async (req, res, next) => {
     if (!product || product.adminId.toString() !== req.admin._id.toString()) {
       return res.redirect('/admin/products');
     }
-
-    const Review = require('../models/review');
 
     const [reviews, ratingAgg, soldAgg] = await Promise.all([
       Review.find({ productId: product._id }).sort({ createdAt: -1 }).lean(),
