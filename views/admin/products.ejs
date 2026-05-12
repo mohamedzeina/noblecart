@@ -47,11 +47,12 @@
                 <div class="admin-product-list">
                     <% for (let product of prods) { %>
                         <article class="admin-product-item">
+                            <a href="/admin/product/<%= product._id %>" class="admin-product-item__link" aria-label="View <%= product.title %> details">
                             <div class="admin-product-item__thumb">
                                 <img src="<%= product.imageUrl %>" alt="<%= product.title %>" loading="lazy">
                             </div>
                             <div class="admin-product-item__info">
-                                <h2 class="admin-product-item__title"><a href="/admin/product/<%= product._id %>"><%= product.title %></a></h2>
+                                <h2 class="admin-product-item__title"><%= product.title %></h2>
                                 <div class="admin-product-item__meta">
                                     <span class="admin-product-item__price">$<%= product.price.toFixed(2) %></span>
                                     <% if (product.category) { %>
@@ -70,6 +71,7 @@
                                 </div>
                                 <p class="admin-product-item__desc"><%= product.description %></p>
                             </div>
+                            </a>
                             <div class="card__actions admin-product-item__actions">
                                 <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn--solid">Edit</a>
                                 <input type="hidden" value="<%= product._id %>" name="productId">

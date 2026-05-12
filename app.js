@@ -25,15 +25,7 @@ const User = require('./models/user');
 const Admin = require('./models/admin');
 
 
-const os = require('os');
-
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, os.tmpdir()),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-  },
-});
+const fileStorage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (file.fieldname === 'model') {

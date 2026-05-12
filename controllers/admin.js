@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -10,24 +9,22 @@ const cloudinary = require('../util/cloudinary');
 const pg = require('../util/paginationHelper');
 const { sendStatusUpdate } = require('../util/email');
 
-function uploadImage(file) {
+function uploadBuffer(buffer, options) {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(file.path, { folder: 'noblecart' }, (error, result) => {
-      fs.unlink(file.path, () => {});
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
       if (error) return reject(error);
       resolve(result);
     });
+    stream.end(buffer);
   });
 }
 
+function uploadImage(file) {
+  return uploadBuffer(file.buffer, { folder: 'noblecart' });
+}
+
 function uploadModel(file) {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(file.path, { folder: 'noblecart-models', resource_type: 'raw', format: 'glb' }, (error, result) => {
-      fs.unlink(file.path, () => {});
-      if (error) return reject(error);
-      resolve(result);
-    });
-  });
+  return uploadBuffer(file.buffer, { folder: 'noblecart-models', resource_type: 'raw', format: 'glb' });
 }
 
 exports.getAddProduct = (req, res, next) => {
@@ -51,7 +48,6 @@ exports.postAddProduct = async (req, res, next) => {
   const stock = parseInt(req.body.stock, 10) || 0;
 
   if (!imageFile) {
-    if (modelFile) fs.unlink(modelFile.path, () => {});
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
@@ -66,8 +62,6 @@ exports.postAddProduct = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    fs.unlink(imageFile.path, () => {});
-    if (modelFile) fs.unlink(modelFile.path, () => {});
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
@@ -145,8 +139,6 @@ exports.postEditProduct = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    if (imageFile) fs.unlink(imageFile.path, () => {});
-    if (modelFile) fs.unlink(modelFile.path, () => {});
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Edit Product',
       path: '/admin/edit-product',
@@ -168,8 +160,6 @@ exports.postEditProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(prodId);
     if (product.adminId.toString() !== req.admin._id.toString()) {
-      if (imageFile) fs.unlink(imageFile.path, () => {});
-      if (modelFile) fs.unlink(modelFile.path, () => {});
       return res.redirect('/');
     }
 
