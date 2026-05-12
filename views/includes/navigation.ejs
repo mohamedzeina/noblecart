@@ -82,9 +82,13 @@
       <% } %>
       <li class="main-header__item account-menu">
         <button class="nav-icon account-toggle" aria-label="Account" aria-expanded="false" aria-haspopup="true">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="22" height="22">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-          </svg>
+          <span class="nav-avatar">
+            <% if (currentUser && currentUser.avatar) { %>
+            <img src="<%= currentUser.avatar %>" alt="" class="nav-avatar__img" />
+            <% } else { %>
+            <span class="nav-avatar__initial"><%= currentUser && currentUser.name ? currentUser.name[0].toUpperCase() : currentUser ? currentUser.email[0].toUpperCase() : '?' %></span>
+            <% } %>
+          </span>
         </button>
         <div class="account-dropdown" role="menu" aria-label="Account menu">
           <a class="account-dropdown__item" href="/profile" role="menuitem">

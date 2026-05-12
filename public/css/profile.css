@@ -610,6 +610,37 @@
   background: #f1f5f9;
 }
 
+/* ── Inline field hints / errors ─────────────────────────── */
+.profile-field-hint {
+  font-size: 0.775rem;
+  margin: 0.2rem 0 0;
+  min-height: 1em;
+  transition: color 0.15s;
+}
+
+.profile-field-hint--ok {
+  color: #16a34a;
+}
+
+.profile-field-hint--error {
+  color: #dc2626;
+}
+
+.profile-field-error {
+  font-size: 0.775rem;
+  color: #dc2626;
+  margin: 0.2rem 0 0;
+  min-height: 1em;
+}
+
+/* ── Reduced motion ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   .profile-security-layout {

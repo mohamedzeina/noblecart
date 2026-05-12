@@ -120,6 +120,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.user !== undefined;
   res.locals.isAdmin = req.admin !== undefined;
+  res.locals.currentUser = req.user || null;
   res.locals.csrfToken = req.csrfToken();
   res.locals.cartCount = req.user
     ? req.user.cart.items.reduce((sum, i) => sum + i.quantity, 0)

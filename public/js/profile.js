@@ -182,14 +182,21 @@ if (addressForm && addressSubmit) {
 }
 
 // Avatar preview
-const avatarInput   = document.getElementById('profile-avatar-input');
-const avatarImg     = document.getElementById('profile-avatar-img');
-const avatarInitial = document.getElementById('profile-avatar-initial');
+const avatarInput     = document.getElementById('profile-avatar-input');
+const avatarImg       = document.getElementById('profile-avatar-img');
+const avatarInitial   = document.getElementById('profile-avatar-initial');
+const avatarSizeError = document.getElementById('avatar-size-error');
 
 if (avatarInput) {
   avatarInput.addEventListener('change', () => {
     const file = avatarInput.files[0];
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      if (avatarSizeError) avatarSizeError.textContent = 'Image must be 5 MB or smaller.';
+      avatarInput.value = '';
+      return;
+    }
+    if (avatarSizeError) avatarSizeError.textContent = '';
     const reader = new FileReader();
     reader.onload = (e) => {
       if (avatarImg) {
@@ -200,4 +207,44 @@ if (avatarInput) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+// Password blur validation
+const newPasswordInput     = document.getElementById('newPassword');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+const pwLengthHint         = document.getElementById('pw-length-hint');
+const pwMatchHint          = document.getElementById('pw-match-hint');
+
+if (newPasswordInput && pwLengthHint) {
+  newPasswordInput.addEventListener('blur', () => {
+    const val = newPasswordInput.value;
+    if (!val) { pwLengthHint.textContent = ''; pwLengthHint.className = 'profile-field-hint'; return; }
+    if (val.length >= 6) {
+      pwLengthHint.textContent = 'Looks good';
+      pwLengthHint.className = 'profile-field-hint profile-field-hint--ok';
+    } else {
+      pwLengthHint.textContent = 'At least 6 characters required';
+      pwLengthHint.className = 'profile-field-hint profile-field-hint--error';
+    }
+    if (confirmPasswordInput && confirmPasswordInput.value) {
+      updateMatchHint();
+    }
+  });
+}
+
+function updateMatchHint() {
+  if (!confirmPasswordInput || !pwMatchHint || !newPasswordInput) return;
+  const val = confirmPasswordInput.value;
+  if (!val) { pwMatchHint.textContent = ''; pwMatchHint.className = 'profile-field-hint'; return; }
+  if (val === newPasswordInput.value) {
+    pwMatchHint.textContent = 'Passwords match';
+    pwMatchHint.className = 'profile-field-hint profile-field-hint--ok';
+  } else {
+    pwMatchHint.textContent = 'Passwords do not match';
+    pwMatchHint.className = 'profile-field-hint profile-field-hint--error';
+  }
+}
+
+if (confirmPasswordInput && pwMatchHint) {
+  confirmPasswordInput.addEventListener('blur', updateMatchHint);
 }
