@@ -1,6 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
   const main = document.querySelector('main');
 
+  // Product detail — stock +/- controls and save spinner
+  const stockDec  = document.getElementById('stock-dec');
+  const stockInc  = document.getElementById('stock-inc');
+  const stockInp  = document.getElementById('stock-input');
+  const stockForm = document.getElementById('stock-form');
+  const stockSave = document.getElementById('stock-save');
+
+  if (stockDec && stockInc && stockInp) {
+    stockDec.addEventListener('click', () => {
+      stockInp.value = Math.max(0, parseInt(stockInp.value, 10) - 1);
+    });
+    stockInc.addEventListener('click', () => {
+      stockInp.value = parseInt(stockInp.value, 10) + 1;
+    });
+  }
+
+  if (stockForm && stockSave) {
+    stockForm.addEventListener('submit', () => {
+      stockSave.disabled = true;
+      stockSave.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        Saving…
+      `;
+    });
+  }
+
   function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'cart-toast';

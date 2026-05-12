@@ -19,7 +19,7 @@
                     <h1 class="admin-page-header__title"><%= product.title %></h1>
                 </div>
                 <div class="apd-header-actions card__actions">
-                    <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
+                    <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn--solid">Edit</a>
                     <input type="hidden" value="<%= product._id %>" name="productId">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                     <button class="btn delete-btn" type="button">Delete</button>
@@ -78,7 +78,7 @@
                     <!-- Stock update -->
                     <div class="apd-stock-card">
                         <h2 class="apd-stock-card__title">Update Stock</h2>
-                        <form action="/admin/update-stock" method="POST" class="apd-stock-form">
+                        <form id="stock-form" action="/admin/update-stock" method="POST" class="apd-stock-form">
                             <input type="hidden" name="productId" value="<%= product._id %>">
                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                             <div class="apd-stock-form__controls">
@@ -86,7 +86,7 @@
                                 <input type="number" name="stock" id="stock-input" class="apd-stock-input" value="<%= product.stock %>" min="0" step="1">
                                 <button type="button" class="apd-stock-btn" id="stock-inc">+</button>
                             </div>
-                            <button type="submit" class="btn btn--solid apd-stock-save">Save</button>
+                            <button id="stock-save" type="submit" class="btn btn--solid apd-stock-save">Save</button>
                         </form>
                     </div>
 
@@ -122,12 +122,5 @@
             </div>
         </main>
 
-        <%- include('../includes/end.ejs') %>
         <script src="/js/admin.js"></script>
-        <script>
-            const dec = document.getElementById('stock-dec');
-            const inc = document.getElementById('stock-inc');
-            const inp = document.getElementById('stock-input');
-            dec.addEventListener('click', () => { inp.value = Math.max(0, parseInt(inp.value || 0) - 1); });
-            inc.addEventListener('click', () => { inp.value = parseInt(inp.value || 0) + 1; });
-        </script>
+        <%- include('../includes/end.ejs') %>

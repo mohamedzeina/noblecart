@@ -511,8 +511,55 @@
 
 .apd-header-actions {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+}
+
+.apd-header-actions .btn {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: 8px;
+}
+
+.apd-header-actions .delete-btn {
+  color: #ef4444;
+  border-color: #fca5a5;
+  background: transparent;
+}
+
+.apd-header-actions .delete-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.apd-header-actions .delete-confirm__yes {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.apd-header-actions .delete-confirm__yes:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.apd-header-actions:has(.delete-confirm__label) {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 220px;
+}
+
+.apd-header-actions .delete-confirm__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  display: block;
+  width: 100%;
+  text-align: right;
+  margin-bottom: 0.1rem;
 }
 
 .apd-layout {
@@ -554,6 +601,10 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.25rem 1rem;
 }
 
 .apd-meta__row {
@@ -616,15 +667,29 @@
 .apd-kpi {
   background: #ffffff;
   border: 1px solid #e2e8f0;
+  border-top: 3px solid #22c55e;
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  transition: box-shadow 0.2s, transform 0.15s;
 }
 
+.apd-kpi:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.apd-kpis .apd-kpi:nth-child(2) { border-top-color: #3b82f6; }
+.apd-kpis .apd-kpi:nth-child(3) { border-top-color: #8b5cf6; }
+.apd-kpis .apd-kpi:nth-child(4) { border-top-color: #f59e0b; }
+
+.apd-kpis .apd-kpi:nth-child(1):has(.apd-kpi__value--warn)   { border-top-color: #f59e0b; }
+.apd-kpis .apd-kpi:nth-child(1):has(.apd-kpi__value--danger) { border-top-color: #ef4444; }
+
 .apd-kpi__value {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #1e293b;
   line-height: 1;
@@ -639,11 +704,12 @@
 }
 
 .apd-kpi__label {
-  font-size: 0.72rem;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: 600;
   color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
+  margin-top: 0.1rem;
 }
 
 /* Stock card */
@@ -659,6 +725,8 @@
   font-weight: 700;
   color: #1e293b;
   margin: 0 0 1rem;
+  padding-left: 0.65rem;
+  border-left: 3px solid #3b82f6;
 }
 
 .apd-stock-form__controls {
@@ -702,6 +770,13 @@
   background: #ffffff;
   outline: none;
   transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+
+.apd-stock-input::-webkit-inner-spin-button,
+.apd-stock-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .apd-stock-input:focus {
@@ -733,6 +808,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding-left: 0.65rem;
+  border-left: 3px solid #8b5cf6;
 }
 
 .apd-reviews__count {
@@ -757,13 +834,19 @@
 }
 
 .apd-review {
-  padding: 0.875rem 0;
+  padding: 0.875rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
+  border-radius: 8px;
+  margin: 0 -0.75rem;
+  transition: background 0.15s;
+}
+
+.apd-review:hover {
+  background: #f8fafc;
 }
 
 .apd-review:last-child {
   border-bottom: none;
-  padding-bottom: 0;
 }
 
 .apd-review__header {
