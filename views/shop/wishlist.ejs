@@ -17,7 +17,8 @@
 
     <main id="products">
         <div class="wishlist-header">
-            <h1 class="wishlist-header__title">Wishlist</h1>
+            <span class="wishlist-header__eyebrow">— Saved for later</span>
+            <h1 class="wishlist-header__title">Your <em>wishlist</em></h1>
             <% if (products.length > 0) { %>
             <p class="wishlist-header__count"><%= products.length %> saved item<%= products.length !== 1 ? 's' : '' %></p>
             <% } %>

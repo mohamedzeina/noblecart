@@ -5,9 +5,10 @@
     <%- include('includes/navigation.ejs') %>
     <main>
         <div class="error-page">
+            <span class="error-page__eyebrow">Server error</span>
             <p class="error-page__code">500</p>
-            <h1 class="error-page__title">Something went wrong</h1>
-            <p class="error-page__subtitle">We're working on fixing this. Sorry for the inconvenience.</p>
+            <h1 class="error-page__title">Something went <em>wrong</em>.</h1>
+            <p class="error-page__subtitle">We're working on fixing this. Sorry for the inconvenience — please try again in a moment.</p>
             <a href="/" class="btn btn--solid">Back to Shop</a>
         </div>
     </main>
