@@ -45,6 +45,14 @@
                     Your Orders
                 </a>
 
+                <header class="order-detail__header">
+                    <span class="order-detail__eyebrow">— Order details</span>
+                    <h1 class="order-detail__title">Order <em>#<%= shortId %></em></h1>
+                    <p class="order-detail__header-date"><%= formattedDate %></p>
+                </header>
+
+                <div class="order-detail__grid">
+                <div class="order-detail__main">
                 <div class="order-detail__card">
 
                     <!-- Status banner -->
@@ -80,24 +88,6 @@
                             <p class="order-detail__banner-label"><%= banner.label %></p>
                             <p class="order-detail__banner-subtitle"><%= banner.subtitle %></p>
                         </div>
-                    </div>
-
-                    <!-- Order meta -->
-                    <div class="order-detail__meta">
-                        <div class="order-detail__meta-left">
-                            <h1 class="order-detail__id">Order #<%= shortId %></h1>
-                            <span class="order-detail__date"><%= formattedDate %></span>
-                        </div>
-                        <a href="/orders/<%= order._id %>/invoice"
-                           class="order-detail__invoice-btn"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           aria-label="Download invoice for Order #<%= shortId %>">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                            </svg>
-                            Invoice
-                        </a>
                     </div>
 
                     <!-- Horizontal stepper -->
@@ -157,29 +147,77 @@
                         <% }) %>
                     </ul>
 
-                    <!-- Footer: total + actions -->
-                    <div class="order-detail__footer">
-                        <div class="order-detail__totals">
-                            <div class="order-detail__totals-row">
-                                <span class="order-detail__totals-label">Order Total <span class="order-detail__totals-count">(<%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %>)</span></span>
-                                <span class="order-detail__totals-value">$<%= orderTotal.toFixed(2) %></span>
-                            </div>
-                        </div>
-                        <% if (order.status !== 'canceled') { %>
-                        <form action="/orders/<%= order._id %>/reorder" method="POST" class="order-detail__reorder-form">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <button type="submit"
-                                    class="order-detail__reorder-btn"
-                                    aria-label="Buy all items from Order #<%= shortId %> again">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                                </svg>
-                                Buy Again
-                            </button>
-                        </form>
-                        <% } %>
-                    </div>
+                </div>
+                </div>
 
+                <aside class="order-detail__sidebar">
+                    <div class="order-detail__sidebar-stack">
+                    <div class="order-detail__summary">
+                        <span class="order-detail__summary-eyebrow">— Order summary</span>
+                        <div class="order-detail__summary-status">
+                            <span class="order-status-badge order-status-badge--<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
+                        </div>
+                        <dl class="order-detail__summary-list">
+                            <div class="order-detail__summary-row">
+                                <dt>Date</dt>
+                                <dd><%= formattedDate %></dd>
+                            </div>
+                            <div class="order-detail__summary-row">
+                                <dt>Items</dt>
+                                <dd><%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %></dd>
+                            </div>
+                            <div class="order-detail__summary-row">
+                                <dt>Subtotal</dt>
+                                <dd>$<%= orderTotal.toFixed(2) %></dd>
+                            </div>
+                            <div class="order-detail__summary-row">
+                                <dt>Shipping</dt>
+                                <dd class="order-detail__summary-free">Free</dd>
+                            </div>
+                        </dl>
+                        <div class="order-detail__summary-total">
+                            <span class="order-detail__summary-total-label">Total</span>
+                            <span class="order-detail__summary-total-value">$<%= orderTotal.toFixed(2) %></span>
+                        </div>
+                        <div class="order-detail__summary-actions">
+                            <% if (order.status !== 'canceled') { %>
+                            <form action="/orders/<%= order._id %>/reorder" method="POST" class="order-detail__reorder-form">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button type="submit"
+                                        class="order-detail__reorder-btn"
+                                        aria-label="Buy all items from Order #<%= shortId %> again">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                    </svg>
+                                    Buy Again
+                                </button>
+                            </form>
+                            <% } %>
+                            <a href="/orders/<%= order._id %>/invoice"
+                               class="order-detail__invoice-btn"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Download invoice for Order #<%= shortId %>">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="14" height="14" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                Download invoice
+                            </a>
+                        </div>
+                    </div>
+                    <div class="orders-help">
+                        <span class="orders-help__eyebrow">— Need help?</span>
+                        <p class="orders-help__text">Question about this order or want to return an item? Reach out and we'll take care of it.</p>
+                        <a href="mailto:support@noblecart.com" class="orders-help__link">
+                            support@noblecart.com
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </a>
+                    </div>
+                    </div>
+                </aside>
                 </div>
             </div>
         </main>

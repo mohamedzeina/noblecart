@@ -12,13 +12,51 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
                         </svg>
                     </div>
-                    <h2 class="empty-state__title">No orders yet</h2>
-                    <p class="empty-state__subtitle">Your completed orders will appear here.</p>
-                    <a href="/" class="btn btn--solid">Start Shopping</a>
+                    <h2 class="empty-state__title">No orders <em>yet</em></h2>
+                    <p class="empty-state__subtitle">Your completed orders will appear here once you've made your first purchase.</p>
+                    <a href="/" class="btn empty-state__cta">Start shopping</a>
                 </div>
             <% } else { %>
                 <div class="orders-header">
-                    <h1 class="orders-header__title">Your Orders</h1>
+                    <span class="orders-header__eyebrow">— Your account</span>
+                    <h1 class="orders-header__title">Your <em>orders</em></h1>
+                </div>
+
+                <div class="orders-grid">
+                <aside class="orders-sidebar" aria-label="Order summary">
+                    <section class="orders-stats">
+                        <div class="orders-stat">
+                            <span class="orders-stat__label">Total orders</span>
+                            <span class="orders-stat__value"><%= orderCounts.all %></span>
+                            <span class="orders-stat__caption">All-time</span>
+                        </div>
+                        <div class="orders-stat">
+                            <span class="orders-stat__label">Total spent</span>
+                            <span class="orders-stat__value">$<%= Math.round(totalSpent).toLocaleString('en-US') %><span class="orders-stat__value-decimal">.<%= (totalSpent % 1).toFixed(2).slice(2) %></span></span>
+                            <span class="orders-stat__caption">Excluding cancelled</span>
+                        </div>
+                        <div class="orders-stat orders-stat--accent">
+                            <span class="orders-stat__label">In progress</span>
+                            <span class="orders-stat__value"><%= orderCounts.active %></span>
+                            <span class="orders-stat__caption"><%= orderCounts.active === 0 ? 'Nothing in flight' : (orderCounts.active === 1 ? 'Order in flight' : 'Orders in flight') %></span>
+                        </div>
+                    </section>
+
+                    <div class="orders-help">
+                        <span class="orders-help__eyebrow">— Need help?</span>
+                        <p class="orders-help__text">Missing an order or need to return something? We're here to help.</p>
+                        <a href="mailto:support@noblecart.com" class="orders-help__link">
+                            support@noblecart.com
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </a>
+                    </div>
+                </aside>
+
+                <div class="orders-main">
+                <div class="orders-filter-wrap">
                     <nav class="orders-filter" aria-label="Filter orders by status">
                         <a href="/orders?status=all"
                            class="orders-filter__btn<%= statusFilter === 'all' ? ' orders-filter__btn--active' : '' %>"
@@ -104,6 +142,8 @@
                     <% }) %>
                 </ul>
                 <% } %>
+                </div>
+                </div>
             <% } %>
         </main>
         <%- include('../includes/end.ejs') %>

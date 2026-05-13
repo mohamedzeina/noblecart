@@ -313,6 +313,11 @@ exports.getOrders = async (req, res, next) => {
             active:    [{ $match: { status: { $in: ['pending', 'confirmed', 'shipped', 'out_for_delivery'] } } }, { $count: 'n' }],
             delivered: [{ $match: { status: 'delivered' } }, { $count: 'n' }],
             canceled:  [{ $match: { status: 'canceled' } },  { $count: 'n' }],
+            spent: [
+              { $match: { status: { $ne: 'canceled' } } },
+              { $unwind: '$products' },
+              { $group: { _id: null, total: { $sum: { $multiply: ['$products.quantity', '$products.productData.price'] } } } },
+            ],
           },
         },
       ]),
@@ -324,6 +329,7 @@ exports.getOrders = async (req, res, next) => {
       delivered: rawCounts?.delivered?.[0]?.n || 0,
       canceled:  rawCounts?.canceled?.[0]?.n  || 0,
     };
+    const totalSpent = rawCounts?.spent?.[0]?.total || 0;
 
     res.render('shop/orders', {
       path: '/orders',
@@ -331,6 +337,7 @@ exports.getOrders = async (req, res, next) => {
       orders,
       statusFilter,
       orderCounts,
+      totalSpent,
     });
   } catch (err) {
     const error = new Error(err);
