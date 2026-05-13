@@ -2,20 +2,22 @@
     <link rel="stylesheet" href="/css/admin.css">
     </head>
 
-    <body>
-        <%- include('../includes/navigation.ejs') %>
+    <body class="admin-body">
+        <%- include('../includes/admin-sidebar.ejs') %>
 
-        <main>
+        <main class="admin-main">
+            <div class="admin-page">
             <div class="admin-page-header">
                 <div class="admin-page-header__left">
-                    <h1 class="admin-page-header__title">My Products</h1>
-                    <p class="admin-page-header__subtitle"><%= prods.length %> product<%= prods.length !== 1 ? 's' : '' %> listed</p>
+                    <span class="admin-page-header__eyebrow">— Catalog</span>
+                    <h1 class="admin-page-header__title">My <em>products</em></h1>
+                    <p class="admin-page-header__subtitle"><%= prods.length %> product<%= prods.length !== 1 ? 's' : '' %> on this page</p>
                 </div>
-                <a href="/admin/add-product" class="btn btn--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+                <a href="/admin/add-product" class="admin-btn admin-btn--primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    Add Product
+                    Add product
                 </a>
             </div>
 
@@ -73,10 +75,10 @@
                             </div>
                             </a>
                             <div class="card__actions admin-product-item__actions">
-                                <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn--solid">Edit</a>
+                                <a href="/admin/edit-product/<%= product._id %>?edit=true" class="admin-btn admin-btn--primary">Edit</a>
                                 <input type="hidden" value="<%= product._id %>" name="productId">
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                                <button class="btn delete-btn" type="button">Delete</button>
+                                <button class="admin-btn admin-btn--ghost delete-btn" type="button">Delete</button>
                             </div>
                         </article>
                     <% } %>
@@ -91,8 +93,10 @@
                     </div>
                     <h2 class="empty-state__title"><%= activeCategory ? 'No products in this category' : 'No products yet' %></h2>
                     <p class="empty-state__subtitle"><%= activeCategory ? 'Try a different category or add a new product.' : 'Get started by adding your first product.' %></p>
+                    <a href="/admin/add-product" class="btn empty-state__cta">Add product</a>
                 </div>
             <% } %>
+            </div>
         </main>
         <%- include('../includes/end.ejs') %>
         <script src="/js/admin.js"></script>

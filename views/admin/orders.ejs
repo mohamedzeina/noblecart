@@ -2,13 +2,15 @@
     <link rel="stylesheet" href="/css/admin.css">
     </head>
 
-    <body>
-        <%- include('../includes/navigation.ejs') %>
+    <body class="admin-body">
+        <%- include('../includes/admin-sidebar.ejs') %>
 
-        <main>
+        <main class="admin-main">
+            <div class="admin-page">
             <div class="admin-page-header">
                 <div class="admin-page-header__left">
-                    <h1 class="admin-page-header__title">All Orders</h1>
+                    <span class="admin-page-header__eyebrow">— Fulfillment</span>
+                    <h1 class="admin-page-header__title">All <em>orders</em></h1>
                     <p class="admin-page-header__subtitle"><%= orders.length %> order<%= orders.length !== 1 ? 's' : '' %> on this page</p>
                 </div>
             </div>
@@ -135,6 +137,7 @@
                     <p class="empty-state__subtitle"><%= (activeStatus || activeDate) ? 'Try adjusting your filters.' : 'Orders placed by customers will appear here.' %></p>
                 </div>
             <% } %>
+            </div>
         </main>
         <script src="/js/admin.js"></script>
         <%- include('../includes/end.ejs') %>

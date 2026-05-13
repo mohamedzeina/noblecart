@@ -1,6 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
   const main = document.querySelector('main');
 
+  // Mobile sidebar toggle
+  const sidebar = document.getElementById('admin-sidebar');
+  const sidebarToggle = document.getElementById('admin-sidebar-toggle');
+  const sidebarBackdrop = document.getElementById('admin-sidebar-backdrop');
+
+  if (sidebar && sidebarToggle && sidebarBackdrop) {
+    const openSidebar = () => {
+      sidebar.classList.add('admin-sidebar--open');
+      sidebarBackdrop.classList.add('admin-backdrop--show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    };
+    const closeSidebar = () => {
+      sidebar.classList.remove('admin-sidebar--open');
+      sidebarBackdrop.classList.remove('admin-backdrop--show');
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    };
+    sidebarToggle.addEventListener('click', () => {
+      if (sidebar.classList.contains('admin-sidebar--open')) closeSidebar();
+      else openSidebar();
+    });
+    sidebarBackdrop.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('admin-sidebar--open')) closeSidebar();
+    });
+    // Close after tapping a nav link on mobile
+    sidebar.querySelectorAll('a.admin-sidebar__nav-item').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.matchMedia('(max-width: 900px)').matches) closeSidebar();
+      });
+    });
+  }
+
   // Product detail — stock +/- controls and save spinner
   const stockDec  = document.getElementById('stock-dec');
   const stockInc  = document.getElementById('stock-inc');

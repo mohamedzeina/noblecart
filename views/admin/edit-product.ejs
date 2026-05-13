@@ -1,16 +1,27 @@
 <%- include('../includes/head.ejs') %>
     <link rel="stylesheet" href="/css/forms.css">
-    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/admin.css">
 </head>
 
-<body>
-   <%- include('../includes/navigation.ejs') %>
+<body class="admin-body">
+   <%- include('../includes/admin-sidebar.ejs') %>
 
-    <main>
-        <div class="form-card">
-            <h1 class="form-card__title"><% if (editing) { %>Edit Product<% } else { %>Add Product<% } %></h1>
+    <main class="admin-main">
+        <div class="admin-page admin-page--form">
+        <a href="/admin/products" class="apd-back">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+            My Products
+        </a>
+        <div class="admin-page-header">
+            <div class="admin-page-header__left">
+                <span class="admin-page-header__eyebrow"><% if (editing) { %>— Editing<% } else { %>— New product<% } %></span>
+                <h1 class="admin-page-header__title"><% if (editing) { %>Edit <em>product</em><% } else { %>Add a <em>product</em><% } %></h1>
+                <p class="admin-page-header__subtitle"><% if (editing) { %>Update product details, stock, and category.<% } else { %>Upload a 3D model or image and fill in the basics.<% } %></p>
+            </div>
+        </div>
+        <div class="admin-form-card">
             <% if (errorMessage) { %>
-                <p class="form-card__error"><%= errorMessage %></p>
+                <p class="admin-form-card__error"><%= errorMessage %></p>
             <% } %>
             <form action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
                 <div class="form-control">
@@ -111,8 +122,12 @@
                     <input type="hidden" value="<%= product._id %>" name="productId">
                 <% } %>
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button class="btn" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
+                <div class="admin-form-card__actions">
+                    <a href="/admin/products" class="admin-btn admin-btn--ghost">Cancel</a>
+                    <button class="admin-btn admin-btn--primary" type="submit"><% if (editing) { %>Update product<% } else { %>Add product<% } %></button>
+                </div>
             </form>
+        </div>
         </div>
     </main>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>

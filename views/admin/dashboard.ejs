@@ -2,14 +2,16 @@
     <link rel="stylesheet" href="/css/admin.css">
     </head>
 
-    <body>
-        <%- include('../includes/navigation.ejs') %>
+    <body class="admin-body">
+        <%- include('../includes/admin-sidebar.ejs') %>
 
-        <main class="dash-main">
-            <div class="admin-page-header dash-header">
+        <main class="admin-main">
+            <div class="admin-page admin-page--dashboard">
+            <div class="admin-page-header">
                 <div class="admin-page-header__left">
-                    <h1 class="admin-page-header__title">Dashboard</h1>
-                    <p class="admin-page-header__subtitle">Overview of your store performance</p>
+                    <span class="admin-page-header__eyebrow">— Dashboard</span>
+                    <h1 class="admin-page-header__title">Store <em>overview</em></h1>
+                    <p class="admin-page-header__subtitle">Performance, sales, and recent activity at a glance.</p>
                 </div>
                 <div class="dash-period-filter">
                     <a href="/admin/dashboard?period=7d"  class="dash-period-btn<%= period === '7d'  ? ' dash-period-btn--active' : '' %>">7D</a>
@@ -182,6 +184,7 @@
                 <% } %>
             </div>
 
+            </div>
         </main>
         <script src="/js/admin.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
