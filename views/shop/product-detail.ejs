@@ -266,7 +266,7 @@
                             { value: 'highest', label: 'Highest Rated' },
                             { value: 'lowest',  label: 'Lowest Rated' },
                         ].forEach(chip => { %>
-                        <a href="?reviewSort=<%= chip.value %>#reviews"
+                        <a href="?reviewSort=<%= chip.value %>"
                            class="review-sort-chip<%= activeReviewSort === chip.value ? ' review-sort-chip--active' : '' %>">
                             <%= chip.label %>
                         </a>

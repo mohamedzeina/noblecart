@@ -6,7 +6,7 @@ if (_savedScroll) {
   sessionStorage.removeItem('_scrollY');
   window.scrollTo({ top: parseInt(_savedScroll, 10), behavior: 'instant' });
 }
-document.querySelectorAll('.sort-chip, .pagination a, .empty-state__cta').forEach(el => {
+document.querySelectorAll('.sort-chip, .pagination a, .empty-state__cta, .review-sort-chip').forEach(el => {
   el.addEventListener('click', () => sessionStorage.setItem('_scrollY', window.scrollY));
 });
 
