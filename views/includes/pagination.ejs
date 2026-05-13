@@ -1,14 +1,38 @@
 <% const _pq = typeof extraQuery !== 'undefined' ? extraQuery : ''; %>
-<section class="pagination">
+<nav class="pagination" aria-label="Pagination">
+  <% if (hasPrevPage) { %>
+  <a href="?page=<%= prevPage %><%= _pq %>" class="pagination__arrow pagination__arrow--prev" aria-label="Previous page" rel="prev">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    <span class="pagination__arrow-label">Prev</span>
+  </a>
+  <% } %>
   <% if (currentPage !== 1 && prevPage !== 1) { %>
   <a href="?page=1<%= _pq %>">1</a>
-  <% } %> <% if (hasPrevPage) { %>
+  <% } %>
+  <% if (currentPage > 3) { %>
+  <span class="pagination__ellipsis" aria-hidden="true">…</span>
+  <% } %>
+  <% if (hasPrevPage) { %>
   <a href="?page=<%= prevPage %><%= _pq %>"><%= prevPage %></a>
   <% } %>
-  <a href="?page=<%= currentPage %><%= _pq %>" class="active"><%= currentPage %></a>
+  <a href="?page=<%= currentPage %><%= _pq %>" class="active" aria-current="page"><%= currentPage %></a>
   <% if (hasNextPage) { %>
   <a href="?page=<%= nextPage %><%= _pq %>"><%= nextPage %></a>
-  <% } %> <% if (lastPage !== currentPage && nextPage !== lastPage) { %>
+  <% } %>
+  <% if (lastPage > currentPage + 2) { %>
+  <span class="pagination__ellipsis" aria-hidden="true">…</span>
+  <% } %>
+  <% if (lastPage !== currentPage && nextPage !== lastPage) { %>
   <a href="?page=<%= lastPage %><%= _pq %>"><%= lastPage %></a>
   <% } %>
-</section>
+  <% if (hasNextPage) { %>
+  <a href="?page=<%= nextPage %><%= _pq %>" class="pagination__arrow pagination__arrow--next" aria-label="Next page" rel="next">
+    <span class="pagination__arrow-label">Next</span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </a>
+  <% } %>
+</nav>
