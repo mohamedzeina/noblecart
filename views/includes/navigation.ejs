@@ -2,7 +2,7 @@
 <div class="backdrop"></div>
 <header class="main-header">
   <button id="side-menu-toggle">Menu</button>
-  <a class="main-header__brand" href="<%= isAdmin ? '/admin/dashboard' : '/' %>">Noblecart_</a>
+  <a class="main-header__brand" href="<%= isAdmin ? '/admin/dashboard' : '/' %>"><span class="main-header__brand-text">Noble<span class="main-header__brand-italic">cart</span></span></a>
   <nav class="main-header__nav">
     <ul class="main-header__item-list">
       <% if (isAdmin) { %>
@@ -125,10 +125,10 @@
         </button>
       </li>
       <li class="main-header__item">
-        <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
+        <a class="nav-cat <%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
       </li>
       <li class="main-header__item">
-        <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup">Signup</a>
+        <a class="nav-cat <%= path === '/signup' ? 'active' : '' %>" href="/signup">Sign up</a>
       </li>
       <% } %>
     </ul>
