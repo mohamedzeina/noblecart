@@ -8,7 +8,11 @@
         <main>
             <div class="cart-layout">
                 <section class="cart-items">
-                    <h1 class="cart__title">Review Your Order</h1>
+                    <header class="cart__header">
+                        <span class="cart__eyebrow">— Checkout</span>
+                        <h1 class="cart__title">Review your <em>order</em></h1>
+                        <p class="cart__count"><%= products.length %> item<%= products.length !== 1 ? 's' : '' %> in your cart</p>
+                    </header>
                     <ul class="cart__item-list">
                         <% products.forEach(p => { %>
                             <li class="cart__item" data-product-id="<%= p.productId._id %>" data-price="<%= p.productId.price %>" data-stock="<%= p.productId.stock %>">
@@ -39,15 +43,22 @@
                     </ul>
                 </section>
                 <aside class="cart-summary <%= locals.stockError ? 'cart-summary--stock-error' : '' %>">
-                    <h2 class="cart-summary__title">Order Summary</h2>
+                    <span class="cart-summary__eyebrow">— Order summary</span>
+                    <h2 class="cart-summary__title">Your <em>total</em></h2>
                     <ul class="cart-summary__items">
                         <% products.forEach(p => { %>
                             <li class="cart-summary__item" data-product-id="<%= p.productId._id %>">
-                                <span><%= p.productId.title %> &times; <span class="js-summary-qty"><%= p.quantity %></span></span>
-                                <span class="js-summary-total">$<%= (p.productId.price * p.quantity).toFixed(2) %></span>
+                                <span class="cart-summary__item-label"><%= p.productId.title %> <span class="cart-summary__item-x">×</span> <span class="js-summary-qty"><%= p.quantity %></span></span>
+                                <span class="cart-summary__item-value js-summary-total">$<%= (p.productId.price * p.quantity).toFixed(2) %></span>
                             </li>
                         <% }) %>
                     </ul>
+                    <dl class="cart-summary__breakdown">
+                        <div class="cart-summary__row">
+                            <dt>Shipping</dt>
+                            <dd class="cart-summary__free">Free</dd>
+                        </div>
+                    </dl>
                     <div class="cart-summary__total">
                         <span>Total</span>
                         <span class="js-grand-total">$<%= totalSum.toFixed(2) %></span>

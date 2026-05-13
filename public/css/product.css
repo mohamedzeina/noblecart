@@ -1131,12 +1131,12 @@
 .review-sort {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   flex-wrap: wrap;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid #e2e8f0;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .review-sort::before {
@@ -1148,9 +1148,11 @@
   text-transform: uppercase;
   color: #94a3b8;
   margin-right: 0.5rem;
+  min-width: 2.5rem;
 }
 
 .review-sort-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   font-family: 'JetBrains Mono', monospace;
@@ -1162,7 +1164,7 @@
   background: transparent;
   border: 1px solid rgba(12, 10, 9, 0.12);
   border-radius: 999px;
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.9rem;
   text-decoration: none;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
   white-space: nowrap;
@@ -1175,8 +1177,8 @@
 }
 
 .review-sort-chip:hover {
-  background: rgba(12, 10, 9, 0.04);
-  border-color: rgba(12, 10, 9, 0.3);
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.5);
   color: #0c0a09;
 }
 
@@ -1184,6 +1186,18 @@
   background: #0a0a0a;
   border-color: #0a0a0a;
   color: #ffffff;
+}
+
+.review-sort-chip--active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 4px;
+  height: 4px;
+  background: #f59e0b;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
 
 .review-sort-chip--active:hover {
@@ -1196,46 +1210,52 @@
 .sort-bar {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.25rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .sort-bar__row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
   flex-wrap: wrap;
 }
 
 .sort-bar__label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #94a3b8;
   white-space: nowrap;
+  min-width: 3.5rem;
 }
 
 .sort-bar__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .sort-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  font-size: 0.78rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
   font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: #475569;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: transparent;
+  border: 1px solid rgba(12, 10, 9, 0.12);
   border-radius: 999px;
-  padding: 0.35rem 0.9rem;
+  padding: 0.45rem 0.9rem;
   min-height: 2rem;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -1243,29 +1263,41 @@
 @media (max-width: 768px) {
   .sort-chip {
     min-height: 44px;
-    padding: 0.5rem 1rem;
+    padding: 0.65rem 1rem;
   }
 }
 
 .sort-chip:focus-visible {
-  outline: 2px solid #1e293b;
+  outline: 2px solid #f59e0b;
   outline-offset: 2px;
 }
 
 .sort-chip:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #1e293b;
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #0c0a09;
 }
 
 .sort-chip--active {
-  background: #1e293b;
-  border-color: #1e293b;
+  background: #0a0a0a;
+  border-color: #0a0a0a;
   color: #ffffff;
-  font-weight: 600;
+}
+
+.sort-chip--active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 4px;
+  height: 4px;
+  background: #f59e0b;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
 
 .sort-chip--active:hover {
-  background: #0f172a;
-  border-color: #0f172a;
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #0a0a0a;
 }
