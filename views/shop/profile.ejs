@@ -60,7 +60,8 @@
             <!-- ── Personal Info ──────────────────────────────── -->
             <section id="tab-info" class="profile-section" data-tab-panel="info">
                 <div class="profile-section__header">
-                    <h2 class="profile-section__title">Personal Information</h2>
+                    <span class="profile-section__eyebrow">— Profile</span>
+                    <h2 class="profile-section__title">Personal <em>information</em></h2>
                     <p class="profile-section__desc">Update your name and profile photo.</p>
                 </div>
 
@@ -121,7 +122,8 @@
             %>
             <section id="tab-address" class="profile-section profile-section--hidden" data-tab-panel="address">
                 <div class="profile-section__header">
-                    <h2 class="profile-section__title">Shipping Address</h2>
+                    <span class="profile-section__eyebrow">— Shipping</span>
+                    <h2 class="profile-section__title">Shipping <em>address</em></h2>
                     <p class="profile-section__desc">Default address used during checkout.</p>
                 </div>
 
@@ -241,7 +243,8 @@
             <!-- ── Security ───────────────────────────────────── -->
             <section id="tab-security" class="profile-section profile-section--hidden" data-tab-panel="security">
                 <div class="profile-section__header">
-                    <h2 class="profile-section__title">Security</h2>
+                    <span class="profile-section__eyebrow">— Security</span>
+                    <h2 class="profile-section__title">Account <em>security</em></h2>
                     <p class="profile-section__desc">Change your password. You'll stay logged in after updating.</p>
                 </div>
 
@@ -306,7 +309,7 @@
                             <li>Avoid personal info like birthdays</li>
                             <li>Use a unique password for this account</li>
                         </ul>
-                        <p class="profile-security-tips__note">Member since <%= memberSince.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) %></p>
+                        <p class="profile-security-tips__note">If anything looks off with your account, reach out at <a href="mailto:support@noblecart.com">support@noblecart.com</a></p>
                     </aside>
                 </div>
             </section>
