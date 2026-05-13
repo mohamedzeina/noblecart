@@ -113,7 +113,10 @@
             %>
             <% if (relatedProducts && relatedProducts.length > 0) { %>
             <section class="related-products">
-                <h2 class="related-products__title">You might also like</h2>
+                <div class="related-products__header">
+                    <span class="related-products__eyebrow">— More to explore</span>
+                    <h2 class="related-products__title">You might <em>also like</em></h2>
+                </div>
                 <div class="related-products__grid">
                     <% for (const rp of relatedProducts) { %>
                     <article class="card product-item">

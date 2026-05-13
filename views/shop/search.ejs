@@ -16,7 +16,8 @@
 
     <main id="products">
         <div class="search-results__header">
-            <h1 class="search-results__title">Results for <em>"<%= query %>"</em></h1>
+            <span class="search-results__eyebrow">— Search results</span>
+            <h1 class="search-results__title">Results for <em>&ldquo;<%= query %>&rdquo;</em></h1>
             <p class="search-results__count"><%= products.length %> product<%= products.length !== 1 ? 's' : '' %> found</p>
         </div>
 
